@@ -122,12 +122,15 @@ export default function ResetForm() {
                   </FormLabel>
                   <FormControl>
                     {/* Spread ...field for controlled input */}
-                    <Input
-                      disabled={isPending}
-                      {...field}
-                      placeholder="Enter your email address"
-                      className="pl-10 h-12 border-gray-200 focus:border-blue-400 focus:ring-blue-400 transition-all duration-200"
-                    />
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                      <Input
+                        disabled={isPending}
+                        {...field}
+                        placeholder="Enter your email address"
+                        className="pl-10 h-12 border-gray-200 focus:border-blue-400 focus:ring-blue-400 transition-all duration-200"
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

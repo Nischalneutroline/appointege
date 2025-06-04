@@ -6,44 +6,64 @@ import { db } from "@/lib/db"
 import { getUserByEmail } from "@/data/user"
 import { generateTokenForEmailVerification } from "@/lib/token"
 import { sendVerificationEmail } from "@/lib/mail"
+import { Prisma } from "@prisma/client"
 
 export async function register(values: SignupSchemaType) {
-  const validateFields = SignupSchema.safeParse(values)
+  try {
+    const validateFields = SignupSchema.safeParse(values)
 
-  if (!validateFields.success) {
-    return { error: "Invalid inputs!" }
-  }
-
-  const { email, password, name } = validateFields.data
-
-  const hashedPassword = await bcrypt.hash(password, 10)
-
-  const existingUser = await getUserByEmail(email)
-
-  if (existingUser) {
-    return { error: "Email already in use!" }
-  }
-  const newUser = await db.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name,
-    },
-  })
-  if (!newUser) {
-    return { error: "User creation failed!" }
-  }
-  // Optionally, you can return the new user or some success message
-  // return newUser
-  if (newUser) {
-    // Send Verification Email
-    const verficationToken = await generateTokenForEmailVerification(email)
-    if (!verficationToken) {
-      return { error: "Something went wrong while generating token!" }
+    if (!validateFields.success) {
+      return { error: "Invalid inputs!" }
     }
-    await sendVerificationEmail(verficationToken.email, verficationToken.token)
-    return { success: "Email confirmation sent!" }
-  }
 
-  return { error: "Register failed!" }
+    console.log(validateFields.data)
+    const { email, password, name, phone } = validateFields.data
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const existingUser = await getUserByEmail(email)
+
+    if (existingUser) {
+      return { error: "Email already in use!" }
+    }
+
+    const newUser = await db.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name,
+        phone,
+      },
+    })
+
+    if (!newUser) {
+      return { error: "User creation failed!" }
+    }
+    // Optionally, you can return the new user or some success message
+    // return newUser
+    if (newUser) {
+      // Send Verification Email
+      const verficationToken = await generateTokenForEmailVerification(email)
+      if (!verficationToken) {
+        return { error: "Something went wrong while generating token!" }
+      }
+      await sendVerificationEmail(
+        verficationToken.email,
+        verficationToken.token
+      )
+      return { success: "Email confirmation sent!" }
+    }
+
+    return { error: "Register failed!" }
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      // Handle known errors (e.g., unique constraint violations)
+      console.error("Known prisma error:", error)
+    }
+    if (error instanceof Prisma.PrismaClientValidationError) {
+      console.error("Known validation error:", error)
+    }
+    console.log("Error while registering user:", error)
+    return { error: "Register failed!" }
+  }
 }
