@@ -52,9 +52,12 @@ export const SignupSchema = z
   .object({
     email: z.string().email({ message: "Email is required!" }),
     name: z.string().min(3, { message: "Minimum 3 characters required!" }),
-    phone: z.string().min(10, {
-      message: "Phone number must be at least 10 characters long!",
-    }),
+    phone: z
+      .string()
+      .min(10, {
+        message: "Phone number must be at least 10 characters long!",
+      })
+      .optional(),
     password: z
       .string()
       .min(5, { message: "Password must be at least 5 characters long!" }),
