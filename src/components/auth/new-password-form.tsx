@@ -5,7 +5,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -17,15 +16,51 @@ import { useSearchParams } from "next/navigation";
 import { FormError } from "./form-error";
 import { FormSuccess } from "./form-success";
 import { changePassword } from "@/actions/new-password";
-import { ArrowLeft, Eye, EyeOff, Lock } from "lucide-react";
+import { ArrowLeft, Check, Eye, EyeOff, Lock, X } from "lucide-react";
 import Link from "next/link";
+import FormLabel from "../ui/form-label";
+
+function getPasswordStrength(password: string) {
+  const checks = {
+    length: password.length >= 8,
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+  };
+
+  const strength = Object.values(checks).filter(Boolean).length;
+
+  let label = "Very Weak";
+  let color = "bg-red-500";
+
+  if (strength >= 4) {
+    label = "Strong";
+    color = "bg-green-500";
+  } else if (strength === 3) {
+    label = "Moderate";
+    color = "bg-yellow-500";
+  } else if (strength === 2) {
+    label = "Weak";
+    color = "bg-orange-500";
+  }
+
+  return {
+    strength,
+    label,
+    color,
+    checks,
+  };
+}
 
 export default function NewPasswordForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | undefined>();
   const [success, setSuccess] = useState<string | undefined>();
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordValue, setPasswordValue] = useState("");
 
+  const passwordStrength = getPasswordStrength(passwordValue);
   const searchParams = useSearchParams();
 
   const token = searchParams.get("token");
@@ -83,16 +118,18 @@ export default function NewPasswordForm() {
       {/* Form */}
       <div className="flex flex-col gap-4 ">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 ">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
+            noValidate
+          >
             {/* Password */}
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="space-y-[3px] pt-[5px]">
-                  <FormLabel className="text-slate-700 font-semibold  text-sm leading-[17px] w-fit -tracking-[0.0065rem]">
-                    New Password
-                  </FormLabel>
+                <FormItem className="space-y-[3px] pt-[5px] ">
+                  <FormLabel>New Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -101,6 +138,10 @@ export default function NewPasswordForm() {
                         type={showPassword ? "text" : "password"}
                         placeholder="Create a password"
                         disabled={isPending}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setPasswordValue(e.target.value);
+                        }}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
                       />
                       <button
@@ -116,19 +157,74 @@ export default function NewPasswordForm() {
                       </button>
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[12px] min-h-[18px]" />
                 </FormItem>
               )}
             />
+            {/* Password Strength UI */}
+            {passwordValue && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-600">
+                    Password strength:
+                  </span>
+                  <span
+                    className={`text-xs font-medium ${
+                      passwordStrength.strength < 2
+                        ? "text-red-600"
+                        : passwordStrength.strength < 4
+                        ? "text-yellow-600"
+                        : "text-green-600"
+                    }`}
+                  >
+                    {passwordStrength.label}
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                    style={{
+                      width: `${(passwordStrength.strength / 5) * 100}%`,
+                    }}
+                  />
+                </div>
+                <div className="space-y-1">
+                  {Object.entries(passwordStrength.checks).map(
+                    ([key, passed]) => (
+                      <div
+                        key={key}
+                        className="flex items-center space-x-2 text-xs"
+                      >
+                        {passed ? (
+                          <Check className="w-3 h-3 text-green-500" />
+                        ) : (
+                          <X className="w-3 h-3 text-slate-400" />
+                        )}
+                        <span
+                          className={
+                            passed ? "text-green-600" : "text-slate-500"
+                          }
+                        >
+                          {key === "length" && "At least 8 characters"}
+                          {key === "lowercase" && "One lowercase letter"}
+                          {key === "uppercase" && "One uppercase letter"}
+                          {key === "number" && "One number"}
+                          {key === "special" && "One special character"}
+                        </span>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Confirm Password */}
             <FormField
               control={form.control}
               name="password1"
               render={({ field }) => (
-                <FormItem className="space-y-[3px] pt-[5px]">
-                  <FormLabel className="text-slate-700 font-semibold  text-sm leading-[17px] w-fit -tracking-[0.0065rem]">
-                    Confirm Password
-                  </FormLabel>
+                <FormItem className="space-y-[3px] pt-[5px] ">
+                  <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -153,7 +249,7 @@ export default function NewPasswordForm() {
                       </button>
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[12px] min-h-[18px]" />
                 </FormItem>
               )}
             />

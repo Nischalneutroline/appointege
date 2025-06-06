@@ -5,7 +5,6 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -20,6 +19,7 @@ import { resetPassword } from "@/actions/reset";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { ArrowLeft, ArrowRight, Mail } from "lucide-react";
 import Link from "next/link";
+import FormLabel from "../ui/form-label";
 
 export default function ResetForm() {
   const [isPending, startTransition] = useTransition();
@@ -111,15 +111,17 @@ export default function ResetForm() {
       </div>
       <div className="flex flex-col gap-4 ">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4"
+            noValidate
+          >
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px]">
-                  <FormLabel className="text-slate-700 font-semibold  text-sm leading-[17px] w-fit -tracking-[0.0065rem]">
-                    Email Address
-                  </FormLabel>
+                <FormItem className="space-y-[2px] pt-[5px] relative">
+                  <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -132,7 +134,7 @@ export default function ResetForm() {
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[12px] absolute -bottom-4 min-h-[18px]" />
                 </FormItem>
               )}
             />

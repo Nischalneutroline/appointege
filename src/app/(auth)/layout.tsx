@@ -5,11 +5,11 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <>
+    <div>
       <div className="min-h-screen flex">
         {/* Left Side - Branding (Hidden on mobile) */}
         <div
-          className="hidden lg:flex w-3/5 lg:w-3/6 xl:w-3/5  flex-col items-start justify-center text-white p-8 xl:p-12 relative overflow-hidden gap-4 leading-16  "
+          className="hidden lg:flex w-3/5 lg:w-3/6 xl:w-3/5  flex-col items-start justify-center text-white p-8 xl:p-12 relative overflow-hidden xl:gap-4 gap-2 leading-16  "
           style={{
             background: "linear-gradient(to bottom right, #f4fafe, #e8eefd)",
           }}
@@ -101,7 +101,7 @@ export default function AuthLayout({
             </div>
           </div>
           {/* Decorative Calendar Grid */}
-          <div className="absolute xl:bottom-48 bottom-35 left-8 xl:left-12 grid grid-cols-7 gap-1 w-[320px] opacity-30">
+          <div className="absolute xl:bottom-[20vh] bottom-0 left-8 xl:left-12 grid grid-cols-7 gap-1 w-[320px] opacity-30">
             {Array.from({ length: 28 }, (_, i) => (
               <div
                 key={i}
@@ -142,6 +142,6 @@ export default function AuthLayout({
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

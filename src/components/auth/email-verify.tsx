@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function VerifyEmail() {
   // error and success state
@@ -18,19 +19,47 @@ export default function VerifyEmail() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   console.log(token, "got token here");
+  const router = useRouter();
 
   const verify = async () => {
+    if (!token) {
+      setError("Invalid verification link");
+      return;
+    }
+
+    // Start timer to track minimum display time
+    const startTime = Date.now();
+    const MIN_DISPLAY_TIME = 3000; // 3 seconds minimum display time
+
     setError("");
     setSuccess("");
     setLoading(true);
-    if (token) {
+
+    try {
       const { success, error } = await verifyUser(token);
-      if (success) setSuccess(success);
-      if (error) setError(error);
-    } else {
-      setError("Token is missing!");
+
+      // Calculate remaining time to ensure minimum display time
+      const elapsedTime = Date.now() - startTime;
+      const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime);
+
+      setTimeout(() => {
+        if (success) {
+          setSuccess(success);
+          // Redirect to login after showing success message for 2 seconds
+          setTimeout(() => {
+            router.push("/login");
+          }, 2000);
+        } else if (error) {
+          setError(error);
+        }
+        setLoading(false);
+      }, remainingTime);
+    } catch (error) {
+      setError(
+        "An error occurred while verifying your email. Please try again."
+      );
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   // Verify the token when the component mounts or when the token changes
@@ -51,7 +80,6 @@ export default function VerifyEmail() {
             : "We're verifying your email address"}
         </p>
       </div>
-
       <div className="flex flex-col gap-4 ">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-8">

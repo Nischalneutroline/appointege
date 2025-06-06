@@ -8,7 +8,6 @@ import {
   Form,
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
@@ -26,6 +25,7 @@ import { signIn } from "next-auth/react";
 import { DEFAULT_LOGGEDIN_USER_REDIRECT } from "@/routes";
 import { Social } from "./social";
 import { Checkbox } from "../ui/checkbox";
+import FormLabel from "../ui/form-label";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -107,16 +107,18 @@ export default function LoginForm() {
       </div>
       <div className="flex flex-col gap-4 ">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className=" space-y-4"
+            noValidate
+          >
             {/* Email */}
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem className="space-y-[2px] pt-[5px]">
-                  <FormLabel className="text-slate-700 font-semibold  text-sm leading-[17px] w-fit -tracking-[0.006rem]">
-                    Email Address
-                  </FormLabel>
+                  <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -130,7 +132,7 @@ export default function LoginForm() {
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[12px] min-h-[18px]" />
                 </FormItem>
               )}
             />
@@ -141,10 +143,8 @@ export default function LoginForm() {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="space-y-[2px]  pt-[5px]">
-                  <FormLabel className="text-slate-700 font-semibold text-sm leading-[17px] w-fit -tracking-[0.006rem]">
-                    Password
-                  </FormLabel>
+                <FormItem className="space-y-[2px] pt-[5px] ">
+                  <FormLabel>Password</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -169,7 +169,7 @@ export default function LoginForm() {
                       </button>
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[12px] min-h-[18px]" />
                 </FormItem>
               )}
             />
