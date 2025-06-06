@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import React, { useState, useTransition } from "react"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import React, { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormField,
@@ -11,35 +11,37 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "../ui/input"
-import { Button } from "../ui/button"
-import { FormError } from "./form-error"
-import { FormSuccess } from "./form-success"
+} from "@/components/ui/form";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { FormError } from "./form-error";
+import { FormSuccess } from "./form-success";
 // import { login } from "@/actions/login"
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { LoginSchema } from "@/schemas"
-import { login } from "@/actions/login"
-import { Eye, EyeOff, Lock, Mail } from "lucide-react"
-import { signIn } from "next-auth/react"
-import { DEFAULT_LOGGEDIN_USER_REDIRECT } from "@/routes"
-import { Social } from "./social"
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { LoginSchema } from "@/schemas";
+import { login } from "@/actions/login";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { DEFAULT_LOGGEDIN_USER_REDIRECT } from "@/routes";
+import { Social } from "./social";
+import { Checkbox } from "../ui/checkbox";
 
 export default function LoginForm() {
-  const searchParams = useSearchParams()
+  const searchParams = useSearchParams();
   const urlError =
     searchParams.get("error") === "OAuthAccountNotLinked"
       ? "Email already in use with credential provider!"
-      : ""
+      : "";
 
-  const callbackUrl = searchParams.get("callbackUrl")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const callbackUrl = searchParams.get("callbackUrl");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [isPending, startTransition] = useTransition()
-  const [showTwoFactor, setShowTwoFactor] = useState(false)
+  const [isPending, startTransition] = useTransition();
+  const [showTwoFactor, setShowTwoFactor] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -47,15 +49,15 @@ export default function LoginForm() {
       email: "",
       password: "",
     },
-  })
+  });
 
   const onSubmit = (values: any) => {
-    setSuccess("")
-    setError("")
+    setSuccess("");
+    setError("");
     startTransition(async () => {
-      const { success, error } = await login(values)
-      if (success) setSuccess(success)
-      if (error) setError(error)
+      const { success, error } = await login(values);
+      if (success) setSuccess(success);
+      if (error) setError(error);
       // if (twoFactor) setShowTwoFactor(true)
       //   login(values)
       //     .then(({ success, error }) => {
@@ -63,8 +65,8 @@ export default function LoginForm() {
       //       if (error) setError(error)
       //     })
       //     .catch((error) => setError("Couldn't get action!"))
-    })
-  }
+    });
+  };
   // const onSubmit = (values: z.infer<typeof LoginSchema>) => {
   //   setSuccess("")
   //   setError("")
@@ -85,53 +87,62 @@ export default function LoginForm() {
   const handleSocialLogin = (provider: "google" | "github") => {
     signIn(provider, {
       redirectTo: DEFAULT_LOGGEDIN_USER_REDIRECT,
-    })
-  }
+    });
+  };
+
+  const handleRememberMeChange = (checked: boolean) => {
+    console.log("Remember me checked:", checked);
+    setRememberMe(checked);
+  };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 mb-1">Welcome Back</h2>
-        <p className="text-slate-600 text-sm">
+    <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+      <div className="text-center flex flex-col gap-1">
+        <h2 className="text-2xl text-slate-800 font-extrabold -tracking-[0.011rem] ">
+          Welcome Back
+        </h2>
+        <p className="text-slate-600 text-sm font-medium  -tracking-[0.011rem] ">
           Sign in to your Appointege account
         </p>
       </div>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-4">
-          {/* Email */}
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem className="space-y-1">
-                <FormLabel className="text-slate-700 font-medium text-sm">
-                  Email Address
-                </FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                    <Input
-                      {...field}
-                      disabled={isPending}
-                      type="email"
-                      placeholder="Enter your email"
-                      className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm"
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <div className="flex flex-col gap-4 ">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className=" space-y-4">
+            {/* Email */}
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="space-y-[2px] pt-[5px]">
+                  <FormLabel className="text-slate-700 font-semibold  text-sm leading-[17px] w-fit -tracking-[0.006rem]">
+                    Email Address
+                  </FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                      <Input
+                        {...field}
+                        disabled={isPending}
+                        type="email"
+                        placeholder="Enter your email"
+                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        // className=""
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Password */}
-          <div className="space-y-1">
+            {/* Password */}
+
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-slate-700 font-medium text-sm">
+                <FormItem className="space-y-[2px]  pt-[5px]">
+                  <FormLabel className="text-slate-700 font-semibold text-sm leading-[17px] w-fit -tracking-[0.006rem]">
                     Password
                   </FormLabel>
                   <FormControl>
@@ -142,7 +153,7 @@ export default function LoginForm() {
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
                         disabled={isPending}
-                        className="pl-9 pr-10 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm"
+                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
                       />
                       {/* Toggle Password */}
                       <button
@@ -162,42 +173,59 @@ export default function LoginForm() {
                 </FormItem>
               )}
             />
-            <Link
-              className="text-sm text-sky-600 hover:text-sky-700 font-medium transition-colors"
-              href={"/reset-password"}
+
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) =>
+                    handleRememberMeChange(checked as boolean)
+                  }
+                  className="h-4 w-4 border-slate-300 data-[state=checked]:bg-sky-500 data-[state=checked]:border-sky-500"
+                />
+                <label
+                  htmlFor="remember"
+                  className="text-sm text-black cursor-pointer font-medium  "
+                >
+                  Remember me
+                </label>
+              </div>
+              <Link
+                className="text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors -tracking-[0.011rem]"
+                href={"/reset-password"}
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <FormError message={error || urlError} />
+            <FormSuccess message={success} />
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
             >
-              Forgot password?
-            </Link>
-          </div>
-
-          <FormError message={error || urlError} />
-          <FormSuccess message={success} />
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm"
-          >
-            {isPending ? "Signing in..." : "Sign In"}
-          </Button>
-        </form>
-      </Form>
-      {/*  */}
-
-      <Social />
+              {isPending ? "Signing in..." : "Sign In"}
+            </Button>
+          </form>
+        </Form>
+        <Social type="in" />
+      </div>
 
       <div className="mt-6 text-center">
-        <p className="text-slate-600 text-sm">
+        <p className="text-black text-sm font-normal">
           Don't have an account?{" "}
           <Link
             href="/register"
-            className="text-sky-600 hover:text-sky-700 font-semibold transition-colors"
+            className="text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
           >
             Sign up
           </Link>
         </p>
       </div>
     </div>
-  )
+  );
 }
 
 // "use client"
