@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import authConfig from "@/auth.config"
 import { db } from "@/lib/db"
 import { getUserById } from "@/data/user"
+import { DEFAULT_LOGGEDIN_USER_REDIRECT } from "./routes"
 
 export const {
   auth,
@@ -25,6 +26,9 @@ export const {
     },
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      return DEFAULT_LOGGEDIN_USER_REDIRECT
+    },
     // Only SignIn Callback can use prisma adapter as it happens on the server side for signIn
     // jwt and session callbacks are called on the client side
     async signIn({ user, account, profile }) {
