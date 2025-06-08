@@ -9,7 +9,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 export default function VerifyEmail() {
   // error and success state
