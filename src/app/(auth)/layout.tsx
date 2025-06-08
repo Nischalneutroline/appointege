@@ -1,8 +1,8 @@
-import { Calendar, CircleCheckBig, Clock, Users } from "lucide-react";
+import { Calendar, CircleCheckBig, Clock, Users } from 'lucide-react'
 export default function AuthLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <>
@@ -11,7 +11,7 @@ export default function AuthLayout({
         <div
           className="hidden lg:flex w-3/5 lg:w-3/6 xl:w-3/5  flex-col items-start justify-center text-white p-8 xl:p-12 relative overflow-y-auto scrollbar-thin xl:gap-4 gap-2 leading-16  "
           style={{
-            background: "linear-gradient(to bottom right, #f4fafe, #e8eefd)",
+            background: 'linear-gradient(to bottom right, #f4fafe, #e8eefd)',
           }}
         >
           {/* Content */}
@@ -21,9 +21,9 @@ export default function AuthLayout({
                 <div className="w-10 h-10 bg-[#0ba6e9] rounded-[12px] flex items-center justify-center  ">
                   <Calendar
                     style={{
-                      height: "24px",
-                      width: "24px",
-                      color: "white",
+                      height: '24px',
+                      width: '24px',
+                      color: 'white',
                     }}
                   />
                 </div>
@@ -59,9 +59,9 @@ export default function AuthLayout({
                   <div className="h-7 w-7 bg-[#e0f1fe] rounded-md flex justify-center items-center">
                     <Clock
                       style={{
-                        height: "16px",
-                        width: "16px",
-                        color: "#0185c8",
+                        height: '16px',
+                        width: '16px',
+                        color: '#0185c8',
                       }}
                     />
                   </div>
@@ -73,9 +73,9 @@ export default function AuthLayout({
                   <div className="h-7 w-7 bg-[#e0f1fe] rounded-md flex justify-center items-center">
                     <Users
                       style={{
-                        height: "16px",
-                        width: "16px",
-                        color: "#0185c8",
+                        height: '16px',
+                        width: '16px',
+                        color: '#0185c8',
                       }}
                     />
                   </div>
@@ -87,9 +87,9 @@ export default function AuthLayout({
                   <div className="h-7 w-7 bg-[#e0f1fe] rounded-md flex justify-center items-center">
                     <CircleCheckBig
                       style={{
-                        height: "16px",
-                        width: "16px",
-                        color: "#0185c8",
+                        height: '16px',
+                        width: '16px',
+                        color: '#0185c8',
                       }}
                     />
                   </div>
@@ -107,10 +107,10 @@ export default function AuthLayout({
                 key={i}
                 className={`aspect-square rounded  ${
                   i % 7 === 0 || i % 7 === 6
-                    ? "bg-slate-200 h-10.5 w-10.5"
+                    ? 'bg-slate-200 h-10.5 w-10.5'
                     : Math.random() > 0.7
-                    ? "bg-sky-300/60 h-10.5 w-10.5"
-                    : "bg-slate-100/60 h-10.5 w-10.5 "
+                    ? 'bg-sky-300/60 h-10.5 w-10.5'
+                    : 'bg-slate-100/60 h-10.5 w-10.5 '
                 }`}
               />
             ))}
@@ -123,7 +123,7 @@ export default function AuthLayout({
           <div className="lg:hidden w-full mb-8 shadow-xs bg-[#fefeff]">
             <div className="flex items-center justify-center py-3 space-x-2">
               <div className="w-8 h-8 bg-[#0ba6e9] rounded-md  flex items-center text-white justify-center ">
-                <Calendar style={{ height: "20px", width: "20px" }} />
+                <Calendar style={{ height: '20px', width: '20px' }} />
               </div>
               <div className="flex flex-col  ">
                 <h1 className="flex justify-center text-xl font-extrabold text-black -tracking-[0.045rem] ">
@@ -143,5 +143,5 @@ export default function AuthLayout({
         </div>
       </div>
     </>
-  );
+  )
 }
