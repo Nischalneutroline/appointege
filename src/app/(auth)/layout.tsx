@@ -101,16 +101,16 @@ export default function AuthLayout({
             </div>
           </div>
           {/* Decorative Calendar Grid */}
-          <div className="absolute xl:bottom-[20vh] bottom-0 left-8 xl:left-12 grid grid-cols-7 gap-1 w-[320px] opacity-30">
+          <div className="absolute 2xl:bottom-[20vh] xl:bottom-[10vh] bottom-[5vh] left-8 xl:left-12 grid grid-cols-7 gap-1 w-[320px] opacity-30">
             {Array.from({ length: 28 }, (_, i) => (
               <div
                 key={i}
                 className={`aspect-square rounded  ${
                   i % 7 === 0 || i % 7 === 6
-                    ? "bg-slate-200 h-10.5 w-10.5 "
+                    ? "bg-slate-200 h-10.5 w-10.5"
                     : Math.random() > 0.7
                     ? "bg-sky-300/60 h-10.5 w-10.5"
-                    : "bg-slate-100/60 h-10.5 w-10.5"
+                    : "bg-slate-100/60 h-10.5 w-10.5 "
                 }`}
               />
             ))}

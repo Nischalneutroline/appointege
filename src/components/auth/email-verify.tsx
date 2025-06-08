@@ -1,14 +1,15 @@
 "use client"
 
-import verifyUser from "@/actions/verifyUser"
-import CardWrapper from "@/components/auth/card-wrapper"
-import { FormError } from "@/components/auth/form-error"
-import { FormSuccess } from "@/components/auth/form-success"
-import { useRouter, useSearchParams } from "next/navigation"
-import React, { useEffect, useState } from "react"
-import { Button } from "../ui/button"
-import { ArrowLeft, Loader2 } from "lucide-react"
-import Link from "next/link"
+import verifyUser from "@/actions/verifyUser";
+import CardWrapper from "@/components/auth/card-wrapper";
+import { FormError } from "@/components/auth/form-error";
+import { FormSuccess } from "@/components/auth/form-success";
+import { useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { Button } from "../ui/button";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function VerifyEmail() {
   // error and success state
