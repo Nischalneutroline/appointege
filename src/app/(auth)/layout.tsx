@@ -5,17 +5,17 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div>
-      <div className="min-h-screen flex">
+    <>
+      <div className=" flex">
         {/* Left Side - Branding (Hidden on mobile) */}
         <div
-          className="hidden lg:flex w-3/5 lg:w-3/6 xl:w-3/5  flex-col items-start justify-center text-white p-8 xl:p-12 relative overflow-hidden xl:gap-4 gap-2 leading-16  "
+          className="hidden lg:flex w-3/5 lg:w-3/6 xl:w-3/5  flex-col items-start justify-center text-white p-8 xl:p-12 relative overflow-y-auto scrollbar-thin xl:gap-4 gap-2 leading-16  "
           style={{
             background: "linear-gradient(to bottom right, #f4fafe, #e8eefd)",
           }}
         >
           {/* Content */}
-          <div className="relative z-10 text-start flex flex-col gap-4  -top-[106px] ">
+          <div className="relative z-10 text-start flex flex-col gap-4 ">
             <div className="flex flex-col mb-4 gap-2 ">
               <div className="flex items-center justify-start h-10 gap-3">
                 <div className="w-10 h-10 bg-[#0ba6e9] rounded-[12px] flex items-center justify-center  ">
@@ -101,7 +101,7 @@ export default function AuthLayout({
             </div>
           </div>
           {/* Decorative Calendar Grid */}
-          <div className="absolute 2xl:bottom-[20vh] xl:bottom-[10vh] bottom-[5vh] left-8 xl:left-12 grid grid-cols-7 gap-1 w-[320px] opacity-30">
+          <div className="grid grid-cols-7 gap-1 w-[320px] opacity-30">
             {Array.from({ length: 28 }, (_, i) => (
               <div
                 key={i}
@@ -142,6 +142,6 @@ export default function AuthLayout({
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
