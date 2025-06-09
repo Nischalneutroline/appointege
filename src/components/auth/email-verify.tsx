@@ -1,15 +1,15 @@
-"use client"
+'use client'
 
-import verifyUser from "@/actions/verifyUser";
-import CardWrapper from "@/components/auth/card-wrapper";
-import { FormError } from "@/components/auth/form-error";
-import { FormSuccess } from "@/components/auth/form-success";
-import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import verifyUser from '@/actions/verifyUser'
+import CardWrapper from '@/components/auth/card-wrapper'
+import { FormError } from '@/components/auth/form-error'
+import { FormSuccess } from '@/components/auth/form-success'
+import { useSearchParams } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+import { Button } from '../ui/button'
+import { ArrowLeft, Loader2 } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function VerifyEmail() {
   // error and success state
@@ -17,13 +17,13 @@ export default function VerifyEmail() {
   const [success, setSuccess] = useState<string | undefined>()
   const [isLoading, setLoading] = useState(false)
   const searchParams = useSearchParams()
-  const token = searchParams.get("token")
-  console.log(token, "got token here")
+  const token = searchParams.get('token')
+  console.log(token, 'got token here')
   const router = useRouter()
 
   const verify = async () => {
     if (!token) {
-      setError("Invalid verification link")
+      setError('Invalid verification link')
       return
     }
 
@@ -31,8 +31,8 @@ export default function VerifyEmail() {
     const startTime = Date.now()
     const MIN_DISPLAY_TIME = 3000 // 3 seconds minimum display time
 
-    setError("")
-    setSuccess("")
+    setError('')
+    setSuccess('')
     setLoading(true)
 
     try {
@@ -47,7 +47,7 @@ export default function VerifyEmail() {
           setSuccess(success)
           // Redirect to login after showing success message for 2 seconds
           setTimeout(() => {
-            router.push("/login")
+            router.push('/login')
           }, 2000)
         } else if (error) {
           setError(error)
@@ -56,7 +56,7 @@ export default function VerifyEmail() {
       }, remainingTime)
     } catch (error) {
       setError(
-        "An error occurred while verifying your email. Please try again."
+        'An error occurred while verifying your email. Please try again.',
       )
       setLoading(false)
     }
@@ -72,11 +72,11 @@ export default function VerifyEmail() {
     <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
       <div className="text-center flex flex-col gap-2">
         <h2 className="text-2xl text-slate-800 leading-8 font-extrabold">
-          {isLoading ? "Verifying Email..." : "Email Verification"}
+          {isLoading ? 'Verifying Email...' : 'Email Verification'}
         </h2>
         <p className="text-slate-600 text-sm font-medium">
           {isLoading
-            ? "Please wait while we verify your email address"
+            ? 'Please wait while we verify your email address'
             : "We're verifying your email address"}
         </p>
       </div>
@@ -104,7 +104,7 @@ export default function VerifyEmail() {
               </Button>
             )}
 
-            <div className="text-center mt-4">
+            <div className="text-center mt-6">
               <Link
                 href="/login"
                 className="inline-flex items-center text-sm text-sky-600 hover:text-sky-700 font-semibold"

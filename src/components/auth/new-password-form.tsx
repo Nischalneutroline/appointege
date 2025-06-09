@@ -1,108 +1,253 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { NewPasswordSchema, NewPasswordSchemaType } from "@/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { useSearchParams } from "next/navigation";
-import { FormError } from "./form-error";
-import { FormSuccess } from "./form-success";
-import { changePassword } from "@/actions/new-password";
-import { ArrowLeft, Check, Eye, EyeOff, Lock, X } from "lucide-react";
-import Link from "next/link";
-import FormLabel from "../ui/form-label";
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { NewPasswordSchema, NewPasswordSchemaType } from '@/schemas'
+import { zodResolver } from '@hookform/resolvers/zod'
+import React, { useEffect, useState, useTransition } from 'react'
+import { useForm } from 'react-hook-form'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { FormError } from './form-error'
+import { FormSuccess } from './form-success'
+import { changePassword } from '@/actions/new-password'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Calendar,
+  Check,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  Lock,
+  RefreshCw,
+  Sparkles,
+  X,
+} from 'lucide-react'
+import Link from 'next/link'
+import FormLabel from '../ui/form-label'
 
-function getPasswordStrength(password: string) {
-  const checks = {
-    length: password.length >= 8,
-    lowercase: /[a-z]/.test(password),
-    uppercase: /[A-Z]/.test(password),
-    number: /[0-9]/.test(password),
-    special: /[^A-Za-z0-9]/.test(password),
-  };
+// function getPasswordStrength(password: string) {
+//   const checks = {
+//     length: password.length >= 8,
+//     lowercase: /[a-z]/.test(password),
+//     uppercase: /[A-Z]/.test(password),
+//     number: /[0-9]/.test(password),
+//     special: /[^A-Za-z0-9]/.test(password),
+//   };
 
-  const strength = Object.values(checks).filter(Boolean).length;
+//   const strength = Object.values(checks).filter(Boolean).length;
 
-  let label = "Very Weak";
-  let color = "bg-red-500";
+//   let label = "Very Weak";
+//   let color = "bg-red-500";
 
-  if (strength >= 4) {
-    label = "Strong";
-    color = "bg-green-500";
-  } else if (strength === 3) {
-    label = "Moderate";
-    color = "bg-yellow-500";
-  } else if (strength === 2) {
-    label = "Weak";
-    color = "bg-orange-500";
-  }
+//   if (strength >= 4) {
+//     label = "Strong";
+//     color = "bg-green-500";
+//   } else if (strength === 3) {
+//     label = "Moderate";
+//     color = "bg-yellow-500";
+//   } else if (strength === 2) {
+//     label = "Weak";
+//     color = "bg-orange-500";
+//   }
 
-  return {
-    strength,
-    label,
-    color,
-    checks,
-  };
+//   return {
+//     strength,
+//     label,
+//     color,
+//     checks,
+//   };
+// }
+
+const getPasswordStrength = (password: string) => {
+  let strength = 0
+  if (password.length >= 8) strength++
+  if (/[A-Z]/.test(password)) strength++
+  if (/[0-9]/.test(password)) strength++
+  if (/[^A-Za-z0-9]/.test(password)) strength++
+  return strength
 }
 
 export default function NewPasswordForm() {
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
-  const [showPassword, setShowPassword] = useState(false);
-  const [passwordValue, setPasswordValue] = useState("");
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | undefined>()
+  const [success, setSuccess] = useState<string | undefined>()
+  const [showPassword, setShowPassword] = useState(false)
+  const [passwordValue, setPasswordValue] = useState('')
 
-  const passwordStrength = getPasswordStrength(passwordValue);
-  const searchParams = useSearchParams();
+  const passwordStrength = getPasswordStrength(passwordValue)
+  const searchParams = useSearchParams()
 
-  const token = searchParams.get("token");
+  const token = searchParams.get('token')
 
   // Create form
   const form = useForm<NewPasswordSchemaType>({
     resolver: zodResolver(NewPasswordSchema),
     defaultValues: {
-      password: "",
-      password1: "",
+      password: '',
+      password1: '',
     },
-  });
+  })
+
+  const [showContent, setShowContent] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowContent(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   // handle submit
   const onSubmit = (values: NewPasswordSchemaType) => {
-    setError("");
-    setSuccess("");
+    setError('')
+    setSuccess('')
     if (!token) {
-      setError("Token is missing!");
-      return;
+      setError('Token is missing!')
+      return
     }
     startTransition(async () => {
-      const result = await changePassword(values, token);
+      const result = await changePassword(values, token)
       // Fallback in case `result` is undefined or invalid
       if (!result) {
-        setError("Unexpected error, please try again!");
-        return;
+        setError('Unexpected error, please try again!')
+        return
       }
 
-      const { error, success } = result; // Safely destructure
-      console.log(error, success);
+      const { error, success } = result // Safely destructure
+      console.log(error, success)
 
       if (error) {
-        setError(error);
+        setError(error)
       }
       if (success) {
-        setSuccess(success);
+        setSuccess(success)
       }
       // console.error("Error while login form:", err)
       // setError("Something went wrong, please try again, or reload! 😉")
-    });
-  };
+    })
+  }
+
+  if (error) {
+    return (
+      <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+        <div className="text-center flex flex-col gap-1">
+          <h2 className="text-2xl font-bold text-slate-800">
+            Something went wrong
+          </h2>
+
+          <p className="text-slate-600 text-sm font-medium  -tracking-[0.011rem]">
+            Your password could not be updated. This may be due to a temporary
+            issue or an expired link.
+          </p>
+        </div>
+
+        {/* Error details */}
+        <div className="flex flex-col gap-6 ">
+          <div className="bg-red-50/50 border border-red-200/50 rounded-xl p-4 text-left">
+            <h3 className="font-medium text-red-800 mb-3 text-center text-sm">
+              Try the following:
+            </h3>
+            <ul className="text-red-700 text-sm space-y-2">
+              <li className="flex items-start space-x-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <span>Reset your password again</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <span>Request a new reset link</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
+                <span>Contact our support if this continues</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-6">
+            <Button
+              onClick={() => {
+                router.push('/reset-password')
+              }}
+              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
+            >
+              Request New Reset Link
+            </Button>
+
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="cursor-pointer flex justify-center text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Login
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Help text */}
+        <div className="-mt-2 text-center">
+          <p className="text-slate-500 text-xs">
+            Need help? Contact our support team
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (success) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+        <div className="text-center flex flex-col gap-1">
+          <h2 className="text-2xl font-bold text-slate-800">
+            Password Changed Successfully!
+          </h2>
+
+          <p className="text-slate-600 text-xs font-medium  -tracking-[0.011rem]">
+            Your account is now secure with your new password.
+          </p>
+          <p className="text-slate-600 text-xs font-medium  -tracking-[0.011rem]">
+            You can now log in using your updated credentials.
+          </p>
+          <p className="text-sky-600 text-xs font-medium -tracking-[0.011rem]">
+            Ready to get back to work?
+          </p>
+        </div>
+
+        {/* Feature highlights */}
+        <div className="bg-gradient-to-r from-green-50/50 to-sky-50/50 rounded-xl p-4 mb-4 border border-green-200/30">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <Calendar className="w-4 h-4 text-sky-600" />
+            <span className="font-medium text-slate-700 text-sm">
+              Your Appointege account is ready!
+            </span>
+          </div>
+          <p className="text-slate-600 text-xs text-center">
+            Secure and ready for managing appointments.
+          </p>
+        </div>
+
+        <Link
+          href="/login"
+          className="flex justify-center text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors mt-2"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Login
+        </Link>
+
+        {/* Celebration message */}
+        <div className="mt-4 text-center">
+          <p className="text-slate-500 text-xs">Welcome back to Appointege!</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
@@ -135,12 +280,12 @@ export default function NewPasswordForm() {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                       <Input
                         {...field}
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="Create a password"
                         disabled={isPending}
                         onChange={(e) => {
-                          field.onChange(e);
-                          setPasswordValue(e.target.value);
+                          field.onChange(e)
+                          setPasswordValue(e.target.value)
                         }}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
                       />
@@ -162,7 +307,7 @@ export default function NewPasswordForm() {
               )}
             />
             {/* Password Strength UI */}
-            {passwordValue && (
+            {/* {passwordValue && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-600">
@@ -216,8 +361,32 @@ export default function NewPasswordForm() {
                   )}
                 </div>
               </div>
+            )} */}
+            {passwordValue && (
+              <div className="space-y-2">
+                <div className="flex space-x-1">
+                  {[1, 2, 3, 4].map((level) => (
+                    <div
+                      key={level}
+                      className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                        passwordStrength >= level
+                          ? passwordStrength <= 2
+                            ? 'bg-red-400'
+                            : passwordStrength === 3
+                            ? 'bg-yellow-400'
+                            : 'bg-green-400'
+                          : 'bg-slate-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-slate-600">
+                  {passwordStrength <= 2 && 'Weak password'}
+                  {passwordStrength === 3 && 'Good password'}
+                  {passwordStrength === 4 && 'Strong password'}
+                </p>
+              </div>
             )}
-
             {/* Confirm Password */}
             <FormField
               control={form.control}
@@ -231,7 +400,7 @@ export default function NewPasswordForm() {
 
                       <Input
                         {...field}
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="Confirm password"
                         disabled={isPending}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
@@ -257,13 +426,58 @@ export default function NewPasswordForm() {
             <FormSuccess message={success} />
             {/* <Button disabled={isPending} type="submit">
             Rest Password
+
+
+            
           </Button> */}
+
+            <div className="bg-sky-50/50 border border-sky-200/50 rounded-xl p-4">
+              <p className="text-sky-800 text-sm font-medium mb-2">
+                Password Requirements:
+              </p>
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2 text-xs">
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      passwordValue.length >= 8
+                        ? 'bg-green-500'
+                        : 'bg-slate-300'
+                    }`}
+                  />
+                  <span className="text-sky-700">Must be 8+ characters</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      /[A-Z]/.test(passwordValue)
+                        ? 'bg-green-500'
+                        : 'bg-slate-300'
+                    }`}
+                  />
+                  <span className="text-sky-700">
+                    At least one uppercase letter
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div
+                    className={`w-1.5 h-1.5 rounded-full ${
+                      /[0-9]/.test(passwordValue)
+                        ? 'bg-green-500'
+                        : 'bg-slate-300'
+                    }`}
+                  />
+                  <span className="text-sky-700">
+                    At least one number or symbol
+                  </span>
+                </div>
+              </div>
+            </div>
             <Button
               type="submit"
               disabled={isPending}
               className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
             >
-              {isPending ? "Updating Password..." : "Update Password"}
+              {isPending ? 'Updating Password...' : 'Update Password'}
             </Button>
           </form>
         </Form>
@@ -430,5 +644,5 @@ export default function NewPasswordForm() {
     //   Back to Login
     // </Link>
     //   </div>
-  );
+  )
 }

@@ -1,31 +1,31 @@
-"use client";
+'use client'
 
-import React, { useState, useTransition } from "react";
-import CardWrapper from "./card-wrapper";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { LoginSchema, LoginSchemaType, SignupSchema } from "@/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useState, useTransition } from 'react'
+import CardWrapper from './card-wrapper'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+import { LoginSchema, LoginSchemaType, SignupSchema } from '@/schemas'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Form,
   FormField,
   FormItem,
   FormControl,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { FormError } from "./form-error";
-import { FormSuccess } from "./form-success";
-import { register } from "@/actions/register";
-import { Check, Eye, EyeOff, Lock, Mail, User, X } from "lucide-react";
-import { Checkbox } from "../ui/checkbox";
-import { Label } from "../ui/label";
+} from '@/components/ui/form'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
+import { FormError } from './form-error'
+import { FormSuccess } from './form-success'
+import { register } from '@/actions/register'
+import { Check, Eye, EyeOff, Lock, Mail, User, X } from 'lucide-react'
+import { Checkbox } from '../ui/checkbox'
+import { Label } from '../ui/label'
 
-import Link from "next/link";
-import { Social } from "./social";
+import Link from 'next/link'
+import { Social } from './social'
 
-import FormLabel from "../ui/form-label";
+import FormLabel from '../ui/form-label'
 // import { login } from "@/actions/login"
 // import { register } from "@/actions/register"
 
@@ -36,22 +36,22 @@ function getPasswordStrength(password: string) {
     uppercase: /[A-Z]/.test(password),
     number: /[0-9]/.test(password),
     special: /[^A-Za-z0-9]/.test(password),
-  };
+  }
 
-  const strength = Object.values(checks).filter(Boolean).length;
+  const strength = Object.values(checks).filter(Boolean).length
 
-  let label = "Very Weak";
-  let color = "bg-red-500";
+  let label = 'Very Weak'
+  let color = 'bg-red-500'
 
   if (strength >= 4) {
-    label = "Strong";
-    color = "bg-green-500";
+    label = 'Strong'
+    color = 'bg-green-500'
   } else if (strength === 3) {
-    label = "Moderate";
-    color = "bg-yellow-500";
+    label = 'Moderate'
+    color = 'bg-yellow-500'
   } else if (strength === 2) {
-    label = "Weak";
-    color = "bg-orange-500";
+    label = 'Weak'
+    color = 'bg-orange-500'
   }
 
   return {
@@ -59,59 +59,59 @@ function getPasswordStrength(password: string) {
     label,
     color,
     checks,
-  };
+  }
 }
 
 export default function RegisterForm() {
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPassword1, setShowPassword1] = useState(false);
-  const [passwordValue, setPasswordValue] = useState("");
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword1, setShowPassword1] = useState(false)
+  const [passwordValue, setPasswordValue] = useState('')
 
-  const passwordStrength = getPasswordStrength(passwordValue);
+  const passwordStrength = getPasswordStrength(passwordValue)
 
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition()
 
-  const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [agreeToTerms, setAgreeToTerms] = useState(false)
 
   const form = useForm<z.infer<typeof SignupSchema>>({
     resolver: zodResolver(SignupSchema),
     defaultValues: {
-      email: "",
-      password: "",
-      name: "",
+      email: '',
+      password: '',
+      name: '',
       // phone: "",
-      password1: "",
+      password1: '',
     },
-  });
+  })
 
   const onSubmit = (values: z.infer<typeof SignupSchema>) => {
-    setSuccess("");
-    setError("");
+    setSuccess('')
+    setError('')
     startTransition(async () => {
-      const { success, error } = await register(values);
+      const { success, error } = await register(values)
       if (success) {
-        setSuccess(success);
-        form.reset();
+        setSuccess(success)
+        form.reset()
       }
-      if (error) setError(error);
+      if (error) setError(error)
       // register(values)
       //   .then(({ success, error }) => {
       //     if (success) setSuccess(success)
       //     if (error) setError(error)
       //   })
       //   .catch((error) => setError("Couldn't get action!"))
-    });
-  };
+    })
+  }
 
   const handleTermsChange = (checked: boolean) => {
-    setAgreeToTerms(checked === true);
-  };
+    setAgreeToTerms(checked === true)
+  }
 
   return (
-    <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6  ">
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
       <div className="text-center flex flex-col gap-1">
         <div className="text-2xl text-slate-800 font-extrabold -tracking-[0.020rem] ">
           Create Account
@@ -137,7 +137,7 @@ export default function RegisterForm() {
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      {" "}
+                      {' '}
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                       <Input
                         {...field}
@@ -214,12 +214,12 @@ export default function RegisterForm() {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                       <Input
                         {...field}
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="Create password"
                         disabled={isPending}
                         onChange={(e) => {
-                          field.onChange(e);
-                          setPasswordValue(e.target.value);
+                          field.onChange(e)
+                          setPasswordValue(e.target.value)
                         }}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
                       />
@@ -250,10 +250,10 @@ export default function RegisterForm() {
                   <span
                     className={`text-xs font-medium ${
                       passwordStrength.strength < 2
-                        ? "text-red-600"
+                        ? 'text-red-600'
                         : passwordStrength.strength < 4
-                        ? "text-yellow-600"
-                        : "text-green-600"
+                        ? 'text-yellow-600'
+                        : 'text-green-600'
                     }`}
                   >
                     {passwordStrength.label}
@@ -281,17 +281,17 @@ export default function RegisterForm() {
                         )}
                         <span
                           className={
-                            passed ? "text-green-600" : "text-slate-500"
+                            passed ? 'text-green-600' : 'text-slate-500'
                           }
                         >
-                          {key === "length" && "At least 8 characters"}
-                          {key === "lowercase" && "One lowercase letter"}
-                          {key === "uppercase" && "One uppercase letter"}
-                          {key === "number" && "One number"}
-                          {key === "special" && "One special character"}
+                          {key === 'length' && 'At least 8 characters'}
+                          {key === 'lowercase' && 'One lowercase letter'}
+                          {key === 'uppercase' && 'One uppercase letter'}
+                          {key === 'number' && 'One number'}
+                          {key === 'special' && 'One special character'}
                         </span>
                       </div>
-                    )
+                    ),
                   )}
                 </div>
               </div>
@@ -309,7 +309,7 @@ export default function RegisterForm() {
 
                       <Input
                         {...field}
-                        type={showPassword1 ? "text" : "password"}
+                        type={showPassword1 ? 'text' : 'password'}
                         placeholder="Confirm password"
                         disabled={isPending}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
@@ -343,14 +343,14 @@ export default function RegisterForm() {
               />
               <Label htmlFor="terms" className="ml-2  text-sm text-slate-600">
                 <span className="whitespace-nowrap">
-                  I agree to the{" "}
+                  I agree to the{' '}
                   <a
                     href="#"
                     className="font-medium text-sky-600 hover:text-sky-700 hover:underline"
                   >
                     Terms of Service
-                  </a>{" "}
-                  and{" "}
+                  </a>{' '}
+                  and{' '}
                   <a
                     href="#"
                     className="font-medium text-sky-600 hover:text-sky-700 hover:underline"
@@ -367,8 +367,8 @@ export default function RegisterForm() {
               className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
             >
               {isPending
-                ? "Creating Account..."
-                : "Create Account & Start Managing"}
+                ? 'Creating Account...'
+                : 'Create Account & Start Managing'}
             </Button>
           </form>
         </Form>
@@ -378,9 +378,9 @@ export default function RegisterForm() {
 
       <div className="mt-6 text-center">
         <p className="text-back text-sm font-normal">
-          Already have an account?{" "}
+          Already have an account?{' '}
           <Link
-            href={"/login"}
+            href={'/login'}
             className="text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
           >
             Sign in
@@ -388,7 +388,7 @@ export default function RegisterForm() {
         </p>
       </div>
     </div>
-  );
+  )
 }
 
 // <div className="bg-white rounded-2xl shadow-xl border border-slate-200 px-6 pb-8 space-y-6 max-h-[calc(100vh-17rem)] overflow-y-auto scrollbar-thin">

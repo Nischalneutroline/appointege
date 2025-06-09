@@ -1,104 +1,116 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { ResetSchema, ResetSchemaType } from "@/schemas";
-import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import CardWrapper from "./card-wrapper";
-import { FormError } from "./form-error";
-import { FormSuccess } from "./form-success";
-import { resetPassword } from "@/actions/reset";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { ArrowLeft, ArrowRight, Mail } from "lucide-react";
-import Link from "next/link";
-import FormLabel from "../ui/form-label";
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { ResetSchema, ResetSchemaType } from '@/schemas'
+import { zodResolver } from '@hookform/resolvers/zod'
+import React, { useState, useTransition } from 'react'
+import { useForm } from 'react-hook-form'
+import CardWrapper from './card-wrapper'
+import { FormError } from './form-error'
+import { FormSuccess } from './form-success'
+import { resetPassword } from '@/actions/reset'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { ArrowLeft, ArrowRight, Mail } from 'lucide-react'
+import Link from 'next/link'
+import FormLabel from '../ui/form-label'
 
 export default function ResetForm() {
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string | undefined>();
+  const [isPending, startTransition] = useTransition()
+  const [error, setError] = useState<string | undefined>()
+  const [success, setSuccess] = useState<string | undefined>()
+  const [email, setEmail] = useState<string | undefined>()
+  const [emailSent, setEmailSent] = useState(false)
 
   const form = useForm<ResetSchemaType>({
     resolver: zodResolver(ResetSchema),
     defaultValues: {
-      email: "",
+      email: '',
     },
-  });
+  })
 
   const onSubmit = (values: ResetSchemaType) => {
-    setError("");
-    setSuccess("");
+    setError('')
+    setSuccess('')
     startTransition(async () => {
-      const result = await resetPassword(values);
+      const result = await resetPassword(values)
 
       // Fallback in case `result` is undefined or invalid
       if (!result) {
-        setError("Unexpected error, please try again!");
-        return;
+        setError('Unexpected error, please try again!')
+        return
       }
 
-      const { error, success } = result; // Safely destructure
-      console.log(error, success);
+      const { error, success } = result // Safely destructure
+      console.log(error, success)
 
       if (error) {
-        setError(error);
+        setError(error)
       }
       if (success) {
-        setSuccess(success);
+        setEmailSent(true)
+        setEmail(values.email)
+        setSuccess(success)
       }
       // console.error("Error while login form:", err)
       // setError("Something went wrong, please try again, or reload! 😉")
-    });
-  };
+    })
+  }
+
+  if (emailSent) {
+    return (
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <Mail className="w-6 h-6 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">
+            Check Your Email
+          </h2>
+          <p className="text-slate-600 text-sm">
+            We've sent password reset instructions to{' '}
+            <span className="font-medium">{email}</span>
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-center text-slate-600 text-sm">
+            Didn't receive the email? Check your spam folder or try again.
+          </p>
+
+          <Button
+            type="button"
+            onClick={() => {
+              setEmailSent(false)
+              setError(undefined)
+              setSuccess(undefined)
+              setEmail(undefined)
+              form.reset()
+            }}
+            className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
+          >
+            Try Again
+          </Button>
+
+          <Link
+            href="/login"
+            className="flex items-center justify-center gap-2 text-sm mt-2 text-sky-600 hover:text-sky-700 font-semibold transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Login
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    // <CardWrapper
-    //   headerLabel={"Forgot your password?"}
-    //   backButtonLabel={"Back to login"}
-    //   backButtonHref={"/auth/login"}
-    // >
-    //   <Form {...form}>
-    //     <form
-    //       onSubmit={form.handleSubmit(onSubmit)}
-    //       className="space-y-4 flex flex-col"
-    //     >
-    //       <FormField
-    //         control={form.control}
-    //         name="email"
-    //         render={({ field }) => (
-    //           <FormItem>
-    //             <FormLabel>Email</FormLabel>
-    //             <FormControl>
-    //               {/* Spread ...field for controlled input */}
-    //               <Input
-    //                 disabled={isPending}
-    //                 {...field}
-    //                 placeholder="nischal.dev@example.com"
-    //                 //   disabled={isPending}
-    //               />
-    //             </FormControl>
-    //             <FormMessage />
-    //           </FormItem>
-    //         )}
-    //       />
-
-    //       <FormError message={error} />
-    //       <FormSuccess message={success} />
-    //       <Button disabled={isPending} type="submit">
-    //         Rest Password
-    //       </Button>
-    //     </form>
-    //   </Form>
-    // </CardWrapper>
-
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
       <div className="text-center flex flex-col gap-2">
         <h2 className="text-2xl text-slate-800  -tracking-[0.020rem] font-extrabold">
@@ -161,5 +173,5 @@ export default function ResetForm() {
         </Link>
       </div>
     </div>
-  );
+  )
 }

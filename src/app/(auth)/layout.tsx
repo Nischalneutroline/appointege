@@ -1,4 +1,11 @@
+'use client'
+
+import { AppDispatch, RootState } from '@/store/store'
+import { setAuthFormSpacing } from '@/store/uiSlice'
 import { Calendar, CircleCheckBig, Clock, Users } from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 export default function AuthLayout({
   children,
 }: Readonly<{
@@ -137,7 +144,10 @@ export default function AuthLayout({
           </div>
 
           {/* Auth Form Container */}
-          <div className="w-full max-w-sm  mx-auto my-auto overflow-y-auto rounded-2xl shadow-xl/10  ">
+          <div
+            id="auth-container"
+            className={`w-full max-w-sm mx-auto overflow-y-auto my-[50px]`}
+          >
             {children}
           </div>
         </div>

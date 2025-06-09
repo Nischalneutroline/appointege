@@ -1,63 +1,62 @@
-"use client";
+'use client'
 
-import React, { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useState, useTransition } from 'react'
+import { useForm } from 'react-hook-form'
+import * as z from 'zod'
+import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Form,
   FormField,
   FormItem,
   FormControl,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
-import { FormError } from "./form-error";
-import { FormSuccess } from "./form-success";
+} from '@/components/ui/form'
+import { Input } from '../ui/input'
+import { Button } from '../ui/button'
+import { FormError } from './form-error'
+import { FormSuccess } from './form-success'
 // import { login } from "@/actions/login"
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { LoginSchema } from "@/schemas";
-import { login } from "@/actions/login";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { signIn } from "next-auth/react";
-import { DEFAULT_LOGGEDIN_USER_REDIRECT } from "@/routes";
-import { Social } from "./social";
-import { Checkbox } from "../ui/checkbox";
-import FormLabel from "../ui/form-label";
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
+import { LoginSchema } from '@/schemas'
+import { login } from '@/actions/login'
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { signIn } from 'next-auth/react'
+import { DEFAULT_LOGGEDIN_USER_REDIRECT } from '@/routes'
+import { Social } from './social'
+import { Checkbox } from '../ui/checkbox'
+import FormLabel from '../ui/form-label'
 
 export default function LoginForm() {
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams()
   const urlError =
-    searchParams.get("error") === "OAuthAccountNotLinked"
-      ? "Email already in use with credential provider!"
-      : "";
+    searchParams.get('error') === 'OAuthAccountNotLinked'
+      ? 'Email already in use with credential provider!'
+      : ''
 
-  const callbackUrl = searchParams.get("callbackUrl");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
-  const [isPending, startTransition] = useTransition();
-  const [showTwoFactor, setShowTwoFactor] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [isPending, startTransition] = useTransition()
+  const [showTwoFactor, setShowTwoFactor] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
-  });
+  })
 
   const onSubmit = (values: any) => {
-    setSuccess("");
-    setError("");
+    setSuccess('')
+    setError('')
     startTransition(async () => {
-      const { success, error } = await login(values);
-      if (success) setSuccess(success);
-      if (error) setError(error);
+      const { success, error } = await login(values)
+      if (success) setSuccess(success)
+      if (error) setError(error)
       // if (twoFactor) setShowTwoFactor(true)
       //   login(values)
       //     .then(({ success, error }) => {
@@ -65,8 +64,8 @@ export default function LoginForm() {
       //       if (error) setError(error)
       //     })
       //     .catch((error) => setError("Couldn't get action!"))
-    });
-  };
+    })
+  }
   // const onSubmit = (values: z.infer<typeof LoginSchema>) => {
   //   setSuccess("")
   //   setError("")
@@ -84,16 +83,16 @@ export default function LoginForm() {
   //   })
   // }
 
-  const handleSocialLogin = (provider: "google" | "github") => {
+  const handleSocialLogin = (provider: 'google' | 'github') => {
     signIn(provider, {
       redirectTo: DEFAULT_LOGGEDIN_USER_REDIRECT,
-    });
-  };
+    })
+  }
 
   const handleRememberMeChange = (checked: boolean) => {
-    console.log("Remember me checked:", checked);
-    setRememberMe(checked);
-  };
+    console.log('Remember me checked:', checked)
+    setRememberMe(checked)
+  }
 
   return (
     <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
@@ -150,7 +149,7 @@ export default function LoginForm() {
                       <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                       <Input
                         {...field}
-                        type={showPassword ? "text" : "password"}
+                        type={showPassword ? 'text' : 'password'}
                         placeholder="Enter your password"
                         disabled={isPending}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
@@ -193,7 +192,7 @@ export default function LoginForm() {
               </div>
               <Link
                 className="text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors -tracking-[0.011rem]"
-                href={"/reset-password"}
+                href={'/reset-password'}
               >
                 Forgot password?
               </Link>
@@ -206,7 +205,7 @@ export default function LoginForm() {
               disabled={isPending}
               className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
             >
-              {isPending ? "Signing in..." : "Sign In"}
+              {isPending ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
         </Form>
@@ -215,7 +214,7 @@ export default function LoginForm() {
 
       <div className="mt-6 text-center">
         <p className="text-black text-sm font-normal">
-          Don't have an account?{" "}
+          Don't have an account?{' '}
           <Link
             href="/register"
             className="text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
@@ -225,7 +224,7 @@ export default function LoginForm() {
         </p>
       </div>
     </div>
-  );
+  )
 }
 
 // "use client"
