@@ -75,7 +75,7 @@ export async function sendVerifyEmail(
   email: string,
 ): Promise<{ success?: string } | { error?: string }> {
   if (!email) {
-    return { error: 'Email and token are required!' }
+    return { error: 'Email is required!' }
   }
   try {
     const verificationToken = await generateTokenForEmailVerification(email)

@@ -17,8 +17,21 @@ import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { FormError } from './form-error'
 import { FormSuccess } from './form-success'
-import { register } from '@/actions/register'
-import { Check, Eye, EyeOff, Lock, Mail, User, X } from 'lucide-react'
+import { register, sendVerifyEmail } from '@/actions/register'
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Check,
+  CheckCheck,
+  CheckCircle,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  RefreshCw,
+  User,
+  X,
+} from 'lucide-react'
 import { Checkbox } from '../ui/checkbox'
 import { Label } from '../ui/label'
 
@@ -26,8 +39,29 @@ import Link from 'next/link'
 import { Social } from './social'
 
 import FormLabel from '../ui/form-label'
+import { useRouter } from 'next/navigation'
+import { Toaster } from '../ui/sonner'
+import { toast } from 'sonner'
+import { HiOutlineExclamationTriangle } from 'react-icons/hi2'
+import { cn } from '@/lib/utils'
 // import { login } from "@/actions/login"
 // import { register } from "@/actions/register"
+
+type SignupFormValues = z.infer<typeof SignupSchema>
+
+type PasswordStrength = {
+  strength: number
+  label: string
+  color: string
+  checks: {
+    length: boolean
+    lowercase: boolean
+    uppercase: boolean
+    number: boolean
+    special: boolean
+  }
+  level: 'weak' | 'moderate' | 'strong'
+}
 
 function getPasswordStrength(password: string) {
   const checks = {
@@ -42,22 +76,26 @@ function getPasswordStrength(password: string) {
 
   let label = 'Very Weak'
   let color = 'bg-red-500'
-
+  let level = 'weak'
   if (strength >= 4) {
     label = 'Strong'
     color = 'bg-green-500'
+    level = 'strong'
   } else if (strength === 3) {
     label = 'Moderate'
     color = 'bg-yellow-500'
+    level = 'moderate'
   } else if (strength === 2) {
     label = 'Weak'
     color = 'bg-orange-500'
+    level = 'weak'
   }
 
   return {
     strength,
     label,
     color,
+    level,
     checks,
   }
 }
@@ -65,11 +103,14 @@ function getPasswordStrength(password: string) {
 export default function RegisterForm() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-
+  const [accCreated, setAccCreated] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showPassword1, setShowPassword1] = useState(false)
   const [passwordValue, setPasswordValue] = useState('')
-
+  const [formValues, setFormValues] = useState<SignupFormValues>()
+  const [submitting, setSubmitting] = useState(false)
+  const [showPasswordStrength, setShowPasswordStrength] = useState(true)
+  const router = useRouter()
   const passwordStrength = getPasswordStrength(passwordValue)
 
   const [isPending, startTransition] = useTransition()
@@ -82,7 +123,7 @@ export default function RegisterForm() {
       email: '',
       password: '',
       name: '',
-      // phone: "",
+      phone: '',
       password1: '',
     },
   })
@@ -90,11 +131,13 @@ export default function RegisterForm() {
   const onSubmit = (values: z.infer<typeof SignupSchema>) => {
     setSuccess('')
     setError('')
+    setFormValues(values)
     startTransition(async () => {
       const { success, error } = await register(values)
       if (success) {
         setSuccess(success)
-        form.reset()
+        // form.reset()
+        setAccCreated(true)
       }
       if (error) setError(error)
       // register(values)
@@ -108,6 +151,142 @@ export default function RegisterForm() {
 
   const handleTermsChange = (checked: boolean) => {
     setAgreeToTerms(checked === true)
+  }
+
+  if (accCreated) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+        {/* Success Alert Bar - Centered within card */}
+        {!submitting && (
+          <div
+            className={cn(
+              ' border border-green-100 rounded-xl p-4 animate-fade-in shadow-sm',
+              {
+                'border-green-100': success,
+                'border-red-100': error,
+              },
+            )}
+          >
+            {success ? (
+              <div className=" bg-green-50 flex items-center justify-center space-x-3">
+                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <CheckCircle
+                    className="w-3 h-3 text-white"
+                    fill="currentColor"
+                  />
+                </div>
+                <span className="text-green-700 font-medium text-sm">
+                  {success}
+                </span>
+              </div>
+            ) : (
+              <div className="bg-red-50 flex items-center justify-center space-x-3">
+                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <HiOutlineExclamationTriangle
+                    className="w-3 h-3 text-white"
+                    fill="currentColor"
+                  />
+                </div>
+                <span className="text-red-700 font-medium text-sm">
+                  {error}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Email Icon */}
+        <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+          <CheckCheck className="w-8 h-8 text-green-600" />
+        </div>
+
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl text-slate-800 font-extrabold -tracking-[0.011rem] flex items-center justify-center space-x-2">
+            <Mail className="w-6 h-6 text-sky-600" />
+            <div>Check Your Inbox!</div>
+          </h1>
+
+          <div className="space-y-1">
+            <p className="text-slate-600 text-sm font-medium  -tracking-[0.011rem] ">
+              We've sent a confirmation link to your email.
+            </p>
+            <p className="text-slate-600 text-xs font-medium  -tracking-[0.011rem] ">
+              Please click the link to activate your Appointege account.
+            </p>
+          </div>
+        </div>
+
+        {/* Help Section */}
+        <div className="flex flex-col bg-slate-50 border border-slate-200 rounded-xl py-4 px-6 gap-2">
+          <h3 className="font-semibold text-slate-800 text-center text-sm">
+            Didn't receive the email?
+          </h3>
+          <ul className="text-slate-600 text-xs space-y-1 font-medium">
+            <li className="flex items-start space-x-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-2 flex-shrink-0" />
+              <span>Check your spam or junk folder in email.</span>
+            </li>
+            <li className="flex items-start space-x-3">
+              <div className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-2 flex-shrink-0" />
+              <span>You can resend the confirmation email.</span>
+            </li>
+          </ul>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-4 mb-6">
+          <Button
+            onClick={async () => {
+              if (formValues) {
+                setSubmitting(true)
+                setError('')
+                setSuccess('')
+                try {
+                  const { success, error } = await sendVerifyEmail(
+                    formValues?.email,
+                  )
+                  if (success) {
+                    setSubmitting(false)
+                    setSuccess('Confirmation email resent successfully!')
+                    toast.success('Confirmation email resent successfully!')
+                  }
+                  if (error) setError(error)
+                } catch (err) {
+                  setError('Failed to resend email. Please try again.')
+                  toast.error('Failed to resend email. Please try again.')
+                }
+                setSubmitting(false)
+              }
+            }}
+            disabled={submitting}
+            className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4 mr-2" />
+            )}
+            {submitting ? 'Sending...' : 'Resend Email'}
+          </Button>
+
+          <Link
+            href="/login"
+            className="flex items-center justify-center gap-2 text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Login
+          </Link>
+        </div>
+
+        {/* Footer */}
+        <div className="text-center">
+          <p className="text-slate-500 text-xs">
+            Need help? Contact our support team
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -142,7 +321,7 @@ export default function RegisterForm() {
                       <Input
                         {...field}
                         type="text"
-                        placeholder="Full name"
+                        placeholder="Enter Your Full Name"
                         disabled={isPending}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
                       />
@@ -168,7 +347,7 @@ export default function RegisterForm() {
                         {...field}
                         disabled={isPending}
                         type="email"
-                        placeholder="Enter your email"
+                        placeholder="Enter Your Email"
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
                       />
                     </div>
@@ -178,14 +357,12 @@ export default function RegisterForm() {
               )}
             />
             {/* Phone Number */}
-            {/* <FormField
+            <FormField
               control={form.control}
               name="phone"
               render={({ field }) => (
                 <FormItem className="space-y-[2px] pt-[5px]">
-                  <FormLabel className="text-slate-700 font-semibold  text-sm leading-[17px] w-fit -tracking-[0.006rem]">
-                    Phone Number
-                  </FormLabel>
+                  <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -193,7 +370,7 @@ export default function RegisterForm() {
                         {...field}
                         disabled={isPending}
                         type="tel"
-                        placeholder="Enter your phone number"
+                        placeholder="Enter Your Phone Number"
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
                       />
                     </div>
@@ -201,7 +378,7 @@ export default function RegisterForm() {
                   <FormMessage />
                 </FormItem>
               )}
-            /> */}
+            />
             {/* Password */}
             <FormField
               control={form.control}
@@ -215,11 +392,12 @@ export default function RegisterForm() {
                       <Input
                         {...field}
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Create password"
+                        placeholder="Create Password"
                         disabled={isPending}
                         onChange={(e) => {
                           field.onChange(e)
                           setPasswordValue(e.target.value)
+                          setShowPasswordStrength(true)
                         }}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
                       />
@@ -241,7 +419,7 @@ export default function RegisterForm() {
               )}
             />
             {/* Password Strength UI */}
-            {passwordValue && (
+            {showPasswordStrength && passwordValue && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-600">
@@ -310,9 +488,16 @@ export default function RegisterForm() {
                       <Input
                         {...field}
                         type={showPassword1 ? 'text' : 'password'}
-                        placeholder="Confirm password"
+                        placeholder="Confirm Password"
                         disabled={isPending}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        onFocus={() => {
+                          if (passwordStrength.level === 'strong') {
+                            setShowPasswordStrength(false)
+                          } else {
+                            setShowPasswordStrength(true)
+                          }
+                        }}
                       />
                       <button
                         type="button"
@@ -420,7 +605,7 @@ export default function RegisterForm() {
 //                   <Input
 //                     {...field}
 //                     type="text"
-//                     placeholder="Full name"
+//                     placeholder="Enter Your Full Name"
 //                     disabled={isPending}
 //                     className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
 //                   />
@@ -448,7 +633,7 @@ export default function RegisterForm() {
 //                     {...field}
 //                     disabled={isPending}
 //                     type="email"
-//                     placeholder="Enter your email"
+//                     placeholder="Enter Your Email"
 //                     className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
 //                   />
 //                 </div>
@@ -473,7 +658,7 @@ export default function RegisterForm() {
 //                     {...field}
 //                     disabled={isPending}
 //                     type="tel"
-//                     placeholder="Enter your phone number"
+//                     placeholder="Enter Your Phone Number"
 //                     className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
 //                   />
 //                 </div>
@@ -497,7 +682,7 @@ export default function RegisterForm() {
 //                   <Input
 //                     {...field}
 //                     type={showPassword ? "text" : "password"}
-//                     placeholder="Create a password"
+//                     placeholder="Create Password"
 //                     disabled={isPending}
 //                     className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
 //                   />
@@ -534,7 +719,7 @@ export default function RegisterForm() {
 //                   <Input
 //                     {...field}
 //                     type={showPassword1 ? "text" : "password"}
-//                     placeholder="Confirm password"
+//                     placeholder="Confirm Password"
 //                     disabled={isPending}
 //                     className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
 //                   />

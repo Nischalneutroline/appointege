@@ -21,6 +21,7 @@ import {
   ArrowLeft,
   Calendar,
   Check,
+  CheckCheck,
   CheckCircle,
   Eye,
   EyeOff,
@@ -31,6 +32,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import FormLabel from '../ui/form-label'
+import { HiOutlineExclamationTriangle } from 'react-icons/hi2'
 
 // function getPasswordStrength(password: string) {
 //   const checks = {
@@ -65,13 +67,41 @@ import FormLabel from '../ui/form-label'
 //   };
 // }
 
-const getPasswordStrength = (password: string) => {
-  let strength = 0
-  if (password.length >= 8) strength++
-  if (/[A-Z]/.test(password)) strength++
-  if (/[0-9]/.test(password)) strength++
-  if (/[^A-Za-z0-9]/.test(password)) strength++
-  return strength
+function getPasswordStrength(password: string) {
+  const checks = {
+    length: password.length >= 8,
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[^A-Za-z0-9]/.test(password),
+  }
+
+  const strength = Object.values(checks).filter(Boolean).length
+
+  let label = 'Very Weak'
+  let color = 'bg-red-500'
+  let level = 'weak'
+  if (strength >= 4) {
+    label = 'Strong'
+    color = 'bg-green-500'
+    level = 'strong'
+  } else if (strength === 3) {
+    label = 'Moderate'
+    color = 'bg-yellow-500'
+    level = 'moderate'
+  } else if (strength === 2) {
+    label = 'Weak'
+    color = 'bg-orange-500'
+    level = 'weak'
+  }
+
+  return {
+    strength,
+    label,
+    color,
+    level,
+    checks,
+  }
 }
 
 export default function NewPasswordForm() {
@@ -81,6 +111,7 @@ export default function NewPasswordForm() {
   const [success, setSuccess] = useState<string | undefined>()
   const [showPassword, setShowPassword] = useState(false)
   const [passwordValue, setPasswordValue] = useState('')
+  const [showPasswordStrength, setShowPasswordStrength] = useState(true)
 
   const passwordStrength = getPasswordStrength(passwordValue)
   const searchParams = useSearchParams()
@@ -137,6 +168,9 @@ export default function NewPasswordForm() {
     return (
       <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
         <div className="text-center flex flex-col gap-1">
+          <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <HiOutlineExclamationTriangle className="w-6 h-6 text-red-600" />
+          </div>
           <h2 className="text-2xl font-bold text-slate-800">
             Something went wrong
           </h2>
@@ -149,11 +183,11 @@ export default function NewPasswordForm() {
 
         {/* Error details */}
         <div className="flex flex-col gap-4 ">
-          <div className="bg-red-50/50 border border-red-200/50 rounded-xl p-4 text-left">
-            <h3 className="font-medium text-red-800 mb-3 text-center text-sm">
+          <div className="bg-red-50/50 border border-red-200/50 rounded-xl p-4 text-left space-y-3">
+            <h3 className="font-medium text-red-800  text-center text-sm">
               Try the following:
             </h3>
-            <ul className="text-red-700 text-sm space-y-2">
+            <ul className="text-red-700 text-sm gap-1 flex flex-col items-start ">
               <li className="flex items-start space-x-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-2 flex-shrink-0" />
                 <span>Reset your password again</span>
@@ -204,12 +238,15 @@ export default function NewPasswordForm() {
   if (success) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+        <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+          <CheckCheck className="w-8 h-8 text-green-600" />
+        </div>
         <div className="text-center flex flex-col gap-1">
           <h2 className="text-2xl font-bold text-slate-800">
             Password Changed Successfully!
           </h2>
 
-          <p className="text-slate-600 text-xs font-medium  -tracking-[0.011rem]">
+          <p className="text-slate-600 text-sm font-medium  -tracking-[0.011rem]">
             Your account is now secure with your new password.
           </p>
           <p className="text-slate-600 text-xs font-medium  -tracking-[0.011rem]">
@@ -282,11 +319,12 @@ export default function NewPasswordForm() {
                       <Input
                         {...field}
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Create a password"
+                        placeholder="Create Password"
                         disabled={isPending}
                         onChange={(e) => {
                           field.onChange(e)
                           setPasswordValue(e.target.value)
+                          setShowPasswordStrength(true)
                         }}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
                       />
@@ -363,29 +401,59 @@ export default function NewPasswordForm() {
                 </div>
               </div>
             )} */}
-            {passwordValue && (
+            {showPasswordStrength && passwordValue && (
               <div className="space-y-2">
-                <div className="flex space-x-1">
-                  {[1, 2, 3, 4].map((level) => (
-                    <div
-                      key={level}
-                      className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                        passwordStrength >= level
-                          ? passwordStrength <= 2
-                            ? 'bg-red-400'
-                            : passwordStrength === 3
-                            ? 'bg-yellow-400'
-                            : 'bg-green-400'
-                          : 'bg-slate-200'
-                      }`}
-                    />
-                  ))}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-600">
+                    Password strength:
+                  </span>
+                  <span
+                    className={`text-xs font-medium ${
+                      passwordStrength.strength < 2
+                        ? 'text-red-600'
+                        : passwordStrength.strength < 4
+                        ? 'text-yellow-600'
+                        : 'text-green-600'
+                    }`}
+                  >
+                    {passwordStrength.label}
+                  </span>
                 </div>
-                <p className="text-xs text-slate-600">
-                  {passwordStrength <= 2 && 'Weak password'}
-                  {passwordStrength === 3 && 'Good password'}
-                  {passwordStrength === 4 && 'Strong password'}
-                </p>
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                    style={{
+                      width: `${(passwordStrength.strength / 5) * 100}%`,
+                    }}
+                  />
+                </div>
+                <div className="space-y-1">
+                  {Object.entries(passwordStrength.checks).map(
+                    ([key, passed]) => (
+                      <div
+                        key={key}
+                        className="flex items-center space-x-2 text-xs"
+                      >
+                        {passed ? (
+                          <Check className="w-3 h-3 text-green-500" />
+                        ) : (
+                          <X className="w-3 h-3 text-slate-400" />
+                        )}
+                        <span
+                          className={
+                            passed ? 'text-green-600' : 'text-slate-500'
+                          }
+                        >
+                          {key === 'length' && 'At least 8 characters'}
+                          {key === 'lowercase' && 'One lowercase letter'}
+                          {key === 'uppercase' && 'One uppercase letter'}
+                          {key === 'number' && 'One number'}
+                          {key === 'special' && 'One special character'}
+                        </span>
+                      </div>
+                    ),
+                  )}
+                </div>
               </div>
             )}
             {/* Confirm Password */}
@@ -402,9 +470,16 @@ export default function NewPasswordForm() {
                       <Input
                         {...field}
                         type={showPassword ? 'text' : 'password'}
-                        placeholder="Confirm password"
+                        placeholder="Confirm Password"
                         disabled={isPending}
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        onFocus={() => {
+                          if (passwordStrength.level === 'strong') {
+                            setShowPasswordStrength(false)
+                          } else {
+                            setShowPasswordStrength(true)
+                          }
+                        }}
                       />
                       <button
                         type="button"

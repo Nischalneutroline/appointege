@@ -7,18 +7,16 @@ import { FormSuccess } from '@/components/auth/form-success'
 import { useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
-import { ArrowLeft, Loader2 } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, Loader2, MailCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 export default function VerifyEmail() {
-  // error and success state
   const [error, setError] = useState<string | undefined>()
   const [success, setSuccess] = useState<string | undefined>()
   const [isLoading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
-  console.log(token, 'got token here')
   const router = useRouter()
 
   const verify = async () => {
@@ -27,7 +25,6 @@ export default function VerifyEmail() {
       return
     }
 
-    // Start timer to track minimum display time
     const startTime = Date.now()
     const MIN_DISPLAY_TIME = 3000 // 3 seconds minimum display time
 
@@ -38,78 +35,99 @@ export default function VerifyEmail() {
     try {
       const { success, error } = await verifyUser(token)
 
-      // Calculate remaining time to ensure minimum display time
       const elapsedTime = Date.now() - startTime
       const remainingTime = Math.max(0, MIN_DISPLAY_TIME - elapsedTime)
 
       setTimeout(() => {
         if (success) {
-          setSuccess(success)
-          // Redirect to login after showing success message for 2 seconds
+          setSuccess(success || 'Your email has been verified successfully!')
           setTimeout(() => {
             router.push('/login')
           }, 2000)
-        } else if (error) {
-          setError(error)
+        } else {
+          setError(
+            error ||
+              'Failed to verify email. The link may be invalid or expired.',
+          )
         }
         setLoading(false)
       }, remainingTime)
     } catch (error) {
       setError(
-        'An error occurred while verifying your email. Please try again.',
+        'An error occurred while verifying your email. Please try again later.',
       )
       setLoading(false)
     }
   }
 
-  // Verify the token when the component mounts or when the token changes
   useEffect(() => {
-    if (!token) return
+    if (!token) {
+      setError(
+        'No verification token found. Please use the link from your email.',
+      )
+      return
+    }
     verify()
   }, [token])
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
-      <div className="text-center flex flex-col gap-2">
-        <h2 className="text-2xl text-slate-800 leading-8 font-extrabold">
-          {isLoading ? 'Verifying Email...' : 'Email Verification'}
-        </h2>
-        <p className="text-slate-600 text-sm font-medium">
-          {isLoading
-            ? 'Please wait while we verify your email address'
-            : "We're verifying your email address"}
-        </p>
-      </div>
-      <div className="flex flex-col gap-4 ">
+    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-4">
+      <div className="text-center flex flex-col items-center gap-4 ">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-8">
-            <Loader2 className="w-8 h-8 text-sky-500 animate-spin mb-4" />
-            <p className="text-slate-600">Confirming your email...</p>
+          <div className="w-12 h-12 rounded-lg bg-sky-50 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 text-sky-500 animate-spin" />
+          </div>
+        ) : success ? (
+          <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center">
+            <MailCheck className="w-6 h-6 text-green-500" />
+          </div>
+        ) : error ? (
+          <div className="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 text-red-500" />
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            <FormError message={error} />
-            <FormSuccess message={success} />
+          <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center">
+            <MailCheck className="w-6 h-6 text-slate-400" />
+          </div>
+        )}
 
-            {!error && !success && (
-              <Button
-                onClick={verify}
-                disabled={isLoading}
-                className="w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : null}
-                Verify Email
-              </Button>
-            )}
+        <div className="text-center space-y-1">
+          <h2 className="text-2xl text-slate-800 font-extrabold -tracking-[0.011rem]">
+            {isLoading
+              ? 'Verifying Your Email'
+              : success
+              ? 'Email Verified!'
+              : error
+              ? 'Verification Failed'
+              : 'Verify Your Email'}
+          </h2>
 
-            <div className="text-center mt-6">
+          <p className="text-slate-600 text-sm font-medium -tracking-[0.010rem] px-4">
+            {isLoading
+              ? 'Please wait while we verify your email address. This may take a moment.'
+              : success
+              ? 'Your email has been successfully verified. Redirecting you to login...'
+              : error
+              ? 'Error occured while verifying your email. Please try again later.'
+              : 'Please wait while we verify your email...'}
+          </p>
+        </div>
+      </div>
+      <FormError message={error} />
+      <FormSuccess message={success} />
+      <div className="flex flex-col gap-4">
+        {error && !isLoading && (
+          <div className="flex flex-col gap-2 items-center w-full">
+            <div className="text-center space-y-4">
+              <p className="text-slate-600 text-xs">
+                Need help? Please contact support if the <br /> problem
+                persists.
+              </p>
               <Link
                 href="/login"
-                className="inline-flex items-center text-sm text-sky-600 hover:text-sky-700 font-semibold"
+                className="inline-flex items-center justify-center gap-2 text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
               >
-                <ArrowLeft className="w-4 h-4 mr-1" />
+                <ArrowLeft className="w-4 h-4" />
                 Back to Login
               </Link>
             </div>

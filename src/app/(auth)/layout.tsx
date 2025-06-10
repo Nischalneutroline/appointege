@@ -1,5 +1,3 @@
-'use client'
-
 import { Calendar, CircleCheckBig, Clock, Users } from 'lucide-react'
 
 export default function AuthLayout({

@@ -17,11 +17,9 @@ export const SettingSchema = z
         .min(5, { message: 'Password must be at least 5 characters long!' }),
     ),
     newPassword: z.optional(
-      z
-        .string()
-        .min(5, {
-          message: 'New Password must be at least 5 characters long!',
-        }),
+      z.string().min(5, {
+        message: 'New Password must be at least 5 characters long!',
+      }),
     ),
     role: z.enum(['USER', 'ADMIN']),
     emailVerified: z.optional(z.null()),
@@ -57,12 +55,12 @@ export const SignupSchema = z
       .min(1, { message: 'Email is required!' })
       .email({ message: 'Invalid email format!' }),
     name: z.string().min(3, { message: 'Minimum 3 characters required!' }),
-    // phone: z
-    //   .string()
-    //   .min(10, {
-    //     message: "Phone number must be at least 10 characters long!",
-    //   })
-    //   .optional(),
+    phone: z
+      .string()
+      .min(10, {
+        message: 'Phone number must be at least 10 characters long!',
+      })
+      .optional(),
     // password: z
     //   .string()
     //   .min(5, { message: "Password must be at least 5 characters long!" }),

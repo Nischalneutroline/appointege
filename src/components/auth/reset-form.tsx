@@ -73,7 +73,7 @@ export default function ResetForm() {
           <h2 className="text-2xl font-bold text-slate-800">
             Check Your Email
           </h2>
-          <p className="text-slate-600 text-sm">
+          <p className="flex flex-col text-slate-600 text-sm">
             We've sent password reset instructions to
             <span className="font-medium">{email}</span>
           </p>
@@ -133,7 +133,7 @@ export default function ResetForm() {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px] relative">
+                <FormItem className="space-y-[2px] pt-[5px] ">
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -142,12 +142,12 @@ export default function ResetForm() {
                         {...field}
                         disabled={isPending}
                         type="email"
-                        placeholder="Enter your email address"
+                        placeholder="Enter Your Email Address"
                         className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
                       />
                     </div>
                   </FormControl>
-                  <FormMessage className="text-[12px] absolute -bottom-4 min-h-[18px]" />
+                  <FormMessage className="text-[12px] min-h-[18px]" />
                 </FormItem>
               )}
             />
