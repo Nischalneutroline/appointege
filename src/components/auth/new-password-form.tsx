@@ -148,7 +148,7 @@ export default function NewPasswordForm() {
         </div>
 
         {/* Error details */}
-        <div className="flex flex-col gap-6 ">
+        <div className="flex flex-col gap-4 ">
           <div className="bg-red-50/50 border border-red-200/50 rounded-xl p-4 text-left">
             <h3 className="font-medium text-red-800 mb-3 text-center text-sm">
               Try the following:
@@ -221,26 +221,27 @@ export default function NewPasswordForm() {
         </div>
 
         {/* Feature highlights */}
-        <div className="bg-gradient-to-r from-green-50/50 to-sky-50/50 rounded-xl p-4 mb-4 border border-green-200/30">
-          <div className="flex items-center justify-center space-x-2 mb-2">
-            <Calendar className="w-4 h-4 text-sky-600" />
-            <span className="font-medium text-slate-700 text-sm">
-              Your Appointege account is ready!
-            </span>
+        <div className="flex flex-col gap-4">
+          <div className="bg-gradient-to-r from-green-50/50 to-sky-50/50 rounded-xl p-4 border border-green-200/30 space-y-1 ">
+            <div className="flex items-center justify-center space-x-2">
+              <Calendar className="w-4 h-4 text-sky-600" />
+              <span className="font-medium text-slate-700 text-sm">
+                Your Appointege account is ready!
+              </span>
+            </div>
+            <p className="text-slate-600 text-xs text-center">
+              Secure and ready for managing appointments.
+            </p>
           </div>
-          <p className="text-slate-600 text-xs text-center">
-            Secure and ready for managing appointments.
-          </p>
+
+          <Link
+            href="/login"
+            className="flex justify-center text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Login
+          </Link>
         </div>
-
-        <Link
-          href="/login"
-          className="flex justify-center text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors mt-2"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Login
-        </Link>
-
         {/* Celebration message */}
         <div className="mt-4 text-center">
           <p className="text-slate-500 text-xs">Welcome back to Appointege!</p>
@@ -251,7 +252,7 @@ export default function NewPasswordForm() {
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
-      <div className="text-center flex flex-col gap-2">
+      <div className="text-center flex flex-col gap-1">
         <h2 className="text-2xl text-slate-800  -tracking-[0.020rem] font-extrabold">
           Set New Password
         </h2>

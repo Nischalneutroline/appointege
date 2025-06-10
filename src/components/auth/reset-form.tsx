@@ -66,22 +66,23 @@ export default function ResetForm() {
   if (emailSent) {
     return (
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+        <div className="text-center flex flex-col gap-1">
+          {/* <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <Mail className="w-6 h-6 text-green-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">
+          </div> */}
+          <h2 className="text-2xl font-bold text-slate-800">
             Check Your Email
           </h2>
           <p className="text-slate-600 text-sm">
-            We've sent password reset instructions to{' '}
+            We've sent password reset instructions to
             <span className="font-medium">{email}</span>
           </p>
         </div>
 
-        <div className="space-y-3">
-          <p className="text-center text-slate-600 text-sm">
-            Didn't receive the email? Check your spam folder or try again.
+        <div className="space-y-4">
+          <p className="text-center text-slate-600 text-xs">
+            Didn't receive the email?
+            <br /> Check your spam folder or try again.
           </p>
 
           <Button
@@ -112,7 +113,7 @@ export default function ResetForm() {
 
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
-      <div className="text-center flex flex-col gap-2">
+      <div className="text-center flex flex-col gap-1">
         <h2 className="text-2xl text-slate-800  -tracking-[0.020rem] font-extrabold">
           Reset Password
         </h2>
