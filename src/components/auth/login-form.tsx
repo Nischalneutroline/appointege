@@ -84,7 +84,7 @@ export default function LoginForm() {
 
   if (isLoggedIn) {
     return (
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
         <div className="text-center flex flex-col items-center gap-4">
           <div className="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-green-500" />
@@ -111,7 +111,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+    <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
       <div className="text-center flex flex-col gap-1">
         <h2 className="text-2xl text-slate-800 font-extrabold -tracking-[0.011rem] ">
           Welcome Back

@@ -65,7 +65,7 @@ export default function ResetForm() {
 
   if (emailSent) {
     return (
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
+      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-6">
         <div className="text-center flex flex-col gap-1">
           {/* <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
             <Mail className="w-6 h-6 text-green-600" />
@@ -112,7 +112,7 @@ export default function ResetForm() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-6">
+    <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-6">
       <div className="text-center flex flex-col gap-1">
         <h2 className="text-2xl text-slate-800  -tracking-[0.020rem] font-extrabold">
           Reset Password

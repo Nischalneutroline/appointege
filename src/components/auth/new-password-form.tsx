@@ -166,7 +166,7 @@ export default function NewPasswordForm() {
 
   if (error) {
     return (
-      <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+      <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
         <div className="text-center flex flex-col gap-1">
           <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
             <HiOutlineExclamationTriangle className="w-6 h-6 text-red-600" />
@@ -237,7 +237,7 @@ export default function NewPasswordForm() {
 
   if (success) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl ">
         <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
           <CheckCheck className="w-8 h-8 text-green-600" />
         </div>
@@ -288,7 +288,7 @@ export default function NewPasswordForm() {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
       <div className="text-center flex flex-col gap-1">
         <h2 className="text-2xl text-slate-800  -tracking-[0.020rem] font-extrabold">
           Set New Password

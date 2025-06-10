@@ -71,7 +71,7 @@ export default function VerifyEmail() {
   }, [token])
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 space-y-4">
+    <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4">
       <div className="text-center flex flex-col items-center gap-4 ">
         {isLoading ? (
           <div className="w-12 h-12 rounded-lg bg-sky-50 flex items-center justify-center">

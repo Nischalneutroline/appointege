@@ -155,7 +155,7 @@ export default function RegisterForm() {
 
   if (accCreated) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 ">
+      <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
         {/* Success Alert Bar - Centered within card */}
         {!submitting && (
           <div
@@ -290,7 +290,7 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6">
+    <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
       <div className="text-center flex flex-col gap-1">
         <div className="text-2xl text-slate-800 font-extrabold -tracking-[0.020rem] ">
           Create Account
