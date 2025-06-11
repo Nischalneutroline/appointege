@@ -56,19 +56,19 @@
 
 //-----  New page redirect
 
-"use client"
+'use client'
 
-import { FcGoogle } from "react-icons/fc"
-import { signIn } from "next-auth/react"
-import { Button } from "@/components/ui/button"
-import { DEFAULT_LOGGEDIN_USER_REDIRECT } from "@/routes"
+import { FcGoogle } from 'react-icons/fc'
+import { signIn } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
+import { DEFAULT_LOGGEDIN_USER_REDIRECT } from '@/routes'
 
 interface SocialProps {
   type: string
 }
 
 export function Social({ type }: SocialProps) {
-  const onClick = (provider: "google" | "github") => {
+  const onClick = (provider: 'google' | 'github') => {
     signIn(provider, {
       callbackUrl: DEFAULT_LOGGEDIN_USER_REDIRECT,
       redirect: false, // Prevent default redirect behavior
@@ -77,8 +77,8 @@ export function Social({ type }: SocialProps) {
         // Open Google OAuth in a popup
         window.open(
           response.url,
-          "googleAuth",
-          "width=600,height=600,menubar=no,toolbar=no,location=no"
+          'googleAuth',
+          'width=600,height=600,menubar=no,toolbar=no,location=no',
         )
       }
     })
@@ -103,14 +103,15 @@ export function Social({ type }: SocialProps) {
       <Button
         type="button"
         variant="outline"
-        onClick={() => onClick("google")}
-        className="cursor-pointer w-full h-11 border-slate-300 hover:bg-slate-50 rounded-xl transition-all duration-200 hover:scale-[1.02] text-sm font-semibold -tracking-[0.006rem]"
+        onClick={() => onClick('google')}
+        className="cursor-pointer w-full h-11 border-slate-300 hover:bg-slate-50 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg  text-sm font-bold -tracking-[0.006rem] "
       >
+        {/* cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg */}
         <FcGoogle
           style={{
-            marginRight: "8px",
-            height: "18px",
-            width: "18px",
+            marginRight: '8px',
+            height: '18px',
+            width: '18px',
           }}
         />
         {` Sign ${type} with Google`}

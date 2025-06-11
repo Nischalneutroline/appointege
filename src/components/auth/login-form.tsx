@@ -101,7 +101,7 @@ export default function LoginForm() {
         <div className="flex justify-center">
           <Button
             onClick={() => router.push('/')}
-            className="h-11 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl text-sm"
+            className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
           >
             Go to Dashboard
           </Button>
@@ -219,7 +219,7 @@ export default function LoginForm() {
             <Button
               type="submit"
               disabled={isPending}
-              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
+              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
             >
               {isPending ? 'Signing in...' : 'Sign In'}
             </Button>

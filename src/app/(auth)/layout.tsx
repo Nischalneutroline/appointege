@@ -140,7 +140,7 @@ export default function AuthLayout({
           {/* Auth Form Container */}
           <div
             id="auth-container"
-            className={`w-full max-w-sm mx-auto overflow-y-auto my-auto shadow-2xl`}
+            className={`w-full max-w-sm mx-auto overflow-y-auto my-auto shadow-2xl rounded-2xl`}
           >
             {children}
           </div>

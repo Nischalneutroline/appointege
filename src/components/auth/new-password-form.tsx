@@ -23,6 +23,7 @@ import {
   Check,
   CheckCheck,
   CheckCircle,
+  CircleCheck,
   Eye,
   EyeOff,
   Lock,
@@ -167,12 +168,27 @@ export default function NewPasswordForm() {
   if (error) {
     return (
       <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
+        <div className="relative mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto shadow-lg relative">
+            <HiOutlineExclamationTriangle className="w-10 h-10 text-red-600 animate-bounce" />
+
+            {/* Floating sparkles */}
+            <Sparkles className="w-4 h-4 text-red-500 absolute -top-2 -right-2 animate-pulse" />
+            <Sparkles className="w-3 h-3 text-sky-500 absolute -bottom-1 -left-2 animate-pulse delay-300" />
+            <Sparkles className="w-3 h-3 text-red-400 absolute top-2 -left-3 animate-pulse delay-700" />
+          </div>
+
+          {/* Ripple effect */}
+          <div className="absolute inset-0 w-20 h-20 mx-auto rounded-2xl border-2 border-red-300 animate-ping opacity-20" />
+          <div className="absolute inset-0 w-20 h-20 mx-auto rounded-2xl border border-red-200 animate-ping opacity-30 delay-300" />
+        </div>
+
         <div className="text-center flex flex-col gap-1">
-          <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-            <HiOutlineExclamationTriangle className="w-6 h-6 text-red-600" />
+          <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+            <HiOutlineExclamationTriangle className="w-8 h-8 text-red-600" />
           </div>
           <h2 className="text-2xl font-bold text-slate-800">
-            Something went wrong
+            ⚠️ Oops! Something went wrong
           </h2>
 
           <p className="text-slate-600 text-sm font-medium  -tracking-[0.011rem]">
@@ -208,8 +224,9 @@ export default function NewPasswordForm() {
               onClick={() => {
                 router.push('/reset-password')
               }}
-              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
+              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg group"
             >
+              <RefreshCw className="w-5 h-5 mr-2 group-hover:rotate-180 transition-transform duration-300" />
               Request New Reset Link
             </Button>
 
@@ -238,23 +255,46 @@ export default function NewPasswordForm() {
   if (success) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl ">
-        <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-          <CheckCheck className="w-8 h-8 text-green-600" />
-        </div>
-        <div className="text-center flex flex-col gap-1">
-          <h2 className="text-2xl font-bold text-slate-800">
-            Password Changed Successfully!
-          </h2>
+        <div
+          className={`relative z-10 transition-all duration-700 ${
+            showContent
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-8'
+          }`}
+        >
+          {/* Success Icon with Animation */}
+          <div className="relative mb-8">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto shadow-lg relative">
+              <CircleCheck className="w-10 h-10 text-green-600 animate-bounce" />
 
-          <p className="text-slate-600 text-sm font-medium  -tracking-[0.011rem]">
-            Your account is now secure with your new password.
-          </p>
-          <p className="text-slate-600 text-xs font-medium  -tracking-[0.011rem]">
-            You can now log in using your updated credentials.
-          </p>
-          <p className="text-sky-600 text-xs font-medium -tracking-[0.011rem]">
-            Ready to get back to work?
-          </p>
+              {/* Floating sparkles */}
+              <Sparkles className="w-4 h-4 text-green-500 absolute -top-2 -right-2 animate-pulse" />
+              <Sparkles className="w-3 h-3 text-sky-500 absolute -bottom-1 -left-2 animate-pulse delay-300" />
+              <Sparkles className="w-3 h-3 text-green-400 absolute top-2 -left-3 animate-pulse delay-700" />
+            </div>
+
+            {/* Ripple effect */}
+            <div className="absolute inset-0 w-20 h-20 mx-auto rounded-2xl border-2 border-green-300 animate-ping opacity-20" />
+            <div className="absolute inset-0 w-20 h-20 mx-auto rounded-2xl border border-green-200 animate-ping opacity-30 delay-300" />
+          </div>
+
+          <div className="space-y-4">
+            <h1 className="text-2xl font-bold text-slate-800 text-center">
+              ✅ Password Changed Successfully!
+            </h1>
+
+            <div className="space-y-1">
+              <p className="text-slate-700 text-sm font-medium leading-relaxed text-center">
+                Your account is now secure with your new password.
+              </p>
+              <p className="text-slate-600 text-xs font-semibold leading-relaxed text-center">
+                You can now log in using your updated credentials.
+              </p>
+            </div>
+            <p className="text-sky-600 text-xs font-semibold text-center">
+              Ready to get back to work?
+            </p>
+          </div>
         </div>
 
         {/* Feature highlights */}
@@ -503,8 +543,6 @@ export default function NewPasswordForm() {
             {/* <Button disabled={isPending} type="submit">
             Rest Password
 
-
-            
           </Button> */}
 
             <div className="bg-sky-50/50 border border-sky-200/50 rounded-xl p-4">
@@ -551,7 +589,7 @@ export default function NewPasswordForm() {
             <Button
               type="submit"
               disabled={isPending}
-              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
+              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg group "
             >
               {isPending ? 'Updating Password...' : 'Update Password'}
             </Button>
@@ -568,157 +606,5 @@ export default function NewPasswordForm() {
         </Link>
       </div>
     </div>
-
-    //  <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-4 sm:p-8">
-    //     <div className="text-center mb-6 sm:mb-8">
-    //       <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">
-    //         Set New Password
-    //       </h2>
-    //       <p className="text-slate-600 text-sm sm:text-base">
-    //         Create a strong password for your Appointege account
-    //       </p>
-    //     </div>
-
-    //     <form
-    //       onSubmit={handleSubmit(onSubmit)}
-    //       className="space-y-4 sm:space-y-6 mb-6"
-    //       noValidate
-    //     >
-    //       <div className="space-y-2">
-    //         <Label
-    //           htmlFor="password"
-    // className="text-slate-700 font-medium text-sm"
-    //         >
-    //           New Password
-    //         </Label>
-    //         <div className="relative">
-    //           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 sm:w-5 sm:h-5" />
-    //           <Input
-    //             id="password"
-    //             type={showPassword ? "text" : "password"}
-    //             {...register("password")}
-    //             className="pl-9 sm:pl-10 pr-10 sm:pr-12 h-10 sm:h-12 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm sm:text-base"
-    //             placeholder="Enter new password"
-    //             required
-    //           />
-    //           <button
-    //             type="button"
-    //             onClick={() => setShowPassword(!showPassword)}
-    //             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-    //           >
-    //             {showPassword ? (
-    //               <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
-    //             ) : (
-    //               <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-    //             )}
-    //           </button>
-    //         </div>
-
-    //         {passwordValue && (
-    //           <div className="space-y-2">
-    //             <div className="flex items-center justify-between">
-    //               <span className="text-xs text-slate-600">
-    //                 Password strength:
-    //               </span>
-    //               <span
-    //                 className={`text-xs font-medium ${
-    //                   passwordStrength.strength < 2
-    //                     ? "text-red-600"
-    //                     : passwordStrength.strength < 4
-    //                       ? "text-yellow-600"
-    //                       : "text-green-600"
-    //                 }`}
-    //               >
-    //                 {passwordStrength.label}
-    //               </span>
-    //             </div>
-    //             <div className="w-full bg-slate-200 rounded-full h-2">
-    //               <div
-    //                 className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
-    //                 style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
-    //               />
-    //             </div>
-    //             <div className="space-y-1">
-    //               {Object.entries(passwordStrength.checks).map(
-    //                 ([key, passed]) => (
-    //                   <div
-    //                     key={key}
-    //                     className="flex items-center space-x-2 text-xs"
-    //                   >
-    //                     {passed ? (
-    //                       <Check className="w-3 h-3 text-green-500" />
-    //                     ) : (
-    //                       <X className="w-3 h-3 text-slate-400" />
-    //                     )}
-    //                     <span
-    //                       className={passed ? "text-green-600" : "text-slate-500"}
-    //                     >
-    //                       {key === "length" && "At least 8 characters"}
-    //                       {key === "lowercase" && "One lowercase letter"}
-    //                       {key === "uppercase" && "One uppercase letter"}
-    //                       {key === "number" && "One number"}
-    //                       {key === "special" && "One special character"}
-    //                     </span>
-    //                   </div>
-    //                 )
-    //               )}
-    //             </div>
-    //           </div>
-    //         )}
-    //       </div>
-
-    //       <div className="space-y-2">
-    //         <Label
-    //           htmlFor="confirmPassword"
-    //           className="text-slate-700 font-medium text-sm"
-    //         >
-    //           Confirm New Password
-    //         </Label>
-    //         <div className="relative">
-    //           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 sm:w-5 sm:h-5" />
-    //           <Input
-    //             id="confirmPassword"
-    //             type={showConfirmPassword ? "text" : "password"}
-    //             {...register("confirmPassword")}
-    //             className="pl-9 sm:pl-10 pr-10 sm:pr-12 h-10 sm:h-12 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm sm:text-base"
-    //             placeholder="Confirm new password"
-    //             required
-    //           />
-    //           <button
-    //             type="button"
-    //             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-    //             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-    //           >
-    //             {showConfirmPassword ? (
-    //               <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
-    //             ) : (
-    //               <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-    //             )}
-    //           </button>
-    //         </div>
-    //         {confirmPasswordValue && passwordValue !== confirmPasswordValue && (
-    //           <p className="text-red-500 text-xs">Passwords do not match</p>
-    //         )}
-    //       </div>
-
-    //       <Button
-    //         type="submit"
-    //         disabled={
-    //           isLoading || !watch("password") || !watch("confirmPassword")
-    //         }
-    //         className="w-full h-10 sm:h-12 bg-sky-500 hover:bg-sky-600 text-white font-semibold rounded-xl transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 disabled:opacity-50 text-sm sm:text-base"
-    //       >
-    //         {isLoading ? "Updating Password..." : "Update Password"}
-    //       </Button>
-    //     </form>
-
-    // <Link
-    //   href="/sign-in"
-    //   className="w-full flex items-center justify-center text-sm text-sky-600 hover:text-sky-700 font-medium py-2 transition-all duration-200 hover:underline transform hover:scale-[1.02]"
-    // >
-    //   <ArrowLeft className="w-4 h-4 mr-2" />
-    //   Back to Login
-    // </Link>
-    //   </div>
   )
 }

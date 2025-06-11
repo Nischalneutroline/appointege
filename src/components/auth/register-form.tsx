@@ -19,6 +19,7 @@ import { FormError } from './form-error'
 import { FormSuccess } from './form-success'
 import { register, sendVerifyEmail } from '@/actions/register'
 import {
+  AlertCircle,
   AlertTriangle,
   ArrowLeft,
   Check,
@@ -29,6 +30,7 @@ import {
   Lock,
   Mail,
   RefreshCw,
+  Sparkles,
   User,
   X,
 } from 'lucide-react'
@@ -157,53 +159,79 @@ export default function RegisterForm() {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
         {/* Success Alert Bar - Centered within card */}
-        {!submitting && (
+        {!submitting && success && (
           <div
             className={cn(
-              ' border border-green-100 rounded-xl p-4 animate-fade-in shadow-sm',
-              {
-                'border-green-100': success,
-                'border-red-100': error,
-              },
+              ' border bg-green-100 border-green-100 rounded-xl p-4 animate-fade-in shadow-sm z-[10]',
             )}
           >
-            {success ? (
-              <div className=" bg-green-50 flex items-center justify-center space-x-3">
-                <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <CheckCircle
-                    className="w-3 h-3 text-white"
-                    fill="currentColor"
-                  />
-                </div>
-                <span className="text-green-700 font-medium text-sm">
-                  {success}
-                </span>
+            <div className=" bg-green-100 flex items-center justify-center space-x-3">
+              <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <CheckCircle className="w-3 h-3 text-white" fill="#4CAF50" />
               </div>
-            ) : (
-              <div className="bg-red-50 flex items-center justify-center space-x-3">
-                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <HiOutlineExclamationTriangle
-                    className="w-3 h-3 text-white"
-                    fill="currentColor"
-                  />
-                </div>
-                <span className="text-red-700 font-medium text-sm">
-                  {error}
-                </span>
-              </div>
+              <span className="text-green-700 font-medium text-sm">
+                {success}
+              </span>
+            </div>
+          </div>
+        )}
+        {!submitting && error && (
+          <div
+            className={cn(
+              ' border bg-red-100 border-red-100 rounded-xl p-4 animate-fade-in shadow-sm z-[10]',
             )}
+          >
+            <div className=" bg-red-50 flex items-center justify-center space-x-3">
+              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-3 h-3 text-white" fill="#F44336" />
+              </div>
+              <span className="text-red-700 font-medium text-sm">{error}</span>
+            </div>
           </div>
         )}
 
         {/* Email Icon */}
-        <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
-          <CheckCheck className="w-8 h-8 text-green-600" />
-        </div>
+        {/* <div className="w-16 h-16 bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+          <Mail className="w-8 h-8 text-[#00a4f4]" />
+        </div> */}
+
+        {!submitting && success && (
+          <div className="relative mb-8 z-[5]">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center mx-auto shadow-lg relative">
+              <Mail className="w-10 h-10 text-[#00a4f4] animate-bounce" />
+
+              {/* Floating sparkles */}
+              <Sparkles className="w-4 h-4 text-blue-800 absolute -top-2 -right-2 animate-pulse" />
+              <Sparkles className="w-3 h-3 text-red-400 absolute -bottom-1 -left-2 animate-pulse delay-300" />
+              <Sparkles className="w-3 h-3 text-blue-500 absolute top-2 -left-3 animate-pulse delay-700" />
+            </div>
+
+            {/* Ripple effect */}
+            <div className="absolute inset-0 w-18 h-18 mx-auto rounded-2xl border-2 border-blue-400 animate-ping opacity-20" />
+            <div className="absolute inset-0 w-18 h-18 mx-auto rounded-2xl border border-blue-600 animate-ping opacity-30 delay-300" />
+          </div>
+        )}
+        {!submitting && error && (
+          <div className="relative mb-8 z-[5]">
+            <div className="w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-2xl flex items-center justify-center mx-auto shadow-lg relative">
+              <HiOutlineExclamationTriangle className="w-10 h-10 text-[#cc3f18] animate-bounce" />
+
+              {/* Floating sparkles */}
+              <Sparkles className="w-4 h-4 text-red-800 absolute -top-2 -right-2 animate-pulse" />
+              <Sparkles className="w-3 h-3 text-red-400 absolute -bottom-1 -left-2 animate-pulse delay-300" />
+              <Sparkles className="w-3 h-3 text-red-500 absolute top-2 -left-3 animate-pulse delay-700" />
+            </div>
+
+            {/* Ripple effect */}
+            <div className="absolute inset-0 w-18 h-18 mx-auto rounded-2xl border-2 border-red-400 animate-ping opacity-20" />
+            <div className="absolute inset-0 w-18 h-18 mx-auto rounded-2xl border border-red-600 animate-ping opacity-30 delay-300" />
+          </div>
+        )}
 
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-2xl text-slate-800 font-extrabold -tracking-[0.011rem] flex items-center justify-center space-x-2">
-            <Mail className="w-6 h-6 text-sky-600" />
+          <h1 className="text-2xl text-slate-800 font-extrabold -tracking-[0.011rem] flex items-center justify-center space-x-3">
+            <div className="text-3xl h-fit">📧 </div>
             <div>Check Your Inbox!</div>
           </h1>
 
@@ -249,23 +277,21 @@ export default function RegisterForm() {
                   if (success) {
                     setSubmitting(false)
                     setSuccess('Confirmation email resent successfully!')
-                    toast.success('Confirmation email resent successfully!')
                   }
                   if (error) setError(error)
                 } catch (err) {
                   setError('Failed to resend email. Please try again.')
-                  toast.error('Failed to resend email. Please try again.')
                 }
                 setSubmitting(false)
               }
             }}
             disabled={submitting}
-            className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] disabled:opacity-70 disabled:cursor-not-allowed"
+            className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed group"
           >
             {submitting ? (
               <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
             ) : (
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <RefreshCw className="w-4 h-4 mr-2 group-hover:animate-rotate-180" />
             )}
             {submitting ? 'Sending...' : 'Resend Email'}
           </Button>
@@ -375,7 +401,7 @@ export default function RegisterForm() {
                       />
                     </div>
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-[12px] min-h-[18px]" />
                 </FormItem>
               )}
             />
@@ -549,7 +575,7 @@ export default function RegisterForm() {
             <Button
               type="submit"
               disabled={isPending || !agreeToTerms}
-              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:scale-100 text-sm leading-5 -tracking-[0.011rem]"
+              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
             >
               {isPending
                 ? 'Creating Account...'
