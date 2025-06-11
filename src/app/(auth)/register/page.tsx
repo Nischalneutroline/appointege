@@ -1,13 +1,7 @@
-"use client";
-import RegisterForm from "@/components/auth/register-form";
-import React from "react";
+'use client'
+import RegisterForm from '@/components/auth/register-form'
+import React from 'react'
 
-const Register = () => {
-  return (
-    <div className="">
-      <RegisterForm />
-    </div>
-  );
-};
+const Register = () => <RegisterForm />
 
-export default Register;
+export default Register

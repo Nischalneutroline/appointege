@@ -111,15 +111,14 @@ export default function LoginForm() {
   }
 
   return (
-    <div className=" bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
-      <div className="text-center flex flex-col gap-1">
-        <h2 className="text-2xl text-slate-800 font-extrabold -tracking-[0.011rem] ">
-          Welcome Back
-        </h2>
-        <p className="text-slate-600 text-sm font-medium  -tracking-[0.011rem] ">
+    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-slate-800 mb-1">Welcome Back</h2>
+        <p className="text-slate-600 text-sm">
           Sign in to your Appointege account
         </p>
       </div>
+
       <div className="flex flex-col gap-4 ">
         <Form {...form}>
           <form
@@ -132,7 +131,7 @@ export default function LoginForm() {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px]">
+                <FormItem className=" ">
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -158,7 +157,7 @@ export default function LoginForm() {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px] ">
+                <FormItem className="  ">
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <div className="relative">

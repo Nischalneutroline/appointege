@@ -316,12 +316,12 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-2xl">
-      <div className="text-center flex flex-col gap-1">
-        <div className="text-2xl text-slate-800 font-extrabold -tracking-[0.020rem] ">
+    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-4 sm:p-6 ">
+      <div className="text-center mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1">
           Create Account
-        </div>
-        <p className="text-slate-600 text-sm font-medium  -tracking-[0.011rem] ">
+        </h2>
+        <p className="text-slate-600 text-xs sm:text-sm">
           Join Appointege and start managing appointments
         </p>
       </div>
@@ -330,7 +330,7 @@ export default function RegisterForm() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className=" space-y-4"
+            className="space-y-3 sm:space-y-4"
             noValidate
           >
             {/* Name */}
@@ -338,18 +338,17 @@ export default function RegisterForm() {
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px] ">
+                <FormItem className=" ">
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      {' '}
                       <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                       <Input
                         {...field}
                         type="text"
                         placeholder="Enter Your Full Name"
                         disabled={isPending}
-                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem]"
+                        className="pl-8 sm:pl-9 h-9 sm:h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-xs sm:text-sm"
                       />
                     </div>
                   </FormControl>
@@ -363,7 +362,7 @@ export default function RegisterForm() {
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px]">
+                <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -374,7 +373,7 @@ export default function RegisterForm() {
                         disabled={isPending}
                         type="email"
                         placeholder="Enter Your Email"
-                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        className="pl-8 sm:pl-9 h-9 sm:h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-xs sm:text-sm"
                       />
                     </div>
                   </FormControl>
@@ -387,7 +386,7 @@ export default function RegisterForm() {
               control={form.control}
               name="phone"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px]">
+                <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -397,7 +396,7 @@ export default function RegisterForm() {
                         disabled={isPending}
                         type="tel"
                         placeholder="Enter Your Phone Number"
-                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        className="pl-8 sm:pl-9 h-9 sm:h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-xs sm:text-sm"
                       />
                     </div>
                   </FormControl>
@@ -410,7 +409,7 @@ export default function RegisterForm() {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px]">
+                <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -425,7 +424,7 @@ export default function RegisterForm() {
                           setPasswordValue(e.target.value)
                           setShowPasswordStrength(true)
                         }}
-                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        className="pl-8 sm:pl-9 h-9 sm:h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-xs sm:text-sm"
                       />
                       <button
                         type="button"
@@ -505,7 +504,7 @@ export default function RegisterForm() {
               control={form.control}
               name="password1"
               render={({ field }) => (
-                <FormItem className="space-y-[2px] pt-[5px] ">
+                <FormItem className="space-y-[2px]  ">
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -516,7 +515,7 @@ export default function RegisterForm() {
                         type={showPassword1 ? 'text' : 'password'}
                         placeholder="Confirm Password"
                         disabled={isPending}
-                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        className="pl-8 sm:pl-9 h-9 sm:h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-xs sm:text-sm"
                         onFocus={() => {
                           if (passwordStrength.level === 'strong') {
                             setShowPasswordStrength(false)
@@ -620,7 +619,7 @@ export default function RegisterForm() {
 //           control={form.control}
 //           name="name"
 //           render={({ field }) => (
-//             <FormItem className="space-y-[2px] pt-[5px]">
+//             <FormItem >
 //               <FormLabel className="text-slate-700 font-semibold text-sm leading-[17px] -tracking-[0.006rem]">
 //                 Full Name
 //               </FormLabel>
@@ -647,7 +646,7 @@ export default function RegisterForm() {
 //           control={form.control}
 //           name="email"
 //           render={({ field }) => (
-//             <FormItem className="space-y-[2px] pt-[5px]">
+//             <FormItem >
 //               <FormLabel className="text-slate-700 font-semibold text-sm leading-[17px] -tracking-[0.006rem]">
 //                 Email Address
 //               </FormLabel>
@@ -673,7 +672,7 @@ export default function RegisterForm() {
 //           control={form.control}
 //           name="phone"
 //           render={({ field }) => (
-//             <FormItem className="space-y-[2px] pt-[5px]">
+//             <FormItem >
 //               <FormLabel className="text-slate-700 font-semibold text-sm leading-[17px] -tracking-[0.006rem]">
 //                 Phone Number
 //               </FormLabel>
@@ -698,7 +697,7 @@ export default function RegisterForm() {
 //           control={form.control}
 //           name="password"
 //           render={({ field }) => (
-//             <FormItem className="space-y-[2px] pt-[5px]">
+//             <FormItem >
 //               <FormLabel className="text-slate-700 font-semibold text-sm leading-[17px] -tracking-[0.006rem]">
 //                 Password
 //               </FormLabel>
