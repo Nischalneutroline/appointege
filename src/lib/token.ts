@@ -1,8 +1,8 @@
 // generate verification token
-import { getVerificationTokenByEmail } from "@/data/verificationToken"
-import { db } from "@/lib/db"
+import { getVerificationTokenByEmail } from '@/data/verificationToken'
+import { db } from '@/lib/db'
 // src/lib/token.ts
-import crypto from "crypto"
+import crypto from 'crypto'
 
 export const generateTokenForEmailVerification = async (email: string) => {
   try {
@@ -11,8 +11,8 @@ export const generateTokenForEmailVerification = async (email: string) => {
       // Optionally delete or return existing token
       await db.verificationToken.delete({ where: { id: existingToken.id } })
     }
-    const token = crypto.randomBytes(32).toString("hex")
-    const expiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000) // 1 hours
+    const token = crypto.randomBytes(32).toString('hex')
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
     const generatedToken = await db.verificationToken.create({
       data: {
         email,
@@ -22,7 +22,7 @@ export const generateTokenForEmailVerification = async (email: string) => {
     })
     return generatedToken
   } catch (error) {
-    console.log("Error generating token for email verification:", error)
+    console.log('Error generating token for email verification:', error)
     return null
   }
 }
@@ -36,7 +36,7 @@ export const generateResetToken = async (email: string) => {
       // Optionally delete or return existing token
       await db.passwordResetToken.delete({ where: { id: existingToken.id } })
     }
-    const token = crypto.randomBytes(32).toString("hex")
+    const token = crypto.randomBytes(32).toString('hex')
     const expiresAt = new Date(Date.now() + 1 * 60 * 60 * 1000) // 1 hours
     const generatedToken = await db.passwordResetToken.create({
       data: {
@@ -48,7 +48,7 @@ export const generateResetToken = async (email: string) => {
 
     return generatedToken
   } catch (error) {
-    console.log("Error generating token for password reset:", error)
+    console.log('Error generating token for password reset:', error)
     return null
   }
 }
