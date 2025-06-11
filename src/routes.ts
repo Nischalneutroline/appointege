@@ -11,7 +11,7 @@
  * Users can access these routes without being logged in.
  * Common examples include the home page, about page, and contact page.
  */
-export const publicRoutes = ["/", "/verify-email"]
+export const publicRoutes = ['/', '/verify-email', '/email']
 
 /**
  * An array of routes that are used for authentication.
@@ -24,11 +24,11 @@ export const publicRoutes = ["/", "/verify-email"]
  * Logged-in users accessing these routes are redirected to their role-based dashboard.
  */
 export const authRoutes = [
-  "/login",
-  "/register",
-  "/new-password",
-  "/reset-password",
-  "/error",
+  '/login',
+  '/register',
+  '/new-password',
+  '/reset-password',
+  '/error',
 ]
 
 /**
@@ -41,7 +41,7 @@ export const authRoutes = [
  * This array contains route prefixes that only authenticated users with the USER role can access.
  * Sub-routes (e.g., /dashboard/settings, /profile/edit) are also allowed for USER.
  */
-export const userRoutes = ["/dashboard", "/profile"]
+export const userRoutes = ['/dashboard', '/profile']
 
 /**
  * The prefix for routes accessible only to users with the ADMIN role.
@@ -53,7 +53,7 @@ export const userRoutes = ["/dashboard", "/profile"]
  * This string defines the route prefix that only authenticated users with the ADMIN role can access.
  * Sub-routes (e.g., /admin/users, /admin/settings) are allowed for ADMIN.
  */
-export const adminPrefix = "/admin"
+export const adminPrefix = '/admin'
 
 /**
  * The prefix for routes accessible only to users with the SUPER_ADMIN role.
@@ -65,7 +65,7 @@ export const adminPrefix = "/admin"
  * This string defines the route prefix that only authenticated users with the SUPER_ADMIN role can access.
  * Sub-routes (e.g., /super-admin/reports) are allowed for SUPER_ADMIN.
  */
-export const superAdminPrefix = "/super-admin"
+export const superAdminPrefix = '/super-admin'
 
 /**
  * The prefix for API routes that require authentication.
@@ -77,10 +77,10 @@ export const superAdminPrefix = "/super-admin"
  * This string prefixes API routes that handle authentication (e.g., /api/auth/signin).
  * These routes bypass middleware authentication checks.
  */
-export const apiAuthPrefix = "/api/auth"
+export const apiAuthPrefix = '/api/auth'
 
 // Default redirect paths for different roles after login
-export const DEFAULT_LOGGEDIN_ADMIN_REDIRECT = "/admin"
-export const DEFAULT_LOGGEDIN_SUPER_ADMIN_REDIRECT = "/super-admin"
-export const DEFAULT_LOGGEDIN_USER_REDIRECT = "/"
-export const DEFAULT_UNLOGGEDIN_REDIRECT = "/login"
+export const DEFAULT_LOGGEDIN_ADMIN_REDIRECT = '/admin'
+export const DEFAULT_LOGGEDIN_SUPER_ADMIN_REDIRECT = '/super-admin'
+export const DEFAULT_LOGGEDIN_USER_REDIRECT = '/'
+export const DEFAULT_UNLOGGEDIN_REDIRECT = '/login'

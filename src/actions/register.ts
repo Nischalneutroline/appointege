@@ -53,7 +53,7 @@ export async function register(values: SignupSchemaType) {
       // )
       // return { success: 'Email confirmation sent!' }
 
-      const res = await sendVerifyEmail(email)
+      const res = await sendVerifyEmail(email, name)
       return res
     }
 
@@ -73,6 +73,7 @@ export async function register(values: SignupSchemaType) {
 
 export async function sendVerifyEmail(
   email: string,
+  userName?: string,
 ): Promise<{ success?: string } | { error?: string }> {
   if (!email) {
     return { error: 'Email is required!' }
@@ -82,7 +83,11 @@ export async function sendVerifyEmail(
     if (!verificationToken) {
       return { error: 'Failed to generate verification token!' }
     }
-    await sendVerificationEmail(email, verificationToken.token)
+    await sendVerificationEmail(
+      email,
+      verificationToken.token,
+      userName || 'User',
+    )
     return { success: 'Verification email sent successfully!' }
   } catch (error) {
     console.error('Error sending verification email:', error)
