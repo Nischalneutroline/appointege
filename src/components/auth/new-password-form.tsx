@@ -184,9 +184,9 @@ export default function NewPasswordForm() {
         </div>
 
         <div className="text-center flex flex-col gap-1">
-          <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+          {/* <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mx-auto mb-3">
             <HiOutlineExclamationTriangle className="w-8 h-8 text-red-600" />
-          </div>
+          </div> */}
           <h2 className="text-2xl font-bold text-slate-800">
             ⚠️ Oops! Something went wrong
           </h2>

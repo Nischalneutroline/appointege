@@ -4,7 +4,7 @@ import React, { useState, useTransition } from 'react'
 import CardWrapper from './card-wrapper'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { LoginSchema, LoginSchemaType, SignupSchema } from '@/schemas'
+import { SignupSchema } from '@/schemas'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
   Form,
@@ -20,10 +20,7 @@ import { FormSuccess } from './form-success'
 import { register, sendVerifyEmail } from '@/actions/register'
 import {
   AlertCircle,
-  AlertTriangle,
   ArrowLeft,
-  Check,
-  CheckCheck,
   CheckCircle,
   Eye,
   EyeOff,
@@ -42,8 +39,7 @@ import { Social } from './social'
 
 import FormLabel from '../ui/form-label'
 import { useRouter } from 'next/navigation'
-import { Toaster } from '../ui/sonner'
-import { toast } from 'sonner'
+
 import { HiOutlineExclamationTriangle } from 'react-icons/hi2'
 import { cn } from '@/lib/utils'
 // import { login } from "@/actions/login"
