@@ -126,3 +126,24 @@
     @apply bg-background text-foreground;
   }
 }
+.responsive-text {
+  font-size: 0.875rem; /* 14px */
+}
+
+@media (min-width: 1920px) {
+  .responsive-text {
+    font-size: 1rem; /* 16px */
+  }
+}
+
+@media (min-width: 2560px) {
+  .responsive-text {
+    font-size: 1.125rem; /* 18px */
+  }
+}
+
+@media (min-width: 3840px) {
+  .responsive-text {
+    font-size: 1.25rem; /* 20px */
+  }
+}

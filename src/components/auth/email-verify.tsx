@@ -71,28 +71,28 @@ export default function VerifyEmail() {
   }, [token])
 
   return (
-    <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4">
+    <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 3xl:p-8 4xl:p-10 5xl:p-12 space-y-4">
       <div className="text-center flex flex-col items-center gap-4 ">
         {isLoading ? (
-          <div className="w-12 h-12 rounded-lg bg-sky-50 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-sky-500 animate-spin" />
+          <div className="w-12 h-12 3xl:w-14 3xl:h-14 4xl:w-16 4xl:h-16 5xl:w-18 5xl:h-18 rounded-lg bg-sky-50 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 3xl:w-7 3xl:h-7 4xl:w-8 4xl:h-8 5xl:w-9 5xl:h-9 text-sky-500 animate-spin" />
           </div>
         ) : success ? (
-          <div className="w-12 h-12 rounded-lg bg-green-50 flex items-center justify-center">
-            <MailCheck className="w-6 h-6 text-green-500" />
+          <div className="w-12 h-12 3xl:w-14 3xl:h-14 4xl:w-16 4xl:h-16 5xl:w-18 5xl:h-18 rounded-lg bg-green-50 flex items-center justify-center">
+            <MailCheck className="w-6 h-6 3xl:w-7 3xl:h-7 4xl:w-8 4xl:h-8 5xl:w-9 5xl:h-9 text-green-500" />
           </div>
         ) : error ? (
-          <div className="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center">
-            <AlertTriangle className="w-6 h-6 text-red-500" />
+          <div className="w-12 h-12 3xl:w-14 3xl:h-14 4xl:w-16 4xl:h-16 5xl:w-18 5xl:h-18 rounded-lg bg-red-50 flex items-center justify-center">
+            <AlertTriangle className="w-6 h-6 3xl:w-7 3xl:h-7 4xl:w-8 4xl:h-8 5xl:w-9 5xl:h-9 text-red-500" />
           </div>
         ) : (
-          <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center">
-            <MailCheck className="w-6 h-6 text-slate-400" />
+          <div className="w-12 h-12 3xl:w-14 3xl:h-14 4xl:w-16 4xl:h-16 5xl:w-18 5xl:h-18 rounded-lg bg-slate-100 flex items-center justify-center">
+            <MailCheck className="w-6 h-6 3xl:w-7 3xl:h-7 4xl:w-8 4xl:h-8 5xl:w-9 5xl:h-9 text-slate-400" />
           </div>
         )}
 
-        <div className="text-center space-y-1">
-          <h2 className="text-2xl text-slate-800 font-extrabold -tracking-[0.011rem]">
+        <div className="text-center space-y-1 4xl:space-y-2">
+          <h2 className="text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-5xl text-slate-800 font-extrabold -tracking-[0.011rem]">
             {isLoading
               ? 'Verifying Your Email'
               : success
@@ -102,7 +102,7 @@ export default function VerifyEmail() {
               : 'Verify Your Email'}
           </h2>
 
-          <p className="text-slate-600 text-sm font-medium -tracking-[0.010rem] px-4">
+          <p className="text-slate-600 text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl font-medium -tracking-[0.010rem] px-4">
             {isLoading
               ? 'Please wait while we verify your email address. This may take a moment.'
               : success
@@ -119,15 +119,14 @@ export default function VerifyEmail() {
         {error && !isLoading && (
           <div className="flex flex-col gap-2 items-center w-full">
             <div className="text-center space-y-4">
-              <p className="text-slate-600 text-xs">
-                Need help? Please contact support if the <br /> problem
-                persists.
+              <p className="text-slate-600 text-xs 3xl:text-sm 4xl:text-base 5xl:text-lg">
+                Need help? Please contact support if the problem persists.
               </p>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-2 text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-xs 3xl:text-sm 4xl:text-base 5xl:text-lg text-sky-600 hover:text-sky-700 font-semibold transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-4 h-4 3xl:w-5 3xl:h-5 4xl:w-6 4xl:h-6 5xl:w-7 5xl:h-7" />
                 Back to Login
               </Link>
             </div>
