@@ -7,10 +7,10 @@ export default function AuthLayout({
 }>) {
   return (
     <>
-      <div className=" flex">
+      <div className=" flex ">
         {/* Left Side - Branding (Hidden on mobile) */}
         <div
-          className="hidden lg:flex w-3/5 lg:w-3/6 xl:w-3/5  flex-col items-start justify-center text-white p-8 xl:p-12 relative overflow-y-auto scrollbar-thin gap-12   leading-16  "
+          className="hidden lg:flex w-3/5 lg:w-3/6 xl:w-3/5 flex-col items-start justify-center text-white p-8 lg:p-12 xl:p-16 2xl:p-20 3xl:p-24 4xl:p-28 5xl:p-32 relative overflow-y-auto scrollbar-thin gap-12 leading-16"
           style={{
             background: 'linear-gradient(to bottom right, #f4fafe, #e8eefd)',
           }}
