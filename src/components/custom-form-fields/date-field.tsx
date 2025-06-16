@@ -1,23 +1,23 @@
-"use client"
+'use client'
 
-import { format, addDays, startOfToday } from "date-fns"
-import { CalendarIcon, LucideIcon } from "lucide-react"
+import { format, addDays, startOfToday } from 'date-fns'
+import { CalendarIcon, LucideIcon } from 'lucide-react'
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
+} from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
 import {
   FormField,
   FormItem,
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/ui/form"
-import { cn } from "@/lib/utils"
-import { useFormContext } from "react-hook-form"
+} from '@/components/ui/form'
+import { cn } from '@/lib/utils'
+import { useFormContext } from 'react-hook-form'
 
 interface DatePickerFieldProps {
   name: string
@@ -33,11 +33,11 @@ interface DatePickerFieldProps {
 const DatePickerField = ({
   name,
   label,
-  placeholder = "Pick a date",
+  placeholder = 'Pick a date',
   disabled,
   minDate = startOfToday(),
   maxDate = addDays(new Date(), 30),
-  icon: Icon = CalendarIcon,
+  icon: Icon,
   className,
 }: DatePickerFieldProps) => {
   const { control } = useFormContext()
@@ -47,7 +47,7 @@ const DatePickerField = ({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={cn("flex flex-col", className)}>
+        <FormItem className={cn('flex flex-col', className)}>
           <div className="flex gap-2 items-center">
             {Icon && <Icon className="size-4 text-gray-500" />}
             <FormLabel>{label}</FormLabel>
@@ -58,17 +58,17 @@ const DatePickerField = ({
                 <Button
                   variant="outline"
                   className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !field.value && "text-muted-foreground"
+                    'w-full justify-start text-left font-normal',
+                    !field.value && 'text-muted-foreground',
                   )}
                   disabled={disabled}
                 >
                   {field.value ? (
-                    format(field.value, "PPP")
+                    format(field.value, 'PPP')
                   ) : (
                     <span>{placeholder}</span>
                   )}
-                  <Icon className="ml-auto h-4 w-4 opacity-50" />
+                  {Icon && <Icon className="ml-auto h-4 w-4 opacity-50" />}
                 </Button>
               </FormControl>
             </PopoverTrigger>

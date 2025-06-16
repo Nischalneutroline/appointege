@@ -18,11 +18,26 @@ import TimePickerField from '@/components/custom-form-fields/time-field'
 import { Button } from '@/components/ui/button'
 import { useRouter, useParams } from 'next/navigation'
 import DatePickerField from '@/components/custom-form-fields/date-field'
-import { Mail, SlidersHorizontal, UserPen } from 'lucide-react'
+import {
+  CalendarIcon,
+  Mail,
+  PhoneCallIcon,
+  ScrollText,
+  SlidersHorizontal,
+  UserPen,
+} from 'lucide-react'
 import { useEffect, useState, useMemo } from 'react'
 import LoadingSpinner from '@/components/loading-spinner'
 import FormHeader from '@/components/custom-form-fields/form-header'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden' // Import VisuallyHidden
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
 interface ServiceOption {
   label: string
@@ -39,6 +54,7 @@ const appointmentSchema = z.object({
   date: z.date({ required_error: 'Date is required' }),
   time: z.string().min(1, 'Time is required'),
   message: z.string().optional(),
+  appointmentType: z.string().min(1, 'Appointment type is required'), // New field
 })
 
 type FormData = z.infer<typeof appointmentSchema>
@@ -83,6 +99,7 @@ const NewAppoinment = ({
       date: undefined,
       time: '',
       message: '',
+      appointmentType: '', // New field default
     },
   })
 
@@ -97,6 +114,11 @@ const NewAppoinment = ({
     { label: 'Service 1', value: 'service1' },
     { label: 'Service 2', value: 'service2' },
     { label: 'Service 3', value: 'service3' },
+  ]
+
+  const appointmentTypeOptions = [
+    { label: 'In-Person', value: 'in-person' },
+    { label: 'Virtual', value: 'virtual' },
   ]
 
   const hasFetchedServices = serviceOptions.length > 0
@@ -123,9 +145,8 @@ const NewAppoinment = ({
   return (
     <Dialog onOpenChange={onChange} open={open}>
       <DialogContent className="md:max-w-2xl overflow-y-scroll">
-        <DialogHeader className=" gap-0">
-          {/* Use DialogTitle and DialogDescription for accessibility */}
-          <DialogTitle className="text-blue-700 text-lg ">
+        <DialogHeader className="gap-0">
+          <DialogTitle className="text-blue-700 text-lg">
             {isEditMode ? 'Edit Appointment' : 'Enter Appointment Details'}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
@@ -134,20 +155,6 @@ const NewAppoinment = ({
               : 'View and manage your upcoming appointments'}
           </DialogDescription>
         </DialogHeader>
-
-        {/* Optionally, use VisuallyHidden if you want to hide title/description visually */}
-        {/* <VisuallyHidden>
-            <DialogTitle>
-              {isEditMode ? 'Edit Appointment' : 'Enter Appointment Details'}
-            </DialogTitle>
-            <DialogDescription>
-              {isEditMode
-                ? 'Update existing appointment details'
-                : 'View and manage your upcoming appointments'}
-            </DialogDescription>
-          </VisuallyHidden> */}
-
-        {/* Keep FormHeader for visual rendering if desired */}
 
         {isLoadingAppointment || (isLoadingServices && !hasFetchedServices) ? (
           <div className="flex justify-center items-center py-20 text-muted-foreground">
@@ -167,13 +174,13 @@ const NewAppoinment = ({
                   name="firstName"
                   label="First Name"
                   placeholder="John"
-                  icon={UserPen}
+                  // icon={UserPen}
                 />
                 <InputField
                   name="lastName"
                   label="Last Name"
                   placeholder="Doe"
-                  icon={UserPen}
+                  // icon={UserPen}
                 />
               </div>
 
@@ -182,20 +189,21 @@ const NewAppoinment = ({
                 label="Email"
                 type="email"
                 placeholder="john@example.com"
-                icon={Mail}
+                // icon={Mail}
               />
 
               <PhoneInputField
                 name="phone"
                 label="Phone Number"
                 placeholder="Enter your number"
+                // icon={PhoneCallIcon}
               />
 
               <SelectField
                 name="service"
                 label="Select a Service"
                 options={serviceOptions}
-                icon={SlidersHorizontal}
+                // icon={SlidersHorizontal}
                 placeholder={
                   isLoadingServices ? 'Loading services...' : 'Select a service'
                 }
@@ -218,6 +226,7 @@ const NewAppoinment = ({
                   name="date"
                   label="Appointment Date"
                   placeholder="Pick a date"
+                  // icon={CalendarIcon}
                 />
                 <TimePickerField
                   name="time"
@@ -230,13 +239,51 @@ const NewAppoinment = ({
                 name="message"
                 label="Additional Notes"
                 placeholder="Any special requests?"
+                // icon={ScrollText}
+              />
+
+              <FormField
+                control={form.control}
+                name="appointmentType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Appointment Type</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex space-x-4"
+                        disabled={isLoadingServices || isSubmitting}
+                      >
+                        {appointmentTypeOptions.map((option) => (
+                          <div
+                            key={option.value}
+                            className="flex items-center space-x-2"
+                          >
+                            <RadioGroupItem
+                              value={option.value}
+                              id={option.value}
+                            />
+                            <label
+                              htmlFor={option.value}
+                              className="text-sm font-medium"
+                            >
+                              {option.label}
+                            </label>
+                          </div>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
 
               <div className="flex flex-col gap-3 md:flex-row justify-between mt-6">
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full sm:w-auto hover:opacity-95 active:translate-y-0.5 transition-transform duration-200"
+                  className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-1 active:outline-blue-700 transition-transform duration-200"
                   onClick={handleBack}
                   disabled={isSubmitting}
                 >
@@ -244,8 +291,8 @@ const NewAppoinment = ({
                 </Button>
                 <Button
                   type="submit"
-                  variant={'primary'}
-                  className="w-full sm:w-auto hover:opacity-95 active:translate-y-0.5 transition-transform duration-200"
+                  variant="primary"
+                  className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-1 active:outline-blue-700 transition-colors duration-200"
                   disabled={
                     isLoadingServices || isLoadingAppointment || isSubmitting
                   }

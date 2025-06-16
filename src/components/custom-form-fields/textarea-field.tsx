@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import {
   FormControl,
@@ -6,10 +6,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
-import { useFormContext } from "react-hook-form"
-import { LucideIcon, ScrollText } from "lucide-react"
+} from '@/components/ui/form'
+import { Textarea } from '@/components/ui/textarea'
+import { useFormContext } from 'react-hook-form'
+import { LucideIcon, ScrollText } from 'lucide-react'
 
 interface TextAreaFieldProps {
   name: string
@@ -24,7 +24,7 @@ const TextAreaField = ({
   label,
   placeholder,
   disabled,
-  icon: Icon = ScrollText,
+  icon: Icon,
 }: TextAreaFieldProps) => {
   const { control } = useFormContext()
 
