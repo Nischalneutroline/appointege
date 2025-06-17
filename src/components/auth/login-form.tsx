@@ -111,19 +111,21 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-6">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 mb-1">Welcome Back</h2>
-        <p className="text-slate-600 text-sm">
+    <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-4 sm:p-6 lg:p-8 3xl:p-10 4xl:p-12 5xl:p-14 space-y-6 ">
+      <div className="text-center mb-6 3xl:mb-8 4xl:mb-10 5xl:mb-12 space-y-2 ">
+        <h2 className="text-2xl 3xl:text-3xl 4xl:text-4xl 5xl:text-5xl text-slate-800 font-bold  -tracking-[0.011rem] ">
+          Welcome Back
+        </h2>
+        <p className="text-slate-600 text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl font-medium  -tracking-[0.011rem] ">
           Sign in to your Appointege account
         </p>
       </div>
 
-      <div className="flex flex-col gap-4 ">
+      <div className="flex flex-col gap-4 3xl:gap-6 4xl:gap-8 5xl:gap-10">
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className=" space-y-4"
+            className="space-y-3 sm:space-y-4 lg:space-y-5 3xl:space-y-6 4xl:space-y-8 5xl:space-y-10"
             noValidate
           >
             {/* Email */}
@@ -135,13 +137,13 @@ export default function LoginForm() {
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 3xl:w-5 3xl:h-5 4xl:w-6 4xl:h-6 5xl:w-7 5xl:h-7" />
                       <Input
                         {...field}
                         disabled={isPending}
                         type="email"
                         placeholder="Enter Your Email"
-                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        className="pl-9 3xl:pl-10 4xl:pl-12 5xl:pl-14 h-11 3xl:h-12 4xl:h-14  5xl:h-16 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl font-medium placeholder:-tracking-[0.011rem]"
                         // className=""
                       />
                     </div>
@@ -161,13 +163,13 @@ export default function LoginForm() {
                   <FormLabel>Password</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4 3xl:w-5 3xl:h-5 4xl:w-6 4xl:h-6 5xl:w-7 5xl:h-7" />
                       <Input
                         {...field}
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Enter Your Password"
                         disabled={isPending}
-                        className="pl-9 h-11 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm font-medium placeholder:-tracking-[0.011rem] "
+                        className="pl-9 3xl:pl-10 4xl:pl-12 5xl:pl-14 h-11 3xl:h-12 4xl:h-14  5xl:h-16 border-slate-300 focus:border-sky-500 focus:ring-sky-500 rounded-xl text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl font-medium placeholder:-tracking-[0.011rem]"
                       />
                       {/* Toggle Password */}
                       <button
@@ -200,13 +202,13 @@ export default function LoginForm() {
                 />
                 <label
                   htmlFor="remember"
-                  className="text-sm text-black cursor-pointer font-medium  "
+                  className="text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl text-black cursor-pointer font-medium  "
                 >
                   Remember me
                 </label>
               </div>
               <Link
-                className="text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors -tracking-[0.011rem]"
+                className="text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl text-sky-600 hover:text-sky-700 font-semibold transition-colors -tracking-[0.011rem]"
                 href={'/reset-password'}
               >
                 Forgot password?
@@ -217,8 +219,8 @@ export default function LoginForm() {
             <FormSuccess message={success} />
             <Button
               type="submit"
-              disabled={isPending}
-              className="cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+              disabled={isPending || !form.formState.isValid}
+              className="cursor-pointer w-full h-11 3xl:h-12 4xl:h-16 5xl:h-18 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
             >
               {isPending ? 'Signing in...' : 'Sign In'}
             </Button>
@@ -227,12 +229,12 @@ export default function LoginForm() {
         <Social type="in" />
       </div>
 
-      <div className="mt-6 text-center">
-        <p className="text-black text-sm font-normal">
+      <div className="mt-6 text-center text-sm font-normal 3xl:text-base 4xl:text-lg 5xl:text-xl">
+        <p className="text-back text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl font-normal">
           Don't have an account?{' '}
           <Link
-            href="/register"
-            className="text-sm text-sky-600 hover:text-sky-700 font-semibold transition-colors"
+            href={'/register'}
+            className="text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl text-sky-600 hover:text-sky-700 font-semibold transition-colors"
           >
             Sign up
           </Link>

@@ -55,7 +55,6 @@
 // }
 
 //-----  New page redirect
-
 'use client'
 
 import { FcGoogle } from 'react-icons/fc'
@@ -92,7 +91,7 @@ export function Social({ type }: SocialProps) {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-slate-300" />
           </div>
-          <div className="relative flex justify-center text-sm">
+          <div className="relative flex justify-center text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl">
             <span className="px-4 bg-white text-slate-500 font-medium -tracking-[0.006rem]">
               Or continue with
             </span>
@@ -104,14 +103,13 @@ export function Social({ type }: SocialProps) {
         type="button"
         variant="outline"
         onClick={() => onClick('google')}
-        className="cursor-pointer w-full h-11 border-slate-300 hover:bg-slate-50 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg  text-sm font-bold -tracking-[0.006rem] "
+        className="cursor-pointer w-full h-11 3xl:h-12 4xl:h-14 5xl:h-16 border-slate-300 hover:bg-slate-50 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg  text-sm 3xl:text-base 4xl:text-lg 5xl:text-xl font-bold -tracking-[0.006rem] "
       >
         {/* cursor-pointer w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-lg disabled:scale-100 text-sm leading-5 -tracking-[0.011rem] transition-all duration-300 transform hover:scale-105 hover:shadow-lg */}
         <FcGoogle
+          className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 3xl:w-7 4xl:w-8"
           style={{
             marginRight: '8px',
-            height: '18px',
-            width: '18px',
           }}
         />
         {` Sign ${type} with Google`}
