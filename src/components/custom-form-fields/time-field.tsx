@@ -1,22 +1,22 @@
 // components/custom/time-picker-field.tsx
-"use client"
+'use client'
 
-import { useFormContext, useController } from "react-hook-form"
+import { useFormContext, useController } from 'react-hook-form'
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import {
   FormItem,
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/ui/form"
-import { Clock, LucideIcon } from "lucide-react"
+} from '@/components/ui/form'
+import { Clock, LucideIcon } from 'lucide-react'
 
 interface TimePickerFieldProps {
   name: string
@@ -32,7 +32,7 @@ const TimePickerField = ({
   label,
   className,
   availableTimeSlots,
-  icon: Icon = Clock,
+  icon: Icon,
   disabled,
 }: TimePickerFieldProps) => {
   const { control } = useFormContext()
