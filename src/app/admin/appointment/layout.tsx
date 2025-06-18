@@ -15,7 +15,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
 
   return (
-    <main className="flex flex-col gap-4 overflow-hidden">
+    <main className="flex flex-col gap-4 ">
       <div className="flex flex-col  justify-between gap-4">
         <div className="w-full flex  flex-col lg:flex-row  lg:items-center lg:justify-between gap-2 lg:gap-0">
           <Heading
@@ -48,7 +48,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
       </div>
 
       <ViewModeContext.Provider value={{ viewMode, setViewMode }}>
-        <div className="flex-1 h-full overflow-hidden ">{children}</div>
+        <div className="flex-1 h-full ">{children}</div>
       </ViewModeContext.Provider>
     </main>
   )

@@ -25,7 +25,7 @@ const Page = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
-        <div className="w-fit flex items-center gap-2 py-1 px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
+        <div className="w-fit flex items-center gap-2 overflow-auto py-1 px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
           {filterOptions.map((option, index) => {
             return (
               <FilterTabs
@@ -42,11 +42,11 @@ const Page = () => {
           <SearchBar
             className="bg-white rounded-[8px]"
             placeholder="Search appointment"
-            width="w-[370px] hidden lg:block"
+            width="w-[370px]"
             onSearch={(value) => console.log(value)}
           />
 
-          <div className="flex gap-3 justify-end">
+          <div className="flex  gap-3 justify-end">
             <div className="flex text-[#6B7280] items-center gap-1 justify-center border-[1px] bg-[#FFFFFF] border-[#E5E7EB] rounded-[8px] w-24.5 cursor-pointer hover:scale-110 transition duration-400">
               <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
               <div className=" text-sm font-normal">Filter</div>
@@ -61,19 +61,21 @@ const Page = () => {
       {/* <DataTable columns={columns} data={seletedData} rowKey="id" /> */}
 
       {/* Main Data Section */}
-      <div className="overflow-y-auto scroll-auto">
+      <div className="overflow-y-auto">
         {seletedData.length > 0 ? (
           <>
             {viewMode === 'list' ? (
-              <div className="max-w-full overflow-x-auto scroll-auto"></div>
+              <div className="max-w-full">
+                <DataTable columns={columns} data={seletedData} rowKey="id" />
+              </div>
             ) : viewMode === 'card' ? (
-              <div className="flex flex-col gap-2 ">
+              <div className="flex flex-col gap-2 h-[calc(100vh-350px)] overflow-y-auto ">
                 {seletedData.map((item) => (
                   <AppointmentCard item={item} key={item.id} />
                 ))}
               </div>
             ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 ">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 h-[calc(100vh-350px)] overflow-y-auto ">
                 {seletedData.map((item) => (
                   <AppointmentGrid item={item} key={item.id} />
                 ))}

@@ -20,6 +20,40 @@ import {
 import { NavLinks, NavLinksMobile } from './nav-links'
 import CompanyProfile from '../company-profile'
 
+export const navLinks = [
+  { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={24} /> },
+  {
+    name: 'Appointments',
+    path: '/admin/appointment',
+    icon: <Calendar size={24} />,
+  },
+  {
+    name: 'Customers',
+    path: '/admin/customer',
+    icon: <UsersRound size={24} />,
+  },
+  {
+    name: 'Services',
+    path: '/admin/service',
+    icon: <Wrench size={24} />,
+  },
+  {
+    name: 'Business Settings',
+    path: '/admin/settings',
+    icon: <Settings size={24} />,
+  },
+  {
+    name: 'Supports',
+    path: '/admin/support',
+    icon: <CircleHelp size={24} />,
+  },
+  {
+    name: 'Reminders',
+    path: '/admin/reminders',
+    icon: <Bell size={24} />,
+  },
+]
+
 /**
  * SidebarDesktop Component
  *
@@ -38,39 +72,6 @@ const SidebarDesktop = () => {
    * - path: Route path
    * - icon: React icon component
    */
-  const navLinks = [
-    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={24} /> },
-    {
-      name: 'Appointments',
-      path: '/admin/appointment',
-      icon: <Calendar size={24} />,
-    },
-    {
-      name: 'Customers',
-      path: '/admin/customer',
-      icon: <UsersRound size={24} />,
-    },
-    {
-      name: 'Services',
-      path: '/admin/service',
-      icon: <Wrench size={24} />,
-    },
-    {
-      name: 'Business Settings',
-      path: '/admin/settings',
-      icon: <Settings size={24} />,
-    },
-    {
-      name: 'Supports',
-      path: '/admin/support',
-      icon: <CircleHelp size={24} />,
-    },
-    {
-      name: 'Reminders',
-      path: '/admin/reminders',
-      icon: <Bell size={24} />,
-    },
-  ]
 
   /**
    * Handles navigation to the specified path
@@ -133,7 +134,7 @@ const SidebarDesktop = () => {
         </div>
       ) : (
         // Collapsed Sidebar
-        <div className="flex flex-col gap-6 h-full relative items-center p-4">
+        <div className="flex z-[20] md:z-[10] flex-col gap-6 h-full relative items-center p-4">
           <div className="flex justify-center w-full gap-6">
             <div className="h-8 w-8 rounded-[10px] bg-gradient-to-r from-[#00A6F4] to-[#155DFC] text-white flex items-center justify-center font-medium text-sm">
               BP

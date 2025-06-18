@@ -16,7 +16,7 @@ const LayoutCards = ({ option }: LayoutCardsProps) => {
   return (
     <Card
       key={option.value}
-      className={`flex-1 gap-1 p-3 rounded-[12px] hover:scale-105 transition duration-400 cursor-pointer shadow-base z-10 max-w-[20rem]`}
+      className={`flex-1 gap-1 p-3 rounded-[12px] hover:scale-105 transition duration-400 cursor-pointer shadow-base z-10  overflow-visible`}
       style={{
         backgroundColor: option.background,
         border: `1px solid ${option.border}`,
