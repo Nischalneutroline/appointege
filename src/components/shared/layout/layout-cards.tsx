@@ -5,6 +5,7 @@ interface LayoutCardsProps {
   option: {
     value: string
     label: string
+    textColor: string
     count: number
     icon: React.ReactNode
     background: string
@@ -15,17 +16,23 @@ const LayoutCards = ({ option }: LayoutCardsProps) => {
   return (
     <Card
       key={option.value}
-      className={`flex-1 gap-1 p-3 rounded-[12px] hover:scale-105 transition duration-400 cursor-pointer shadow-[-1px_2px_2px_rgba(0,0,0,0.15)]`}
+      className={`flex-1 gap-1 p-3 rounded-[12px] hover:scale-105 transition duration-400 cursor-pointer shadow-base z-10 max-w-[20rem]`}
       style={{
         backgroundColor: option.background,
         border: `1px solid ${option.border}`,
       }}
     >
-      <div className={`font-normal text-sm  text-primary leading-[150%] `}>
+      <div
+        className={`font-normal text-sm  text-primary leading-[150%] `}
+        style={{ color: option.textColor }}
+      >
         {option.label}
       </div>
       <div className="flex justify-between items-end">
-        <div className="font-medium text-lg text-black h-full flex items-center">
+        <div
+          className="font-medium text-lg text-black h-full flex items-center"
+          style={{ color: option.textColor }}
+        >
           {option.count}
         </div>
         <div className="flex items-center justify-center w-[35px] h-[35px] bg-white rounded-[8px]">

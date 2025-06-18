@@ -1,28 +1,24 @@
-"use client";
+'use client'
 
 // External Libraries
-import React, { useState } from "react";
+import React, { useState } from 'react'
 
-import { cn } from "@/lib/utils";
+import { cn } from '@/lib/utils'
 
 // Icons
 import {
   Settings,
   Bell,
-  HandPlatter,
-  Users,
-  Headset,
   ChevronRight,
-  ChevronLeft,
   LayoutDashboard,
   Calendar,
   UsersRound,
   Wrench,
   CircleHelp,
   SquareArrowUpRight,
-} from "lucide-react";
-import { NavLinks, NavLinksMobile } from "./nav-links";
-import CompanyProfile from "../company-profile";
+} from 'lucide-react'
+import { NavLinks, NavLinksMobile } from './nav-links'
+import CompanyProfile from '../company-profile'
 
 /**
  * SidebarDesktop Component
@@ -33,7 +29,7 @@ import CompanyProfile from "../company-profile";
 const SidebarDesktop = () => {
   // Hooks
 
-  const [isSidebarCollapsed, setCollapsed] = useState(false);
+  const [isSidebarCollapsed, setCollapsed] = useState(false)
 
   /**
    * Navigation links configuration
@@ -43,38 +39,38 @@ const SidebarDesktop = () => {
    * - icon: React icon component
    */
   const navLinks = [
-    { name: "Dashboard", path: "/admin", icon: <LayoutDashboard size={24} /> },
+    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={24} /> },
     {
-      name: "Appointments",
-      path: "/admin/appointment",
+      name: 'Appointments',
+      path: '/admin/appointment',
       icon: <Calendar size={24} />,
     },
     {
-      name: "Customers",
-      path: "/admin/customer",
+      name: 'Customers',
+      path: '/admin/customer',
       icon: <UsersRound size={24} />,
     },
     {
-      name: "Services",
-      path: "/admin/service",
+      name: 'Services',
+      path: '/admin/service',
       icon: <Wrench size={24} />,
     },
     {
-      name: "Business Settings",
-      path: "/admin/settings",
+      name: 'Business Settings',
+      path: '/admin/settings',
       icon: <Settings size={24} />,
     },
     {
-      name: "Supports",
-      path: "/admin/support",
+      name: 'Supports',
+      path: '/admin/support',
       icon: <CircleHelp size={24} />,
     },
     {
-      name: "Reminders",
-      path: "/admin/reminders",
+      name: 'Reminders',
+      path: '/admin/reminders',
       icon: <Bell size={24} />,
     },
-  ];
+  ]
 
   /**
    * Handles navigation to the specified path
@@ -84,8 +80,8 @@ const SidebarDesktop = () => {
   return (
     <aside
       className={cn(
-        "flex flex-col bg-white h-full border-r-1 border-[#E5E7EB] transition-all duration-150 ease-in-out",
-        isSidebarCollapsed ? "w-18 " : "w-70 items-center"
+        'flex flex-col bg-white h-full border-r-1 border-[#E5E7EB] transition-all duration-150 ease-in-out',
+        isSidebarCollapsed ? 'w-18 ' : 'w-70 items-center',
       )}
     >
       {!isSidebarCollapsed ? (
@@ -126,7 +122,7 @@ const SidebarDesktop = () => {
               <button
                 className="flex items-center gap-3 text-base font-medium transition-all px-3 py-1 bg-[#E9F1FD] w-full leading-8 border-[1px] border-[#5BA4FF] rounded-[6px]"
                 style={{
-                  boxShadow: "inset 0 2px 10px rgba(37, 99, 235, 0.15)",
+                  boxShadow: 'inset 0 2px 10px rgba(37, 99, 235, 0.15)',
                 }}
               >
                 <SquareArrowUpRight />
@@ -183,7 +179,7 @@ const SidebarDesktop = () => {
             <button
               className="flex items-center gap-3 text-base font-medium transition-all px-3 py-1 bg-[#E9F1FD] w-full leading-8 border-[1px] border-[#5BA4FF] rounded-[6px]"
               style={{
-                boxShadow: "inset 0 2px 10px rgba(37, 99, 235, 0.15)",
+                boxShadow: 'inset 0 2px 10px rgba(37, 99, 235, 0.15)',
               }}
             >
               <SquareArrowUpRight />
@@ -192,7 +188,7 @@ const SidebarDesktop = () => {
         </div>
       )}
     </aside>
-  );
-};
+  )
+}
 
-export default SidebarDesktop;
+export default SidebarDesktop

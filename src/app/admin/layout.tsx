@@ -1,7 +1,7 @@
-"use client";
+'use client'
 
-import Header from "@/components/shared/layout/header";
-import SidebarDesktop from "@/components/shared/layout/sidebar-desktop";
+import Header from '@/components/shared/layout/header'
+import SidebarDesktop from '@/components/shared/layout/sidebar-desktop'
 // import SidebarMobile from "@/components/admin/sidebar-mobile";
 // // import { useBusinessStore } from "@/state/store"
 // import { useEffect } from "react";
@@ -60,13 +60,13 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
           <Header />
           {/* Main Content */}
           {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1 overflow-auto shadow p-6 bg-[#fbfbfb]">
+          <div className="flex-1  shadow p-6 bg-[#fbfbfb] overflow-hidden">
             {children}
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AdminLayout;
+export default AdminLayout

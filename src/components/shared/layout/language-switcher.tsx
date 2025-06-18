@@ -1,21 +1,21 @@
-import { useState } from "react";
-import { ChevronDown } from "lucide-react";
-import Image from "next/image";
+import { useState } from 'react'
+import { ChevronDown } from 'lucide-react'
+import Image from 'next/image'
 
 const languages = [
   {
-    code: "en",
-    label: "Eng (US)",
-    flag: "/flag/america.png",
+    code: 'en',
+    label: 'Eng (US)',
+    flag: '/flag/america.png',
   },
-  { code: "es", label: "Esp (ES)", flag: "/flag/spain.png" },
-  { code: "fr", label: "Fr (FR)", flag: "/flag/france.webp" },
-  { code: "in", label: "In (IN)", flag: "/flag/india.webp" },
-];
+  { code: 'es', label: 'Esp (ES)', flag: '/flag/spain.png' },
+  { code: 'fr', label: 'Fr (FR)', flag: '/flag/france.webp' },
+  { code: 'in', label: 'In (IN)', flag: '/flag/india.webp' },
+]
 
 export default function LanguageSwitcher() {
-  const [selectedLang, setSelectedLang] = useState(languages[0]);
-  const [open, setOpen] = useState(false);
+  const [selectedLang, setSelectedLang] = useState(languages[0])
+  const [open, setOpen] = useState(false)
 
   return (
     <div className="relative inline-block text-left h-full">
@@ -43,8 +43,8 @@ export default function LanguageSwitcher() {
               <li
                 key={lang.code}
                 onClick={() => {
-                  setSelectedLang(lang);
-                  setOpen(false);
+                  setSelectedLang(lang)
+                  setOpen(false)
                 }}
                 className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer space-x-2 rounded-[8px]"
               >
@@ -59,12 +59,14 @@ export default function LanguageSwitcher() {
                     quality={80}
                   />
                 </div>
-                <span>{lang.label}</span>
+                <span className="text-[#6B7280] text-base font-semibold">
+                  {lang.label}
+                </span>
               </li>
             ))}
           </ul>
         </div>
       )}
     </div>
-  );
+  )
 }

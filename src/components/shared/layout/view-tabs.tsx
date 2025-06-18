@@ -31,27 +31,20 @@ const ViewTabs = ({
   className,
 }: ViewTabsProps) => {
   return (
-    <div
-      className={cn(
-        'flex items-center bg-[#E5E7EB]  p-0.5  gap-0.5 rounded-lg',
-        className,
-      )}
-    >
+    <div className={cn('flex items-center gap-1 rounded-lg', className)}>
       {options.map((option) => (
         <Button
           key={option.value}
           size="sm"
-          variant={'ghost'}
+          variant={viewMode === option.value ? 'cardActive' : 'ghost'}
           onClick={() => setViewMode(option.value)}
           className={cn(
-            'text-sm text-[#6B7280] px-4 h-10  cursor-pointer rounded-[9px] hover:text-[#4F7CFF] hover:bg-white',
-            viewMode === option.value && 'text-[#4F7CFF] bg-white',
+            'text-sm px-4 h-9 text-[#6a7380] cursor-pointer rounded-[9px]',
+            viewMode === option.value && 'text-black',
           )}
+          icon={option.icon}
         >
-          <div className="flex items-center gap-1">
-            {option.icon}
-            {option.label}
-          </div>
+          {option.label}
         </Button>
       ))}
     </div>
