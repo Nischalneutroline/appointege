@@ -1,5 +1,5 @@
-import React from "react";
-import { Appointment } from "@/data/appointment";
+import React from 'react'
+import { Appointment } from '@/data/appointment'
 import {
   Calendar,
   Clock,
@@ -8,30 +8,30 @@ import {
   MapPin,
   SquarePen,
   Trash2,
-} from "lucide-react";
-import { Pill } from "@/components/ui/pill";
+} from 'lucide-react'
+import { Pill } from '@/components/ui/pill'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { getInitials } from "@/lib/utils";
+} from '@/components/ui/dropdown-menu'
+import { getInitials } from '@/lib/utils'
 
 const AppointmentCard = ({ item }: { item: Appointment }) => {
   const statusVariants = {
-    "Follow Up": "warning",
-    Completed: "success",
-    Missed: "destructive",
-    Canceled: "default",
-    Scheduled: "secondary",
-  } as const;
+    'Follow Up': 'warning',
+    Completed: 'success',
+    Missed: 'destructive',
+    Canceled: 'default',
+    Scheduled: 'secondary',
+  } as const
 
   const variant =
-    statusVariants[item.status as keyof typeof statusVariants] || "default";
+    statusVariants[item.status as keyof typeof statusVariants] || 'default'
 
   return (
-    <div className="relative flex w-full h-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white">
+    <div className="relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white">
       <div
         className="h-16 w-16 text-lg font-semibold text-white flex items-center justify-center rounded-[8px] "
         style={{ backgroundColor: item.color }}
@@ -78,20 +78,20 @@ const AppointmentCard = ({ item }: { item: Appointment }) => {
           <DropdownMenuContent align="end" className="">
             <DropdownMenuItem
               className="group/view text-gray-500 hover:bg-gray-50"
-              onClick={() => console.log("Clicked Edit", item.id)}
+              onClick={() => console.log('Clicked Edit', item.id)}
             >
               <Eye className="mr-1 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
               <div className="group-hover/view:text-[#2563EB]">View</div>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => console.log("Clicked Edit", item.id)}
+              onClick={() => console.log('Clicked Edit', item.id)}
               className="group/edit text-gray-500 hover:bg-gray-50"
             >
               <SquarePen className="mr-2 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
               <div className="group-hover/edit:text-[#10B981]">Edit</div>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => console.log("Clicked Delete", item.id)}
+              onClick={() => console.log('Clicked Delete', item.id)}
               className="group/delete text-gray-500 hover:bg-gray-50"
             >
               <Trash2 className="mr-2 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
@@ -101,7 +101,7 @@ const AppointmentCard = ({ item }: { item: Appointment }) => {
         </DropdownMenu>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AppointmentCard;
+export default AppointmentCard
