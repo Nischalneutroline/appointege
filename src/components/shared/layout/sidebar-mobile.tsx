@@ -61,11 +61,7 @@ const SidebarMobile = () => {
 
               <div className="flex flex-col gap-8 px-4">
                 {navLinks.slice(5).map((link) => (
-                  <NavLinks
-                    key={link.name}
-                    {...link}
-                    className="cursor-pointer"
-                  />
+                  <NavLinks key={link.name} {...link} />
                 ))}
               </div>
 

@@ -89,7 +89,10 @@ const SidebarDesktop = () => {
         // Expanded Sidebar
         <div className=" relative flex flex-col w-full gap-6 h-full ">
           {/* Logo and Title Section */}
-          <CompanyProfile name="Business Name" setCollapsed={setCollapsed} />
+          <CompanyProfile
+            name="Business Name"
+            setCollapsed={() => setCollapsed(!isSidebarCollapsed)}
+          />
 
           {/* Navigation Links */}
           <div className="flex flex-col px-4 gap-8">

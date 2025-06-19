@@ -11,7 +11,7 @@ import FilterTabs from '@/components/shared/layout/filter-tabs'
 import { useViewMode } from '@/hooks/useViewMode'
 import AppointmentCard from './_component/appointment-card'
 import Image from 'next/image'
-// import EcommerSvg from '@/public/assets/ecommerce.svg'
+
 import AppointmentGrid from './_component/appointment-grid'
 
 const Page = () => {
@@ -23,9 +23,9 @@ const Page = () => {
   }, [seletedData])
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 overflow-visible">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
-        <div className="w-fit flex items-center gap-2 py-1 px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
+        <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
           {filterOptions.map((option, index) => {
             return (
               <FilterTabs
@@ -38,15 +38,15 @@ const Page = () => {
             )
           })}
         </div>
-        <div className="flex flex-col md:flex-row gap-2 md:gap-0 xl:gap-3 justify-between  max-h-10">
+        <div className="flex flex-row gap-2 md:gap-0 lg:gap-3 justify-between  max-h-10">
           <SearchBar
             className="bg-white rounded-[8px]"
             placeholder="Search appointment"
-            width="w-[370px] hidden lg:block"
+            width="w-[330px]"
             onSearch={(value) => console.log(value)}
           />
 
-          <div className="flex gap-3 justify-end">
+          <div className="flex  gap-3 justify-end">
             <div className="flex text-[#6B7280] items-center gap-1 justify-center border-[1px] bg-[#FFFFFF] border-[#E5E7EB] rounded-[8px] w-24.5 cursor-pointer hover:scale-110 transition duration-400">
               <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
               <div className=" text-sm font-normal">Filter</div>
@@ -61,22 +61,33 @@ const Page = () => {
       {/* <DataTable columns={columns} data={seletedData} rowKey="id" /> */}
 
       {/* Main Data Section */}
-      <div className="overflow-y-auto scroll-auto">
+
+      <div className="flex-1 ">
+        {' '}
         {seletedData.length > 0 ? (
           <>
             {viewMode === 'list' ? (
-              <div className="max-w-full overflow-x-auto scroll-auto"></div>
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-max">
+                  <DataTable columns={columns} data={seletedData} rowKey="id" />
+                </div>
+              </div>
             ) : viewMode === 'card' ? (
-              <div className="flex flex-col gap-2 ">
+              // <div className="flex flex-col gap-2  max-h-[calc(100vh-19.5rem)] sm:max-h-[calc(100vh-19.5rem)]  lg:max-h-[calc(100vh-27.5rem)] xl:max-h-[calc(100vh-21.5rem)] ">
+              <div className="flex flex-col max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)] overflow-y-auto gap-2">
                 {seletedData.map((item) => (
                   <AppointmentCard item={item} key={item.id} />
                 ))}
               </div>
             ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 ">
-                {seletedData.map((item) => (
-                  <AppointmentGrid item={item} key={item.id} />
-                ))}
+              <div className="h-full overflow-y-visible">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 h-full overflow-y-auto max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)]">
+                  {seletedData.map((item) => (
+                    <div key={item.id} className="p-2">
+                      <AppointmentGrid item={item} />
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : null}
           </>

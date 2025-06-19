@@ -10,19 +10,21 @@ import { filterOptions } from './_data/data'
 import ViewTabs from '@/components/shared/layout/view-tabs'
 import LayoutCards from '@/components/shared/layout/layout-cards'
 import { ViewModeContext } from '@/hooks/useViewMode'
+import NewAppoinment from './_component/new-appoinment'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   return (
-    <main className="flex flex-col gap-4 overflow-hidden">
+    <main className="flex flex-col gap-4 ">
       <div className="flex flex-col  justify-between gap-4">
         <div className="w-full flex  flex-col lg:flex-row  lg:items-center lg:justify-between gap-2 lg:gap-0">
           <Heading
             title="Appointments"
             description="Manage and schedule your appointment effortlessly."
           />
-          <div className="flex flex-col md:flex-row gap-2 md:gap-0 justify-between  lg:gap-3 h-10">
+          <div className="flex flex-row gap-2 md:gap-0 justify-between  lg:gap-3 h-10">
             {/* View Tabs for Card List Grid */}
             <div className="flex items-center bg-[#E5E7EB] w-fit  rounded-[10px] p-0.5">
               <ViewTabs viewMode={viewMode} setViewMode={setViewMode} />
@@ -30,7 +32,10 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
 
             {/* Add Appointment Button */}
             <div className="">
-              <CreateButton label="New Appointment" onClick={() => {}} />
+              <CreateButton
+                label="New Appointment"
+                onClick={() => setIsDialogOpen(true)}
+              />
             </div>
           </div>
         </div>
@@ -40,7 +45,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
             <LayoutCards key={option.value} option={option} />
           ))}
         </div> */}
-        <div className="mt-9 md:mt-0 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+        <div className=" hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {filterOptions.map((option) => (
             <LayoutCards key={option.value} option={option} />
           ))}
@@ -48,8 +53,9 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
       </div>
 
       <ViewModeContext.Provider value={{ viewMode, setViewMode }}>
-        <div className="flex-1 h-full overflow-hidden ">{children}</div>
+        <div className="flex-1 h-full overflow-visible">{children}</div>
       </ViewModeContext.Provider>
+      <NewAppoinment open={isDialogOpen} onChange={setIsDialogOpen} />
     </main>
   )
 }
