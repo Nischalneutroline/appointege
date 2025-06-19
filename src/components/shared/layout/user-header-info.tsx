@@ -1,5 +1,5 @@
-import { BellRing, ChevronDown } from "lucide-react";
-import React from "react";
+import { BellRing, ChevronDown } from 'lucide-react'
+import React from 'react'
 
 const UserHeaderInfo = () => {
   return (
@@ -9,11 +9,11 @@ const UserHeaderInfo = () => {
           <BellRing
             size={22}
             style={{
-              color: "#6B7280",
+              color: '#6B7280',
             }}
           />
         </div>
-        <div className="flex items-center justify-center absolute -top-4 -right-4 w-4.5 h-4.5 bg-red-500 rounded-full text-white text-[12px] font-semibold ">
+        <div className="flex items-center justify-center absolute -top-3 -right-4 w-4.5 h-4.5 bg-red-500 rounded-full text-white text-[12px] font-semibold ">
           1
         </div>
       </div>
@@ -24,7 +24,7 @@ const UserHeaderInfo = () => {
         <ChevronDown className="text-[#6B7280]" />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default UserHeaderInfo;
+export default UserHeaderInfo

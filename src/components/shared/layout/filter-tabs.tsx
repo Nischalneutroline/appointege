@@ -31,7 +31,7 @@ const FilterTabs = ({
     <div
       key={option.value}
       className={cn(
-        ` w-fit text-sm font-normal px-5 md:py-2   flex justify-center items-center 
+        ` w-fit text-sm font-normal px-5 py-2  flex justify-center items-center 
          transition-transform duration-300 cursor-pointer rounded-[8px] gap-1.5
          ${!isActive && 'hover:scale-105 bg-[#F8F9FA]'}`,
       )}
