@@ -11,7 +11,7 @@ import FilterTabs from '@/components/shared/layout/filter-tabs'
 import { useViewMode } from '@/hooks/useViewMode'
 import AppointmentCard from './_component/appointment-card'
 import Image from 'next/image'
-import EcommerSvg from '../../../../public/ecommerce.svg'
+
 import AppointmentGrid from './_component/appointment-grid'
 
 const Page = () => {
@@ -23,7 +23,7 @@ const Page = () => {
   }, [seletedData])
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 overflow-visible">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
         <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
           {filterOptions.map((option, index) => {
@@ -61,48 +61,54 @@ const Page = () => {
       {/* <DataTable columns={columns} data={seletedData} rowKey="id" /> */}
 
       {/* Main Data Section */}
-      <div className="overflow-y-au">
-        <div className="flex-1 overflow-auto p-2">
-          {' '}
-          {seletedData.length > 0 ? (
-            <>
-              {viewMode === 'list' ? (
-                <div className="max-w-full">
+
+      <div className="flex-1 ">
+        {' '}
+        {seletedData.length > 0 ? (
+          <>
+            {viewMode === 'list' ? (
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-max">
                   <DataTable columns={columns} data={seletedData} rowKey="id" />
                 </div>
-              ) : viewMode === 'card' ? (
-                <div className="overflow-visible flex flex-col gap-2  max-h-[calc(100vh-19.5rem)] sm:max-h-[calc(100vh-19.5rem)]  lg:max-h-[calc(100vh-27.5rem)] xl:max-h-[calc(100vh-21.5rem)] overflow-y-auto ">
+              </div>
+            ) : viewMode === 'card' ? (
+              // <div className="flex flex-col gap-2  max-h-[calc(100vh-19.5rem)] sm:max-h-[calc(100vh-19.5rem)]  lg:max-h-[calc(100vh-27.5rem)] xl:max-h-[calc(100vh-21.5rem)] ">
+              <div className="flex flex-col max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)] overflow-y-auto gap-2">
+                {seletedData.map((item) => (
+                  <AppointmentCard item={item} key={item.id} />
+                ))}
+              </div>
+            ) : viewMode === 'grid' ? (
+              <div className="h-full overflow-y-visible">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 h-full overflow-y-auto max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)]">
                   {seletedData.map((item) => (
-                    <AppointmentCard item={item} key={item.id} />
+                    <div key={item.id} className="p-2">
+                      <AppointmentGrid item={item} />
+                    </div>
                   ))}
-                </div>
-              ) : viewMode === 'grid' ? (
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2  lg:grid-cols-3  max-h-[calc(100vh-19.5rem)] sm:max-h-[calc(100vh-19.5rem)]  lg:max-h-[calc(100vh-27.5rem)] xl:max-h-[calc(100vh-21.5rem)] overflow-visible">
-                  {seletedData.map((item) => (
-                    <AppointmentGrid item={item} key={item.id} />
-                  ))}
-                </div>
-              ) : null}
-            </>
-          ) : (
-            <div className="py-18 h-full flex items-center justify-center text-gray-500">
-              <div className="flex flex-col items-center gap-2">
-                <Image
-                  src={EcommerSvg}
-                  alt="ecommerce"
-                  width={140}
-                  height={140}
-                />
-                <div className="text-2xl text-[#4F7CFF] font-semibold">
-                  No Appointments Found
-                </div>
-                <div className="text-[#9F9C9C] text-sm font-medium">
-                  Create a new appointment
                 </div>
               </div>
+            ) : null}
+          </>
+        ) : (
+          <div className="py-18 h-full flex items-center justify-center text-gray-500">
+            <div className="flex flex-col items-center gap-2">
+              <Image
+                src="/assets/ecommerce.svg"
+                alt="ecommerce"
+                width={140}
+                height={140}
+              />
+              <div className="text-2xl text-[#4F7CFF] font-semibold">
+                No Appointments Found
+              </div>
+              <div className="text-[#9F9C9C] text-sm font-medium">
+                Create a new appointment
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )

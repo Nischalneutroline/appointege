@@ -1,4 +1,5 @@
-import { FilterOption } from '@/app/admin/appointment/_data/data'
+import { FilterOption } from '@/app/(protected)/admin/appointment/_data/data'
+
 import { Appointment } from '@/data/appointment'
 import { cn } from '@/lib/utils'
 import React, { useState } from 'react'
@@ -31,9 +32,9 @@ const FilterTabs = ({
     <div
       key={option.value}
       className={cn(
-        ` w-fit text-sm font-normal px-5 py-2  flex justify-center items-center 
-         transition-transform duration-300 cursor-pointer rounded-[8px] gap-1.5
-         ${!isActive && 'hover:scale-105 bg-[#F8F9FA]'}`,
+        `w-22 text-sm font-normal px-2 py-2 flex justify-center items-center 
+         transition-transform duration-300 cursor-pointer rounded-[8px] 
+         ${!isActive && 'hover:scale-105'}`,
       )}
       style={{
         backgroundColor,
@@ -46,10 +47,7 @@ const FilterTabs = ({
         setActiveFilter(option.label)
       }}
     >
-      <div>{option.label === 'All Appointments' ? 'All' : option.label}</div>
-      <div className="lg:hidden text-[#6B7280] text-xs font-normal bottom-0 mt-1  ">
-        ({option.data.length})
-      </div>
+      {option.label === 'All Appointments' ? 'All' : option.label}
     </div>
   )
 }

@@ -37,7 +37,7 @@ const variantStyles = {
 }
 
 const pillVariants = cva(
-  'inline-flex items-center justify-center rounded-full px-4  text-xs font-medium transition-colors',
+  'inline-flex items-center justify-center rounded-full px-4 py-1 text-xs font-medium transition-colors',
   {
     variants: {
       variant: {
@@ -124,7 +124,6 @@ const Pill = React.forwardRef<HTMLDivElement, PillProps>(
           withShadow && 'shadow-sm',
           fullWidth && 'w-full',
           'inline-flex items-center justify-start gap-2',
-          `border-[1px] border-${borderColor}`,
         )}
         ref={ref}
         {...props}

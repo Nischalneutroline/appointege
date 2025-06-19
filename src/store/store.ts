@@ -1,9 +1,12 @@
+// store/store.ts
 import { configureStore } from '@reduxjs/toolkit'
-import uiReducer from './uiSlice'
+import authReducer from './slices/authSlice'
+import navReducer from './slices/navSlice'
 
 export const store = configureStore({
   reducer: {
-    ui: uiReducer,
+    auth: authReducer,
+    nav: navReducer,
   },
 })
 

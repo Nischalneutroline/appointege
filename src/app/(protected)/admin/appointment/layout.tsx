@@ -53,7 +53,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
       </div>
 
       <ViewModeContext.Provider value={{ viewMode, setViewMode }}>
-        <div className="flex-1 h-full ">{children}</div>
+        <div className="flex-1 h-full overflow-visible">{children}</div>
       </ViewModeContext.Provider>
       <NewAppoinment open={isDialogOpen} onChange={setIsDialogOpen} />
     </main>

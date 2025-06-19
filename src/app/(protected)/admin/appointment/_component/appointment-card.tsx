@@ -30,7 +30,7 @@ const AppointmentCard = ({ item }: { item: Appointment }) => {
     statusVariants[item.status as keyof typeof statusVariants] || 'default'
 
   return (
-    <div className="relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white">
+    <div className="relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white cursor-pointer">
       <div
         className="h-16 w-16 text-lg font-semibold text-white flex items-center justify-center rounded-[8px] "
         style={{ backgroundColor: item.color }}
@@ -38,7 +38,7 @@ const AppointmentCard = ({ item }: { item: Appointment }) => {
         {getInitials(item.name)}
       </div>
       <div className="w-full flex flex-col gap-1">
-        <div className="flex w-full justify-between pr-20">
+        <div className="flex w-full justify-between pr-8 md:pr-20">
           <div className="text-[#111827] font-semibold text-sm">
             {item.name}
           </div>

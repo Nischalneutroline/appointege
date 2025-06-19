@@ -92,8 +92,7 @@ const SidebarDesktop = () => {
           {/* Logo and Title Section */}
           <CompanyProfile
             name="Business Name"
-            collapsed={isSidebarCollapsed}
-            setCollapsed={setCollapsed}
+            setCollapsed={() => setCollapsed(!isSidebarCollapsed)}
           />
 
           {/* Navigation Links */}

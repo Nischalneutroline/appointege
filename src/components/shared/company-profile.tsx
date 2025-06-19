@@ -1,17 +1,15 @@
-import { useSidebar } from '@/context/sidebar-context'
 import { getInitials } from '@/lib/utils'
 import { ChevronLeft } from 'lucide-react'
 import React from 'react'
 
 interface CustomerProfileProps {
   name: string
-  collapsed: boolean
-  setCollapsed: (collapsed: boolean) => void
+
+  setCollapsed: () => void
 }
 
 const CompanyProfile = (props: CustomerProfileProps) => {
-  const { name, collapsed, setCollapsed } = props
-  const { isOpen, closeSidebar } = useSidebar()
+  const { name, setCollapsed } = props
   const logo = getInitials(name)
   console.log(logo, 'logo')
   return (
@@ -26,14 +24,11 @@ const CompanyProfile = (props: CustomerProfileProps) => {
           </div>
         </div>
       </div>
-      <div
-        className="flex w-8 h-7 cursor-pointer rounded-[4px]items-center justify-center text-xs text-muted-foreground"
-        onClick={() => {
-          setCollapsed(!isOpen)
-          closeSidebar()
-        }}
-      >
-        <ChevronLeft className="w-6 h-6 text-[#6B7280]  hover:text-blue-700" />
+      <div className="flex w-8 h-7 rounded-[4px]items-center justify-center text-xs text-muted-foreground">
+        <ChevronLeft
+          className="w-6 h-6 text-[#6B7280] cursor-pointer hover:text-blue-700"
+          onClick={setCollapsed}
+        />
       </div>
     </div>
   )

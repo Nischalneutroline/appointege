@@ -1,20 +1,30 @@
+'use client'
+
 import { cn } from '@/lib/utils'
 import { ArrowUpRight } from 'lucide-react'
-import { useSidebar } from '@/context/sidebar-context'
 import CompanyProfile from '../company-profile'
 import { NavLinks } from './nav-links'
 import { navLinks } from './sidebar-desktop'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@/store/store'
+import { toggleMobileNav } from '@/store/slices/navSlice'
 
 const SidebarMobile = () => {
-  const { isOpen, closeSidebar } = useSidebar()
-  console.log(isOpen, 'IsOpen')
+  // const { isOpen, closeSidebar } = useSidebar()
+  // console.log(isOpen, 'IsOpen')
+
+  const { mobileNavCollapse } = useSelector((state: RootState) => state.nav)
+  const dispatch = useDispatch()
+  const handleToggle = () => {
+    dispatch(toggleMobileNav())
+  }
   return (
     <>
       {/* Overlay */}
-      {isOpen && (
+      {mobileNavCollapse && (
         <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300"
-          onClick={closeSidebar}
+          onClick={handleToggle}
         />
       )}
 
@@ -22,17 +32,13 @@ const SidebarMobile = () => {
       <div
         className={cn(
           'fixed top-0 left-0 h-full w-70 bg-white border-r-1 border-[#E5E7EB] z-50 transform transition-transform duration-300 ease-in-out',
-          isOpen ? 'translate-x-0' : '-translate-x-full',
+          mobileNavCollapse ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         <div className="relative flex flex-col h-full overflow-y-auto gap-6">
           {/* Logo and Title Section */}
 
-          <CompanyProfile
-            name="Business Name"
-            collapsed={false}
-            setCollapsed={closeSidebar}
-          />
+          <CompanyProfile name="Business Name" setCollapsed={handleToggle} />
 
           {/* Navigation Links */}
           <div className="flex-1 flex flex-col px-4 gap-4">
@@ -55,11 +61,7 @@ const SidebarMobile = () => {
 
               <div className="flex flex-col gap-8 px-4">
                 {navLinks.slice(5).map((link) => (
-                  <NavLinks
-                    key={link.name}
-                    {...link}
-                    className="cursor-pointer"
-                  />
+                  <NavLinks key={link.name} {...link} />
                 ))}
               </div>
 

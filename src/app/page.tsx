@@ -1,7 +1,8 @@
 // app/page.tsx
-import { auth, signOut } from "@/auth";
-import { LoginButton } from "@/components/auth/login-button";
-import { Button } from "@/components/ui/button";
+
+// import { auth, signOut } from '@/auth'
+import { LoginButton } from '@/components/auth/login-button'
+import { Button } from '@/components/ui/button'
 import {
   Calendar,
   Clock,
@@ -10,12 +11,15 @@ import {
   ArrowRight,
   Star,
   ChevronRight,
-} from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+} from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { currentUser } from '@/lib/auth'
+import { signOut } from '@/auth'
 
 export default async function Page() {
-  const session = await auth();
+  const user = await currentUser()
+  // const session = await auth();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -49,11 +53,11 @@ export default async function Page() {
             >
               About
             </Link>
-            {session?.user ? (
+            {user ? (
               <form
                 action={async () => {
-                  "use server";
-                  await signOut();
+                  'use server'
+                  await signOut()
                 }}
               >
                 <Button
@@ -125,21 +129,21 @@ export default async function Page() {
             {[
               {
                 icon: <Calendar className="w-8 h-8 text-sky-500" />,
-                title: "Smart Scheduling",
+                title: 'Smart Scheduling',
                 description:
-                  "Let clients book appointments 24/7 through your personalized booking page.",
+                  'Let clients book appointments 24/7 through your personalized booking page.',
               },
               {
                 icon: <Clock className="w-8 h-8 text-sky-500" />,
-                title: "Automated Reminders",
+                title: 'Automated Reminders',
                 description:
-                  "Reduce no-shows with automated email and SMS reminders.",
+                  'Reduce no-shows with automated email and SMS reminders.',
               },
               {
                 icon: <Users className="w-8 h-8 text-sky-500" />,
-                title: "Client Management",
+                title: 'Client Management',
                 description:
-                  "Keep all client information organized in one place.",
+                  'Keep all client information organized in one place.',
               },
             ].map((feature, index) => (
               <div
@@ -189,5 +193,5 @@ export default async function Page() {
         </div>
       </section> */}
     </div>
-  );
+  )
 }
