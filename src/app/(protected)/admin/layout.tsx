@@ -3,6 +3,7 @@
 // import { auth } from '@/auth'
 import Header from '@/components/shared/layout/header'
 import SidebarDesktop from '@/components/shared/layout/sidebar-desktop'
+import SidebarMobile from '@/components/shared/layout/sidebar-mobile'
 import { currentUser } from '@/lib/auth'
 import { AuthInitializer } from '@/store/authInitializer'
 import { redirect } from 'next/navigation'
@@ -25,13 +26,13 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
       <div className="relative z-10 flex  h-screen">
         {/* Sidebar */}
         {/* Desktop Sidebar */}
-        <div className="">
+        <div className=" hidden lg:block ">
           <SidebarDesktop />
         </div>
 
         {/* Mobile Navbar */}
         <div className="block lg:hidden fixed top-0 w-full z-50">
-          {/* <SidebarMobile /> */}
+          <SidebarMobile />
         </div>
 
         {/* Content Area */}

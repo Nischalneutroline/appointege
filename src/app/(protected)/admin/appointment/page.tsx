@@ -11,7 +11,7 @@ import FilterTabs from '@/components/shared/layout/filter-tabs'
 import { useViewMode } from '@/hooks/useViewMode'
 import AppointmentCard from './_component/appointment-card'
 import Image from 'next/image'
-import EcommerSvg from '../../../../public/ecommerce.svg'
+// import EcommerSvg from '@/public/assets/ecommerce.svg'
 import AppointmentGrid from './_component/appointment-grid'
 
 const Page = () => {
@@ -84,7 +84,7 @@ const Page = () => {
           <div className="py-18 h-full flex items-center justify-center text-gray-500">
             <div className="flex flex-col items-center gap-2">
               <Image
-                src={EcommerSvg}
+                src="/assets/ecommerce.svg"
                 alt="ecommerce"
                 width={140}
                 height={140}

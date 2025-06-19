@@ -1,17 +1,17 @@
-import { getInitials } from "@/lib/utils";
-import { ChevronLeft } from "lucide-react";
-import React from "react";
+import { getInitials } from '@/lib/utils'
+import { ChevronLeft } from 'lucide-react'
+import React from 'react'
 
 interface CustomerProfileProps {
-  name: string;
+  name: string
 
-  setCollapsed: (collapsed: boolean) => void;
+  setCollapsed: () => void
 }
 
 const CompanyProfile = (props: CustomerProfileProps) => {
-  const { name, setCollapsed } = props;
-  const logo = getInitials(name);
-  console.log(logo, "logo");
+  const { name, setCollapsed } = props
+  const logo = getInitials(name)
+  console.log(logo, 'logo')
   return (
     <div className="flex items-center justify-between py-4 pt-6 px-6">
       <div className="flex items-center  w-full text-black gap-2">
@@ -27,11 +27,11 @@ const CompanyProfile = (props: CustomerProfileProps) => {
       <div className="flex w-8 h-7 rounded-[4px]items-center justify-center text-xs text-muted-foreground">
         <ChevronLeft
           className="w-6 h-6 text-[#6B7280] cursor-pointer hover:text-blue-700"
-          onClick={() => setCollapsed(true)}
+          onClick={setCollapsed}
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CompanyProfile;
+export default CompanyProfile
