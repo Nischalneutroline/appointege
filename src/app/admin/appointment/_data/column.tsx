@@ -37,6 +37,7 @@ type AppointmentColumnSchema = {
   id: number
   name: string
   service: string
+  color: string
   date: string
   time: string
   type: string
@@ -74,7 +75,8 @@ export const columns: TableColumn<AppointmentColumnSchema>[] = [
       return (
         <div className="flex gap-2 items-center">
           <div
-            className={`h-8 w-8 flex items-center justify-center rounded-[4px] ${getRandomColor()}`}
+            className={`h-8 w-8 flex items-center justify-center rounded-[4px] `}
+            style={{ backgroundColor: row.color }}
           >
             <span className="text-xs font-semibold text-white">{initials}</span>
           </div>
@@ -91,13 +93,6 @@ export const columns: TableColumn<AppointmentColumnSchema>[] = [
     header: 'Status',
     accessor: 'status',
     render: (status) => {
-      if (status === 'Follow Up') {
-        return (
-          <Pill variant="warning" withDot>
-            {status}
-          </Pill>
-        )
-      }
       if (status === 'Completed') {
         return (
           <Pill variant="success" withDot>
@@ -121,7 +116,7 @@ export const columns: TableColumn<AppointmentColumnSchema>[] = [
       }
       if (status === 'Scheduled') {
         return (
-          <Pill variant="secondary" withDot>
+          <Pill variant="warning" withDot>
             {status}
           </Pill>
         )

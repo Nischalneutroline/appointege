@@ -320,7 +320,7 @@ const NewAppoinment = ({
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-1 active:outline-blue-700 transition-transform duration-200"
+                  className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
                   onClick={handleBack}
                   disabled={isSubmitting}
                 >
@@ -328,8 +328,8 @@ const NewAppoinment = ({
                 </Button>
                 <Button
                   type="submit"
-                  variant="primary"
-                  className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-1 active:outline-blue-700 transition-colors duration-200"
+                  variant="default"
+                  className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
                   disabled={
                     isLoadingServices || isLoadingAppointment || isSubmitting
                   }

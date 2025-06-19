@@ -22,7 +22,7 @@ export const appointments: Appointment[] = [
     date: '2025-05-23',
     time: '10:00 AM',
     type: 'Physical',
-    status: 'Follow Up',
+    status: 'Scheduled',
   },
   {
     id: 12345,

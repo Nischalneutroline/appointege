@@ -1,17 +1,19 @@
-import { getInitials } from "@/lib/utils";
-import { ChevronLeft } from "lucide-react";
-import React from "react";
+import { useSidebar } from '@/context/sidebar-context'
+import { getInitials } from '@/lib/utils'
+import { ChevronLeft } from 'lucide-react'
+import React from 'react'
 
 interface CustomerProfileProps {
-  name: string;
-
-  setCollapsed: (collapsed: boolean) => void;
+  name: string
+  collapsed: boolean
+  setCollapsed: (collapsed: boolean) => void
 }
 
 const CompanyProfile = (props: CustomerProfileProps) => {
-  const { name, setCollapsed } = props;
-  const logo = getInitials(name);
-  console.log(logo, "logo");
+  const { name, collapsed, setCollapsed } = props
+  const { isOpen, closeSidebar } = useSidebar()
+  const logo = getInitials(name)
+  console.log(logo, 'logo')
   return (
     <div className="flex items-center justify-between py-4 pt-6 px-6">
       <div className="flex items-center  w-full text-black gap-2">
@@ -24,14 +26,17 @@ const CompanyProfile = (props: CustomerProfileProps) => {
           </div>
         </div>
       </div>
-      <div className="flex w-8 h-7 rounded-[4px]items-center justify-center text-xs text-muted-foreground">
-        <ChevronLeft
-          className="w-6 h-6 text-[#6B7280] cursor-pointer hover:text-blue-700"
-          onClick={() => setCollapsed(true)}
-        />
+      <div
+        className="flex w-8 h-7 cursor-pointer rounded-[4px]items-center justify-center text-xs text-muted-foreground"
+        onClick={() => {
+          setCollapsed(!isOpen)
+          closeSidebar()
+        }}
+      >
+        <ChevronLeft className="w-6 h-6 text-[#6B7280]  hover:text-blue-700" />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CompanyProfile;
+export default CompanyProfile

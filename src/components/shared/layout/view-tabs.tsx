@@ -19,9 +19,17 @@ interface ViewTabsProps {
 }
 
 const defaultOptions: ViewOption[] = [
-  { value: 'card', label: 'Card', icon: <Grid2x2 size={16} /> },
-  { value: 'list', label: 'List', icon: <List size={16} /> },
-  { value: 'grid', label: 'Grid', icon: <LayoutGrid size={16} /> },
+  {
+    value: 'card',
+    label: 'Card',
+    icon: <Grid2x2 size={16} strokeWidth={1.8} />,
+  },
+  { value: 'list', label: 'List', icon: <List size={16} strokeWidth={1.8} /> },
+  {
+    value: 'grid',
+    label: 'Grid',
+    icon: <LayoutGrid size={16} strokeWidth={1.8} />,
+  },
 ]
 
 const ViewTabs = ({
@@ -39,7 +47,7 @@ const ViewTabs = ({
           variant={viewMode === option.value ? 'cardActive' : 'ghost'}
           onClick={() => setViewMode(option.value)}
           className={cn(
-            'text-sm px-4 h-9 text-[#6a7380] cursor-pointer rounded-[9px]',
+            'text-sm px-4 h-9 text-[#6a7380] cursor-pointer font-normal rounded-[9px]',
             viewMode === option.value && 'text-black',
           )}
           icon={option.icon}

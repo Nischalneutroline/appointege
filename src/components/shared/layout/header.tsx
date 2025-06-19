@@ -1,21 +1,22 @@
 'use client'
-import { Bell, ChevronDown, Menu, Sidebar } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Menu } from 'lucide-react'
 
-import { useState } from 'react'
-import SearchBar from './search-bar'
 import LanguageSwitcher from './language-switcher'
 import UserHeaderInfo from './user-header-info'
+import { useSidebar } from '@/context/sidebar-context'
 // import SidebarMobile from "./sidebar-mobile";
 // import { useNavStore } from "@/state/store";
 const Header = () => {
   //   const { onOpen } = useNavStore();
+  const { toggleSidebar } = useSidebar()
 
   return (
-    <div className="flex items-center gap-4 w-full bg-white border-b-1 px-6 py-4.5 border-b-[#E5E7EB] ">
+    <div className="flex items-center gap-4 w-full bg-white border-b-1 px-6 py-2.5 border-b-[#E5E7EB] ">
       <div className="flex items-center w-full   rounded-md">
         {/* Search Bar */}
-        {/* <SearchBar className="hidden lg:block w-[371px]" /> */}
+        <div className="cursor-pointer lg:hidden" onClick={toggleSidebar}>
+          <Menu size={24} />
+        </div>
 
         {/* Notifications & Avatar */}
         <div className="flex w-full justify-end items-center gap-8 h-10">

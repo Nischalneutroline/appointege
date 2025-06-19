@@ -20,11 +20,10 @@ import { getInitials } from '@/lib/utils'
 
 const AppointmentCard = ({ item }: { item: Appointment }) => {
   const statusVariants = {
-    'Follow Up': 'warning',
     Completed: 'success',
     Missed: 'destructive',
     Canceled: 'default',
-    Scheduled: 'secondary',
+    Scheduled: 'warning',
   } as const
 
   const variant =

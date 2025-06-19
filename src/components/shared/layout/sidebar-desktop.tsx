@@ -16,6 +16,7 @@ import {
   Wrench,
   CircleHelp,
   SquareArrowUpRight,
+  ArrowUpRight,
 } from 'lucide-react'
 import { NavLinks, NavLinksMobile } from './nav-links'
 import CompanyProfile from '../company-profile'
@@ -89,10 +90,14 @@ const SidebarDesktop = () => {
         // Expanded Sidebar
         <div className=" relative flex flex-col w-full gap-6 h-full ">
           {/* Logo and Title Section */}
-          <CompanyProfile name="Business Name" setCollapsed={setCollapsed} />
+          <CompanyProfile
+            name="Business Name"
+            collapsed={isSidebarCollapsed}
+            setCollapsed={setCollapsed}
+          />
 
           {/* Navigation Links */}
-          <div className="flex flex-col px-4 gap-8">
+          <div className="flex flex-col px-4 gap-4">
             <div className="flex flex-col gap-8 px-4">
               {navLinks.slice(0, 4).map((link) => (
                 <NavLinks key={link.name} {...link} />
@@ -107,7 +112,7 @@ const SidebarDesktop = () => {
               ))}
             </div>
             {/* Lower Nav Links */}
-            <div className="flex flex-col absolute bottom-0 w-full left-0 px-4 gap-8 mb-4">
+            <div className="flex flex-col absolute bottom-0 w-full left-0 px-4 gap-4 mb-4">
               {/* Separator */}
               <div className="border-t-2 border-gray-200 w-full" />
 
@@ -121,13 +126,13 @@ const SidebarDesktop = () => {
               <div className="border-t-2 border-gray-200 w-full" />
 
               <button
-                className="flex items-center gap-3 text-base font-medium transition-all px-3 py-1 bg-[#E9F1FD] w-full leading-8 border-[1px] border-[#5BA4FF] rounded-[6px]"
+                className="flex items-center gap-3 text-base font-medium transition-all px-3 py-1 bg-[#E9F1FD] w-full leading-8 border-1 border-[#5BA4FF] rounded-md"
                 style={{
                   boxShadow: 'inset 0 2px 10px rgba(37, 99, 235, 0.15)',
                 }}
               >
-                <SquareArrowUpRight />
-                <div className="font-medium">Upgrade Plan</div>
+                <ArrowUpRight className="bg-[#2672EF] text-white rounded-sm h-6 w-6" />
+                <div className="font-normal">Upgrade Plan</div>
               </button>
             </div>
           </div>
@@ -177,13 +182,8 @@ const SidebarDesktop = () => {
             {/* Separator */}
             <div className="border-t-2 border-gray-200 w-full" />
 
-            <button
-              className="flex items-center gap-3 text-base font-medium transition-all px-3 py-1 bg-[#E9F1FD] w-full leading-8 border-[1px] border-[#5BA4FF] rounded-[6px]"
-              style={{
-                boxShadow: 'inset 0 2px 10px rgba(37, 99, 235, 0.15)',
-              }}
-            >
-              <SquareArrowUpRight />
+            <button className="flex justify-center items-center">
+              <ArrowUpRight className="bg-[#2672EF] text-white rounded-sm h-6.5 w-6.5 " />
             </button>
           </div>
         </div>

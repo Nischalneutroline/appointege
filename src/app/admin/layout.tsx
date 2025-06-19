@@ -2,6 +2,8 @@
 
 import Header from '@/components/shared/layout/header'
 import SidebarDesktop from '@/components/shared/layout/sidebar-desktop'
+import SidebarMobile from '@/components/shared/layout/sidebar-mobile'
+import { SidebarProvider } from '@/context/sidebar-context'
 // import SidebarMobile from "@/components/admin/sidebar-mobile";
 // // import { useBusinessStore } from "@/state/store"
 // import { useEffect } from "react";
@@ -37,35 +39,37 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   //   }, [fetchServices, fetchAppointments, fetchCustomers, fetchBusinessById]);
 
   return (
-    <div className="relative min-h-screen bg-stone-100 overflow-hidden border-r-2">
-      {/* Top Background Gradient */}
-      {/* <div className="absolute inset-0 h-[30vh] rounded-b-lg z-0 pointer-events-none bg-gradient" /> */}
+    <SidebarProvider>
+      <div className="relative min-h-screen bg-stone-100 overflow-hidden border-r-2">
+        {/* Top Background Gradient */}
+        {/* <div className="absolute inset-0 h-[30vh] rounded-b-lg z-0 pointer-events-none bg-gradient" /> */}
 
-      {/* Layout */}
-      <div className="relative z-10 flex  h-screen">
-        {/* Sidebar */}
-        {/* Desktop Sidebar */}
-        <div className="">
-          <SidebarDesktop />
-        </div>
+        {/* Layout */}
+        <div className="relative z-10 flex  h-screen">
+          {/* Sidebar */}
+          {/* Desktop Sidebar */}
+          <div className="hidden lg:block">
+            <SidebarDesktop />
+          </div>
 
-        {/* Mobile Navbar */}
-        <div className="block lg:hidden fixed top-0 w-full z-50">
-          {/* <SidebarMobile /> */}
-        </div>
+          {/* Mobile Navbar */}
+          <div className="fixed inset-0 pointer-events-none z-50">
+            <SidebarMobile />
+          </div>
 
-        {/* Content Area */}
-        <div className="flex-1 flex flex-col w-full h-full">
-          {/* Header */}
-          <Header />
-          {/* Main Content */}
-          {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1  shadow p-6 bg-[#fbfbfb] overflow-hidden">
-            {children}
+          {/* Content Area */}
+          <div className="flex-1 flex flex-col w-full h-full">
+            {/* Header */}
+            <Header />
+            {/* Main Content */}
+            {/* <Toaster position="bottom-right" /> */}
+            <div className="flex-1  shadow p-3 sm:p-4 md:p-6 bg-[#fbfbfb] overflow-hidden">
+              {children}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </SidebarProvider>
   )
 }
 

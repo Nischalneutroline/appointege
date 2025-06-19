@@ -22,13 +22,13 @@ const DataTable = <T,>({
   rowClassName,
 }: TableProps<T>) => {
   return (
-    <table className="lg:min-w-full min-w-[600px]  rounded-lg overflow-auto border-[1px] border-[#DCE9F9] ">
+    <table className="lg:min-w-full min-w-[600px]  rounded-[8px] overflow-auto border-[1px] border-[#DCE9F9] ">
       <thead className="bg-[#F8F9FA] h-12 border-b-[1px] border-b-[#DCE9F9] ">
         <tr className="border-0">
           {columns.map((col, idx) => (
             <th
               key={idx}
-              className={`px-6 py-3 text-left text-sm  font-semibold text-[#111827] uppercase tracking-wider ${
+              className={`px-6 py-3 text-left text-sm  font-semibold text-[#111827]  tracking-wider ${
                 col.className || ''
               }`}
             >

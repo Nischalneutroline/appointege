@@ -25,7 +25,7 @@ const Page = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
-        <div className="w-fit flex items-center gap-2 overflow-auto py-1 px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
+        <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
           {filterOptions.map((option, index) => {
             return (
               <FilterTabs
@@ -38,11 +38,11 @@ const Page = () => {
             )
           })}
         </div>
-        <div className="flex flex-col md:flex-row gap-2 md:gap-0 xl:gap-3 justify-between  max-h-10">
+        <div className="flex flex-row gap-2 md:gap-0 lg:gap-3 justify-between  max-h-10">
           <SearchBar
             className="bg-white rounded-[8px]"
             placeholder="Search appointment"
-            width="w-[370px]"
+            width="w-[330px]"
             onSearch={(value) => console.log(value)}
           />
 
@@ -61,45 +61,48 @@ const Page = () => {
       {/* <DataTable columns={columns} data={seletedData} rowKey="id" /> */}
 
       {/* Main Data Section */}
-      <div className="overflow-y-auto">
-        {seletedData.length > 0 ? (
-          <>
-            {viewMode === 'list' ? (
-              <div className="max-w-full">
-                <DataTable columns={columns} data={seletedData} rowKey="id" />
-              </div>
-            ) : viewMode === 'card' ? (
-              <div className="flex flex-col gap-2 h-[calc(100vh-350px)] overflow-y-auto ">
-                {seletedData.map((item) => (
-                  <AppointmentCard item={item} key={item.id} />
-                ))}
-              </div>
-            ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 h-[calc(100vh-350px)] overflow-y-auto ">
-                {seletedData.map((item) => (
-                  <AppointmentGrid item={item} key={item.id} />
-                ))}
-              </div>
-            ) : null}
-          </>
-        ) : (
-          <div className="py-18 h-full flex items-center justify-center text-gray-500">
-            <div className="flex flex-col items-center gap-2">
-              <Image
-                src={EcommerSvg}
-                alt="ecommerce"
-                width={140}
-                height={140}
-              />
-              <div className="text-2xl text-[#4F7CFF] font-semibold">
-                No Appointments Found
-              </div>
-              <div className="text-[#9F9C9C] text-sm font-medium">
-                Create a new appointment
+      <div className="overflow-y-au">
+        <div className="flex-1 overflow-auto p-2">
+          {' '}
+          {seletedData.length > 0 ? (
+            <>
+              {viewMode === 'list' ? (
+                <div className="max-w-full">
+                  <DataTable columns={columns} data={seletedData} rowKey="id" />
+                </div>
+              ) : viewMode === 'card' ? (
+                <div className="overflow-visible flex flex-col gap-2  max-h-[calc(100vh-19.5rem)] sm:max-h-[calc(100vh-19.5rem)]  lg:max-h-[calc(100vh-27.5rem)] xl:max-h-[calc(100vh-21.5rem)] overflow-y-auto ">
+                  {seletedData.map((item) => (
+                    <AppointmentCard item={item} key={item.id} />
+                  ))}
+                </div>
+              ) : viewMode === 'grid' ? (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2  lg:grid-cols-3  max-h-[calc(100vh-19.5rem)] sm:max-h-[calc(100vh-19.5rem)]  lg:max-h-[calc(100vh-27.5rem)] xl:max-h-[calc(100vh-21.5rem)] overflow-visible">
+                  {seletedData.map((item) => (
+                    <AppointmentGrid item={item} key={item.id} />
+                  ))}
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <div className="py-18 h-full flex items-center justify-center text-gray-500">
+              <div className="flex flex-col items-center gap-2">
+                <Image
+                  src={EcommerSvg}
+                  alt="ecommerce"
+                  width={140}
+                  height={140}
+                />
+                <div className="text-2xl text-[#4F7CFF] font-semibold">
+                  No Appointments Found
+                </div>
+                <div className="text-[#9F9C9C] text-sm font-medium">
+                  Create a new appointment
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )

@@ -24,18 +24,17 @@ import React from 'react'
 
 const AppointmentGrid = ({ item }: { item: Appointment }) => {
   const statusVariants = {
-    'Follow Up': 'warning',
     Completed: 'success',
     Missed: 'destructive',
     Canceled: 'default',
-    Scheduled: 'secondary',
+    Scheduled: 'warning',
   } as const
 
   const variant =
     statusVariants[item.status as keyof typeof statusVariants] || 'default'
 
   return (
-    <div className="flex flex-col gap-2 rounded-[12px] h-fit border-[1px] border-[#E5E7EB] bg-white p-5">
+    <div className="flex flex-col gap-2 rounded-[12px] h-fit border-[1px] border-[#E5E7EB] bg-white p-5 hover:scale-105 transition duration-400 shadow-md">
       <div className="flex justify-between ">
         <div
           className="flex items-center justify-center h-9.5 w-10  text-white font-semibold rounded-[8px]"

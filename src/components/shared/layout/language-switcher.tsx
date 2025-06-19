@@ -30,14 +30,14 @@ export default function LanguageSwitcher() {
             className="w-full h-full object-cover"
           />
         </div>
-        <span className="text-[#6B7280] text-base font-semibold">
+        <span className="text-[#6B7280] text-sm font-semibold">
           {selectedLang.label}
         </span>
         <ChevronDown className="w-4 h-4 text-[#6B7280] font-semibold" />
       </button>
 
       {open && (
-        <div className=" flex flex-col absolute mt-2 w-36 rounded-[8px] shadow-lg bg-white border-[1px] border-[#E5E7EB] space-y-1  z-10 px-2 py-1">
+        <div className=" flex flex-col absolute mt-2 w-36 rounded-[8px] shadow-lg bg-white border-[1px] border-[#E5E7EB] space-y-1  z-20 px-2 py-1">
           <ul className="py-1">
             {languages.map((lang) => (
               <li
@@ -59,7 +59,7 @@ export default function LanguageSwitcher() {
                     quality={80}
                   />
                 </div>
-                <span className="text-[#6B7280] text-base font-semibold">
+                <span className="text-[#6B7280] text-sm font-semibold">
                   {lang.label}
                 </span>
               </li>
