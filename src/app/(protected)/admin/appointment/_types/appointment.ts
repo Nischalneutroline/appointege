@@ -7,6 +7,7 @@ export enum AppointmentStatus {
 }
 
 // Interface for Appointment
+// Hello
 export interface Appointment {
   customerName: string; // Required field for the person being booked
   email: string; // Required email of the person being booked
