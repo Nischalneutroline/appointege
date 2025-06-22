@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { DialogDescription } from '@radix-ui/react-dialog'
 import Image from 'next/image'
 import React from 'react'
-import * as AccordionPrimitive from '@radix-ui/react-accordion'
 
 interface DeleteAppointmentProps {
   open: boolean
