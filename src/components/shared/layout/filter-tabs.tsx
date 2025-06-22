@@ -24,7 +24,7 @@ const FilterTabs = ({
     ? option.background
     : isHovered
       ? 'oklch(96.7% 0.003 264.542)'
-      : undefined
+      : '#F8F9FA'
 
   const border = isActive ? `1px solid ${option.border}` : 'none'
 

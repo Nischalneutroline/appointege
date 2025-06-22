@@ -288,15 +288,15 @@ const NewAppoinment = ({
                 textColor="#099668"
               />
             </div>
-            <div className="flex flex-col gap-3 md:flex-row justify-between">
-              <Button
+            <div className="flex flex-col gap-3 md:flex-row justify-center ">
+              {/* <Button
                 type="button"
                 variant="outline"
                 className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
                 onClick={handleBack}
               >
                 ← Back
-              </Button>
+              </Button> */}
               <Button
                 type="submit"
                 variant="default"
@@ -306,7 +306,7 @@ const NewAppoinment = ({
                 }}
                 className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
               >
-                Save
+                Done
               </Button>
             </div>
           </DialogContent>
@@ -445,8 +445,8 @@ const NewAppoinment = ({
                 )}
               />
 
-              <div className="flex flex-col gap-3 md:flex-row justify-between mt-6">
-                <Button
+              <div className="flex flex-col gap-3  md:flex-row justify-center items-center mt-6">
+                {/* <Button
                   type="button"
                   variant="outline"
                   className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
@@ -454,11 +454,11 @@ const NewAppoinment = ({
                   disabled={isSubmitting}
                 >
                   ← Back
-                </Button>
+                </Button> */}
                 <Button
                   type="submit"
                   variant="default"
-                  className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
+                  className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
                   disabled={
                     isLoadingServices || isLoadingAppointment || isSubmitting
                   }
@@ -467,12 +467,12 @@ const NewAppoinment = ({
                     isSubmitting ? (
                       <LoadingSpinner text="Updating..." />
                     ) : (
-                      'Update Appointment'
+                      'Submitting...'
                     )
                   ) : isSubmitting ? (
                     <LoadingSpinner text="Creating..." />
                   ) : (
-                    'Book Appointment'
+                    'Submit'
                   )}
                 </Button>
               </div>

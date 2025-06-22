@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        cardActive: 'bg-white text-blue-500 shadow-xs ',
+        cardActive: 'bg-white text-[#2563EB] shadow-xs ',
         default: 'bg-blue-600 text-white shadow-xs',
         destructive:
           'bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
@@ -17,6 +17,7 @@ const buttonVariants = cva(
           'border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
         secondary:
           'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+        hover: '  text-[#6B7280] text-sm font-normal',
         ghost:
           'hover:bg-white hover:text-gray-600 dark:hover:bg-accent/50 text-gray-500',
         cardGhost:

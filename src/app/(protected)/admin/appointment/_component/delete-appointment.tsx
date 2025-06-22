@@ -11,7 +11,7 @@ interface DeleteAppointmentProps {
 const DeleteAppointment = ({ open, onChange }: DeleteAppointmentProps) => {
   return (
     <Dialog onOpenChange={onChange} open={open}>
-      <DialogContent>
+      <DialogContent className="flex flex-col gap-4">
         <DialogTitle>
           <div className="flex justify-center">
             <Image
@@ -28,11 +28,15 @@ const DeleteAppointment = ({ open, onChange }: DeleteAppointmentProps) => {
         <div className="flex w-full gap-4 justify-center">
           <button
             type="button"
-            className="flex justify-center items-center px-4 py-1.5 bg-[#EF4444] text-white rounded-md text-sm font-semibold cursor-pointer"
+            className="w-30 flex justify-center items-center px-4 py-1.5 bg-[#EF4444] text-white rounded-md text-sm font-semibold cursor-pointer"
+            onClick={() => onChange(false)}
           >
             Delete
           </button>
-          <button className="flex justify-center items-center px-4 py-1.5 border border-[#E5E7EB] text-[#9CA3AF] rounded-md text-sm font-semibold cursor-pointer">
+          <button
+            className="w-30 flex justify-center items-center px-4 py-1.5 border border-[#E5E7EB] text-[#9CA3AF] rounded-md text-sm font-semibold cursor-pointer"
+            onClick={() => onChange(false)}
+          >
             Cancel
           </button>
         </div>

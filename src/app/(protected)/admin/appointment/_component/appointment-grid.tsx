@@ -131,28 +131,30 @@ const AppointmentGrid = ({ item }: { item: Appointment }) => {
     //     </div>
     //   </div>
     // </div>
-    <div className="flex flex-col items-stretch bg-white rounded-[10px] border-[1px] border-[#DCE9F9] ">
-      <div className="flex flex-col p-5 gap-4">
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-2 items-center">
+    <div className="flex flex-col items-stretch bg-white rounded-[10px] border-[1px] border-[#DCE9F9] gap-4 ">
+      <div className="flex flex-col px-6 pt-6 gap-5">
+        <div className="flex flex-col gap-3">
+          <div className="flex gap-2.5 items-center">
             <div
-              className="h-10 w-10 text-lg font-semibold text-white flex items-center justify-center rounded-[8px] "
+              className="h-10 w-10 p-1.5 font-semibold text-white flex items-center justify-center rounded-[8px] "
               style={{ backgroundColor: item.color }}
             >
-              {getInitials(item.name)}
+              <div className="text-lg leading-[71.694%]">
+                {getInitials(item.name)}
+              </div>
             </div>
             <div className="flex flex-col">
-              <div className="text-base font-medium h-fit text-[#111827]">
+              <div className="text-base font-medium text-[#111827]">
                 Sandiya Thapa
               </div>
-              <div className="flex gap-3 text-sm font-normal">
-                <div className="text-[#6B7280]">Dental Cleaning</div>
+              <div className="flex gap-3 text-xs font-normal">
+                <div className="text-[#78818C]">Dental Cleaning</div>
                 <div className="flex gap-1 items-center justify-center">
                   <div className="flex w-full h-full justify-center items-center">
                     {' '}
-                    <MapPin size={14} strokeWidth={2.5} color="#92AAF3" />
+                    <MapPin size={14} strokeWidth={2.5} color="#92ABF3" />
                   </div>
-                  <div className="text-[#6B7280]">Physical</div>
+                  <div className="text-[#78818C]">Physical</div>
                 </div>
               </div>
             </div>
@@ -184,10 +186,10 @@ const AppointmentGrid = ({ item }: { item: Appointment }) => {
           </div>
         </div>
       </div>
-      <div className="flex w-full justify-between items-center text-[#6B7280] text-sm ">
+      <div className="flex w-full h-10 justify-between items-center text-[#6B7280] text-sm">
         <div className="w-full flex border-t-[1px] border-r-[1px] border-[#DCE9F9] justify-center p-3 cursor-pointer">
           <div
-            className="flex  items-center"
+            className="flex  items-center "
             onClick={() => {
               dispatch(openAppointmentViewForm(item))
             }}
@@ -197,7 +199,7 @@ const AppointmentGrid = ({ item }: { item: Appointment }) => {
           </div>
         </div>
 
-        <div className="w-full flex border-t-[1px] border-r-[1px] border-[#DCE9F9] justify-center p-3 cursor-pointer">
+        <div className="w-full flex border-t-[1px]  border-[#DCE9F9] justify-center p-3 cursor-pointer">
           <div
             className="flex items-center"
             onClick={() => {
@@ -206,17 +208,6 @@ const AppointmentGrid = ({ item }: { item: Appointment }) => {
           >
             <SquarePen className="mr-2 h-3.5 w-3.5" />
             <div>Edit</div>
-          </div>
-        </div>
-        <div className="w-full flex border-t-[1px] border-[#DCE9F9] justify-center p-3 cursor-pointer">
-          <div
-            className="flex items-center"
-            onClick={() => {
-              dispatch(openAppointmentDeleteForm(item))
-            }}
-          >
-            <Trash2 className="mr-2 h-3.5 w-3.5" />
-            <div>Delete</div>
           </div>
         </div>
       </div>
