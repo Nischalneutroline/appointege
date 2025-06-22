@@ -85,9 +85,7 @@ const Page = () => {
               <div className="h-full overflow-y-visible">
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 h-full overflow-y-auto max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)]">
                   {seletedData.map((item) => (
-                    <div key={item.id} className="p-2">
-                      <AppointmentGrid item={item} />
-                    </div>
+                    <AppointmentGrid item={item} key={item.id} />
                   ))}
                 </div>
               </div>
