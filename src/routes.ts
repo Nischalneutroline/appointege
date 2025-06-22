@@ -77,7 +77,8 @@ export const superAdminPrefix = '/super-admin'
  * This string prefixes API routes that handle authentication (e.g., /api/auth/signin).
  * These routes bypass middleware authentication checks.
  */
-export const apiAuthPrefix = '/api/auth'
+export const apiPrefix = '/api'
+export const apiAuthPrefix = '/api'
 
 // Default redirect paths for different roles after login
 export const DEFAULT_LOGGEDIN_ADMIN_REDIRECT = '/admin'

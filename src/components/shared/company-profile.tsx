@@ -11,7 +11,9 @@ interface CustomerProfileProps {
 const CompanyProfile = (props: CustomerProfileProps) => {
   const { name, setCollapsed } = props
   const logo = getInitials(name)
+
   console.log(logo, 'logo')
+
   return (
     <div className="flex items-center justify-between py-4 pt-6 px-6">
       <div className="flex items-center  w-full text-black gap-2">

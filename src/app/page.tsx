@@ -17,8 +17,7 @@ import Image from 'next/image'
 import { currentUser } from '@/lib/auth'
 import { signOut } from '@/auth'
 
-export default async function Page() {
-  const user = await currentUser()
+export default function Page() {
   // const session = await auth();
 
   return (

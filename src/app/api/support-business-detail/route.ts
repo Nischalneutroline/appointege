@@ -1,19 +1,19 @@
-import { NextRequest, NextResponse } from "next/server"
-import { SupportBusinessDetailSchema } from "@/features/support-detail/schemas/schema" // Adjust the path accordingly
-import { ZodError } from "zod"
-import { SupportBusinessDetail } from "@/features/support-detail/types/types"
+import { NextRequest, NextResponse } from 'next/server'
+import { SupportBusinessDetailSchema } from '@/features/support-detail/schemas/schema' // Adjust the path accordingly
+import { ZodError } from 'zod'
+import { SupportBusinessDetail } from '@/features/support-detail/types/types'
 import {
   AvailabilityType,
   Holiday,
   HolidayType,
   WeekDays,
-} from "@/features/business-detail/types/types"
-import { prisma } from "@/lib/prisma"
+} from '@/features/business-detail/types/types'
+import { prisma } from '@/lib/prisma'
 import {
   getSupportDetailByBusinessId,
   getSupportDetailByEmail,
   getSupportDetailById,
-} from "@/db/supportDetail"
+} from '@/db/supportDetail'
 
 // Dummy database for support business details
 // let supportDetails: SupportBusinessDetail[] = [
@@ -58,26 +58,26 @@ export async function POST(req: NextRequest) {
 
     // Check if the business exists
     const existingSupportDetail = await getSupportDetailByEmail(
-      parsedData.supportEmail
+      parsedData.supportEmail,
     )
 
     if (existingSupportDetail) {
       return NextResponse.json(
-        { error: "Business with this email already exists!" },
-        { status: 400 }
+        { error: 'Business with this email already exists!' },
+        { status: 400 },
       )
     }
 
     // check if support detaila already exist by business id
     // one one support detaila is allowed per business
     const existingSupportDetailById = await getSupportDetailByBusinessId(
-      parsedData.businessId
+      parsedData.businessId,
     )
 
     if (existingSupportDetailById) {
       return NextResponse.json(
-        { error: "Support Business Detail already exists!" },
-        { status: 400 }
+        { error: 'Support Business Detail already exists!' },
+        { status: 400 },
       )
     }
 
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
             city: address.city,
             country: address.country,
             zipCode: address.zipCode,
-            googleMap: address.googleMap || "",
+            googleMap: address.googleMap || '',
           })),
         },
         supportAvailability: {
@@ -130,22 +130,22 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Support Business Detail created successfully",
+        message: 'Support Business Detail created successfully',
         data: newSupportDetail,
       },
-      { status: 201 }
+      { status: 201 },
     )
   } catch (error) {
     console.log(error)
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error.errors },
-        { status: 400 }
+        { error: 'Validation failed', details: error.errors },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error", detail: error },
-      { status: 500 }
+      { error: 'Internal server error', detail: error },
+      { status: 500 },
     )
   }
 }
@@ -167,15 +167,15 @@ export async function GET() {
 
     if (supportDetails.length === 0) {
       return NextResponse.json(
-        { error: "No support details found" },
-        { status: 404 }
+        { error: 'No support details found' },
+        { status: 404 },
       )
     }
     return NextResponse.json(supportDetails, { status: 200 })
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch support details" },
-      { status: 500 }
+      { error: 'Failed to fetch support details' },
+      { status: 500 },
     )
   }
 }
@@ -190,8 +190,8 @@ export async function PUT(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Support Business ID is required" },
-        { status: 400 }
+        { error: 'Support Business ID is required' },
+        { status: 400 },
       )
     }
 
@@ -199,8 +199,8 @@ export async function PUT(req: NextRequest) {
 
     if (!existingSupportDetail) {
       return NextResponse.json(
-        { error: "Support Business Detail not found" },
-        { status: 404 }
+        { error: 'Support Business Detail not found' },
+        { status: 404 },
       )
     }
 
@@ -214,20 +214,20 @@ export async function PUT(req: NextRequest) {
         // Handle addresses
         supportAddress: {
           upsert: parsedData.supportAddress.map((addr) => ({
-            where: { id: addr.id || "" }, // Use empty string as fallback if no ID
+            where: { id: addr.id || '' }, // Use empty string as fallback if no ID
             update: {
               street: addr.street,
               city: addr.city,
               country: addr.country,
               zipCode: addr.zipCode,
-              googleMap: addr.googleMap || "",
+              googleMap: addr.googleMap || '',
             },
             create: {
               street: addr.street,
               city: addr.city,
               country: addr.country,
               zipCode: addr.zipCode,
-              googleMap: addr.googleMap || "",
+              googleMap: addr.googleMap || '',
             },
           })),
         },
@@ -235,13 +235,13 @@ export async function PUT(req: NextRequest) {
         // Handle business availability
         supportAvailability: {
           upsert: parsedData.supportAvailability.map((availability) => ({
-            where: { id: availability.id || "" },
+            where: { id: availability.id || '' },
             update: {
               weekDay: availability.weekDay,
               type: availability.type,
               timeSlots: {
                 upsert: availability.timeSlots.map((slot) => ({
-                  where: { id: slot.id || "" },
+                  where: { id: slot.id || '' },
                   update: {
                     startTime: slot.startTime,
                     endTime: slot.endTime,
@@ -269,7 +269,7 @@ export async function PUT(req: NextRequest) {
         // Handle holidays
         supportHoliday: {
           upsert: parsedData.supportHoliday.map((holiday) => ({
-            where: { id: holiday.id || "" },
+            where: { id: holiday.id || '' },
             update: {
               holiday: holiday.holiday as WeekDays,
               type: holiday.type,
@@ -296,21 +296,21 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "Support Business Detail updated successfully",
+        message: 'Support Business Detail updated successfully',
         data: updatedSupportDetail,
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error.errors },
-        { status: 400 }
+        { error: 'Validation failed', details: error.errors },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: 'Internal server error' },
+      { status: 500 },
     )
   }
 }
@@ -322,8 +322,8 @@ export async function DELETE(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Support Detail ID is required" },
-        { status: 400 }
+        { error: 'Support Detail ID is required' },
+        { status: 400 },
       )
     }
 
@@ -331,8 +331,8 @@ export async function DELETE(req: NextRequest) {
 
     if (!existingSupportDetail) {
       return NextResponse.json(
-        { error: "Support Business Detail not found" },
-        { status: 404 }
+        { error: 'Support Business Detail not found' },
+        { status: 404 },
       )
     }
 
@@ -343,21 +343,21 @@ export async function DELETE(req: NextRequest) {
     if (!deletedSupportDetail) {
       return NextResponse.json(
         { error: "Support Business Detail couldn't be deleted" },
-        { status: 404 }
+        { status: 404 },
       )
     }
 
     return NextResponse.json(
       {
-        message: "Support Business Detail deleted successfully",
+        message: 'Support Business Detail deleted successfully',
         data: deletedSupportDetail,
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete support detail" },
-      { status: 500 }
+      { error: 'Failed to delete support detail' },
+      { status: 500 },
     )
   }
 }

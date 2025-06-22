@@ -2,7 +2,7 @@
 
 import bcrypt from 'bcryptjs'
 import { SignupSchema, SignupSchemaType } from '@/schemas'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { getUserByEmail } from '@/data/user'
 import { generateTokenForEmailVerification } from '@/lib/token'
 import { sendVerificationEmail } from '@/lib/mail'
@@ -27,7 +27,7 @@ export async function register(values: SignupSchemaType) {
       return { error: 'Email already in use!' }
     }
 
-    const newUser = await db.user.create({
+    const newUser = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,

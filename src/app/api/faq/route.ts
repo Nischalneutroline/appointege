@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server"
-import { z } from "zod"
-import { faqSchema } from "@/features/faq/schemas/schema"
-import { FAQ } from "@/features/faq/types/types"
-import { prisma } from "@/lib/prisma"
-import { getFAQSById } from "@/db/faq"
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { faqSchema } from '@/features/faq/schemas/schema'
+import { FAQ } from '@/features/faq/types/types'
+import { prisma } from '@/lib/prisma'
+import { getFAQSById } from '@/db/faq'
 
 // const dummyFAQs: FAQ[] = [
 //   {
@@ -73,22 +73,22 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: "FAQ created successfully",
+        message: 'FAQ created successfully',
         faq: newFAQ,
       },
-      { status: 201 }
+      { status: 201 },
     )
   } catch (error) {
     console.log(error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error.errors[0].message },
-        { status: 400 }
+        { error: 'Validation failed', details: error.errors[0].message },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error", message: error },
-      { status: 500 }
+      { error: 'Internal server error', message: error },
+      { status: 500 },
     )
   }
 }
@@ -100,14 +100,14 @@ export async function GET() {
 
     // Check if there are any FAQs
     if (faqs.length === 0) {
-      return NextResponse.json({ error: "No FAQs found!" }, { status: 404 })
+      return NextResponse.json({ error: 'No FAQs found!' }, { status: 404 })
     }
 
     return NextResponse.json(faqs, { status: 200 })
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch FAQs", message: error },
-      { status: 500 }
+      { error: 'Failed to fetch FAQs', message: error },
+      { status: 500 },
     )
   }
 }
@@ -120,14 +120,14 @@ export async function PUT(req: NextRequest) {
     const { id } = body
 
     if (!id) {
-      return NextResponse.json({ error: "FAQ Id required!" }, { status: 400 })
+      return NextResponse.json({ error: 'FAQ Id required!' }, { status: 400 })
     }
 
     // Find the FAQ by ID
     const existingFAQ = await getFAQSById(id)
 
     if (!existingFAQ) {
-      return NextResponse.json({ error: "FAQ not found" }, { status: 404 })
+      return NextResponse.json({ error: 'FAQ not found' }, { status: 404 })
     }
 
     // Update the FAQ entry in prisma
@@ -145,19 +145,19 @@ export async function PUT(req: NextRequest) {
     })
 
     return NextResponse.json(
-      { message: "FAQ updated successfully", faq: updatedFAQ },
-      { status: 200 }
+      { message: 'FAQ updated successfully', faq: updatedFAQ },
+      { status: 200 },
     )
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error.errors[0].message },
-        { status: 400 }
+        { error: 'Validation failed', details: error.errors[0].message },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: 'Internal server error' },
+      { status: 500 },
     )
   }
 }
@@ -169,13 +169,13 @@ export async function DELETE(req: NextRequest) {
     const { id } = body
 
     if (!id) {
-      return NextResponse.json({ error: "FAQ Id required!" }, { status: 400 })
+      return NextResponse.json({ error: 'FAQ Id required!' }, { status: 400 })
     }
     // Find the FAQ by ID
     const existingFAQ = await getFAQSById(id)
 
     if (!existingFAQ) {
-      return NextResponse.json({ error: "FAQ not found!" }, { status: 404 })
+      return NextResponse.json({ error: 'FAQ not found!' }, { status: 404 })
     }
     const deletedFAQ = await prisma.fAQ.delete({
       where: { id },
@@ -184,18 +184,18 @@ export async function DELETE(req: NextRequest) {
     if (!deletedFAQ) {
       return NextResponse.json(
         { error: "FAQ couldn't be deleted!" },
-        { status: 404 }
+        { status: 404 },
       )
     }
 
     return NextResponse.json(
-      { message: "FAQ deleted successfully" },
-      { status: 200 }
+      { message: 'FAQ deleted successfully' },
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
-      { error: "Internal server error", message: error },
-      { status: 500 }
+      { error: 'Internal server error', message: error },
+      { status: 500 },
     )
   }
 }

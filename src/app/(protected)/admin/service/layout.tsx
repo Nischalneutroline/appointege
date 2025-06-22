@@ -3,7 +3,7 @@
 // app/(admin)/appointments/layout.tsx
 import Heading from '@/components/admin/shared/heading'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import CreateButton from '@/components/shared/create-action-button'
 
@@ -13,13 +13,14 @@ import LayoutCards from '@/components/shared/layout/layout-cards'
 import { filterOptions } from '../appointment/_data/data'
 import NewAppoinment from '../appointment/_component/new-appoinment'
 import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/store/store'
+import { AppDispatch, RootState } from '@/store/store'
 import {
   closeAppointmentForm,
   openAppointmentCreateForm,
 } from '@/store/slices/appointmentSlice'
 import ViewAppointment from '../appointment/_component/view/view-appointment'
 import DeleteAppointment from '../appointment/_component/delete-appointment'
+import { fetchServices } from '@/store/slices/serviceslice'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
@@ -27,7 +28,12 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const { isFormOpen, formMode, currentAppointment } = useSelector(
     (state: RootState) => state.appointment,
   )
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<AppDispatch>()
+
+  // useEffect(() => {
+  //   console.log('Fetching services...')
+  //   dispatch(fetchServices())
+  // })
 
   return (
     <main className="flex flex-col gap-4 ">

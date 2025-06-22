@@ -1,15 +1,15 @@
-"use server"
-import { getUserByEmail } from "@/data/user"
+'use server'
+import { getUserByEmail } from '@/data/user'
 import {
   getVerificationTokenByEmail,
   getVerificationTokenByToken,
-} from "@/data/verificationToken"
-import { db } from "@/lib/db"
+} from '@/data/verificationToken'
+import { prisma } from '@/lib/prisma'
 
 export default async function verifyUser(
-  token: string
+  token: string,
 ): Promise<{ error?: string; success?: string }> {
-  console.log(token, "got token here server")
+  console.log(token, 'got token here server')
   try {
     // Get the token by token
     const existinToken = await getVerificationTokenByToken(token)
@@ -19,7 +19,7 @@ export default async function verifyUser(
     }
 
     if (existinToken.expiresAt < new Date()) {
-      return { error: "Token has expired!" }
+      return { error: 'Token has expired!' }
     }
 
     // Verify token and set emailVerified
@@ -27,16 +27,16 @@ export default async function verifyUser(
 
     // if user has already verfied?
     if (!existingUser || existingUser.emailVerified) {
-      return { error: "Invalid Token!" }
+      return { error: 'Invalid Token!' }
     }
 
     // Delete the token after successful verification
-    await db.verificationToken.delete({
+    await prisma.verificationToken.delete({
       where: { id: existinToken.id },
     })
 
     // Update user to mark email as verified
-    await db.user.update({
+    await prisma.user.update({
       where: { id: existingUser.id },
       data: {
         emailVerified: new Date(),
@@ -44,9 +44,9 @@ export default async function verifyUser(
       },
     })
 
-    return { success: "Email Verified Successfully, please login!" }
+    return { success: 'Email Verified Successfully, please login!' }
   } catch (error) {
-    console.error("Error verifying email token:", error)
-    return { error: "An unexpected error occurred!" }
+    console.error('Error verifying email token:', error)
+    return { error: 'An unexpected error occurred!' }
   }
 }

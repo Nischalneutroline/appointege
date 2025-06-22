@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server"
-import { getAnnouncementOrOfferById } from "@/db/announcement-offer"
-import { getAppointmentById } from "@/db/appointment"
-import { getReminderById } from "@/db/reminder"
-import { ReminderSchema } from "@/features/reminder/schemas/schema"
-import { prisma } from "@/lib/prisma"
-import { ZodError } from "zod"
+import { NextRequest, NextResponse } from 'next/server'
+import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
+import { getAppointmentById } from '@/db/appointment'
+import { getReminderById } from '@/db/reminder'
+import { ReminderSchema } from '@/features/reminder/schemas/schema'
+import { prisma } from '@/lib/prisma'
+import { ZodError } from 'zod'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
@@ -17,15 +17,15 @@ export async function GET(req: NextRequest, { params }: ParamsProps) {
 
     if (!announcement) {
       return NextResponse.json(
-        { error: "Reminder with id not found" },
-        { status: 404 }
+        { error: 'Reminder with id not found' },
+        { status: 404 },
       )
     }
     return NextResponse.json(announcement, { status: 200 })
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch reminder" },
-      { status: 500 }
+      { error: 'Failed to fetch reminder' },
+      { status: 500 },
     )
   }
 }
@@ -36,8 +36,8 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     const { id } = await params
     if (!id) {
       return NextResponse.json(
-        { error: "Reminder Id required!" },
-        { status: 400 }
+        { error: 'Reminder Id required!' },
+        { status: 400 },
       )
     }
 
@@ -47,7 +47,7 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     const existingReminder = await getReminderById(id)
 
     if (!existingReminder) {
-      return NextResponse.json({ error: "Reminder not found" }, { status: 404 })
+      return NextResponse.json({ error: 'Reminder not found' }, { status: 404 })
     }
 
     const updatedReminder = await prisma.reminder.update({
@@ -91,19 +91,19 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     })
 
     return NextResponse.json(
-      { message: "Reminder updated successfully", reminder: updatedReminder },
-      { status: 200 }
+      { message: 'Reminder updated successfully', reminder: updatedReminder },
+      { status: 200 },
     )
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error },
-        { status: 400 }
+        { error: 'Validation failed', details: error },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: 'Internal server error' },
+      { status: 500 },
     )
   }
 }
@@ -115,15 +115,15 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Reminder Id required!" },
-        { status: 400 }
+        { error: 'Reminder Id required!' },
+        { status: 400 },
       )
     }
 
     const existingReminder = await getReminderById(id)
 
     if (!existingReminder) {
-      return NextResponse.json({ error: "Reminder not found" }, { status: 404 })
+      return NextResponse.json({ error: 'Reminder not found' }, { status: 404 })
     }
 
     const deletedReminder = await prisma.reminder.delete({
@@ -131,13 +131,13 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
     })
 
     return NextResponse.json(
-      { message: "Reminder deleted successfully", reminder: deletedReminder },
-      { status: 200 }
+      { message: 'Reminder deleted successfully', reminder: deletedReminder },
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete reminder" },
-      { status: 500 }
+      { error: 'Failed to delete reminder' },
+      { status: 500 },
     )
   }
 }

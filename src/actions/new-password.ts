@@ -1,7 +1,7 @@
 'use server'
 
 import { getPasswordResetTokenByToken } from '@/data/passwordToken'
-import { db } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import { NewPasswordSchema, NewPasswordSchemaType } from '@/schemas'
 import bcrypt from 'bcryptjs'
 
@@ -40,7 +40,7 @@ export const changePassword = async (
     const hashedPassword = await bcrypt.hash(password, 10)
 
     // Update the user's password
-    const updatedUser = await db.user.update({
+    const updatedUser = await prisma.user.update({
       where: { email: existinResetToken.email },
       data: {
         password: hashedPassword, // Assuming you have a function to hash the password
@@ -48,7 +48,7 @@ export const changePassword = async (
     })
 
     // Delete the token after successful password change
-    await db.passwordResetToken.delete({
+    await prisma.passwordResetToken.delete({
       where: { id: existinResetToken.id },
     })
     // Optionally, you can also log the user out or invalidate their session here

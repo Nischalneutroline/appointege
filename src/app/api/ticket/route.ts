@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from "next/server"
-import { ZodError } from "zod"
-import { ticketSchema } from "@/features/ticket/schemas/schema"
-import { Ticket } from "@/features/ticket/types/types"
+import { NextRequest, NextResponse } from 'next/server'
+import { ZodError } from 'zod'
+import { ticketSchema } from '@/features/ticket/schemas/schema'
+import { Ticket } from '@/features/ticket/types/types'
 import {
   Role,
   TicketCategory,
   Priority,
   TicketStatus,
-} from "@/features/ticket/types/types"
-import { prisma } from "@/lib/prisma"
-import { getTicketById } from "@/db/ticket"
+} from '@/features/ticket/types/types'
+import { prisma } from '@/lib/prisma'
+import { getTicketById } from '@/db/ticket'
 
 // let tickets: Ticket[] = [
 //   {
@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
         priority: parsedData.priority,
         status: parsedData.status,
         assignedTo: parsedData.assignedTo,
-        resolutionDescription: parsedData.resolutionDescription || "",
+        resolutionDescription: parsedData.resolutionDescription || '',
         proofFiles: parsedData.proofFiles,
         initiatedById: parsedData.initiatedById,
         userId: parsedData.userId,
@@ -100,20 +100,20 @@ export async function POST(req: NextRequest) {
     })
 
     return NextResponse.json(
-      { message: "Ticket created successfully", ticket: newTicket },
-      { status: 201 }
+      { message: 'Ticket created successfully', ticket: newTicket },
+      { status: 201 },
     )
   } catch (error) {
     if (error instanceof ZodError) {
-      console.log('a',error)
+      console.log('a', error)
       return NextResponse.json(
-        { error: "Validation failed", details: error },
-        { status: 400 }
+        { error: 'Validation failed', details: error },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error", details: error },
-      { status: 500 }
+      { error: 'Internal server error', details: error },
+      { status: 500 },
     )
   }
 }
@@ -124,13 +124,13 @@ export async function GET() {
     const tickets = await prisma.ticket.findMany()
 
     if (tickets.length === 0) {
-      return NextResponse.json({ error: "No tickets found" }, { status: 404 })
+      return NextResponse.json({ error: 'No tickets found' }, { status: 404 })
     }
     return NextResponse.json(tickets, { status: 200 })
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch tickets" },
-      { status: 500 }
+      { error: 'Failed to fetch tickets' },
+      { status: 500 },
     )
   }
 }
@@ -145,15 +145,15 @@ export async function PUT(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Ticket Id required!" },
-        { status: 400 }
+        { error: 'Ticket Id required!' },
+        { status: 400 },
       )
     }
 
     const existingTicket = await getTicketById(id)
 
     if (!existingTicket) {
-      return NextResponse.json({ error: "Ticket not found" }, { status: 404 })
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
     const updatedTicket = await prisma.ticket.update({
@@ -166,7 +166,7 @@ export async function PUT(req: NextRequest) {
         priority: parsedData.priority,
         status: parsedData.status,
         assignedTo: parsedData.assignedTo,
-        resolutionDescription: parsedData.resolutionDescription || "",
+        resolutionDescription: parsedData.resolutionDescription || '',
         proofFiles: parsedData.proofFiles,
         initiatedById: parsedData.initiatedById,
         userId: parsedData.userId,
@@ -174,19 +174,19 @@ export async function PUT(req: NextRequest) {
     })
 
     return NextResponse.json(
-      { message: "Ticket updated successfully", ticket: updatedTicket },
-      { status: 200 }
+      { message: 'Ticket updated successfully', ticket: updatedTicket },
+      { status: 200 },
     )
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error.errors[0].message },
-        { status: 400 }
+        { error: 'Validation failed', details: error.errors[0].message },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: 'Internal server error' },
+      { status: 500 },
     )
   }
 }
@@ -198,15 +198,15 @@ export async function DELETE(req: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Ticket Id required!" },
-        { status: 400 }
+        { error: 'Ticket Id required!' },
+        { status: 400 },
       )
     }
 
     const existingTicket = await getTicketById(id)
 
     if (!existingTicket) {
-      return NextResponse.json({ error: "Ticket not found" }, { status: 404 })
+      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 })
     }
 
     const deletedTicket = await prisma.ticket.delete({
@@ -216,18 +216,18 @@ export async function DELETE(req: NextRequest) {
     if (!deletedTicket) {
       return NextResponse.json(
         { error: "Ticket couldn't be deleted" },
-        { status: 404 }
+        { status: 404 },
       )
     }
 
     return NextResponse.json(
-      { message: "Ticket deleted successfully", ticket: deletedTicket },
-      { status: 200 }
+      { message: 'Ticket deleted successfully', ticket: deletedTicket },
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete ticket", detail: error },
-      { status: 500 }
+      { error: 'Failed to delete ticket', detail: error },
+      { status: 500 },
     )
   }
 }

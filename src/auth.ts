@@ -1,10 +1,10 @@
 // src/auth.ts
-import NextAuth, { DefaultSession } from "next-auth"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import authConfig from "@/auth.config"
-import { db } from "@/lib/db"
-import { getUserById } from "@/data/user"
-import { DEFAULT_LOGGEDIN_USER_REDIRECT } from "./routes"
+import NextAuth, { DefaultSession } from 'next-auth'
+import { PrismaAdapter } from '@auth/prisma-adapter'
+import authConfig from '@/auth.config'
+import { prisma } from '@/lib/prisma'
+import { getUserById } from '@/data/user'
+import { DEFAULT_LOGGEDIN_USER_REDIRECT } from './routes'
 
 export const {
   auth,
@@ -13,13 +13,13 @@ export const {
   signOut,
 } = NextAuth({
   pages: {
-    signIn: "/login",
-    error: "/error", // Error code passed in query string as ?error=
+    signIn: '/login',
+    error: '/error', // Error code passed in query string as ?error=
   },
   events: {
     async linkAccount({ user, account, profile }) {
       // Update the new user in the database for emailVerfied
-      await db.user.update({
+      await prisma.user.update({
         where: { id: user.id },
         data: { emailVerified: new Date() }, // Set emailVerified to current date
       })
@@ -32,11 +32,11 @@ export const {
     // Only SignIn Callback can use prisma adapter as it happens on the server side for signIn
     // jwt and session callbacks are called on the client side
     async signIn({ user, account, profile }) {
-      console.log("SignIn Callback - User:", user)
+      console.log('SignIn Callback - User:', user)
       // If the account type is not credentials, allow sign-in
       // This is to allow sign-in with other providers like Google, GitHub, etc.
       // If the account type is credentials, we need to check if the user exists and email is verified
-      if (account?.type !== "credentials") {
+      if (account?.type !== 'credentials') {
         return true
       }
 
@@ -89,7 +89,7 @@ export const {
       return session
     },
   },
-  adapter: PrismaAdapter(db),
-  session: { strategy: "jwt" },
+  adapter: PrismaAdapter(prisma),
+  session: { strategy: 'jwt' },
   ...authConfig,
 })

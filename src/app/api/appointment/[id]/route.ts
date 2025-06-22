@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from "next/server"
-import { getAnnouncementOrOfferById } from "@/db/announcement-offer"
-import { getAppointmentById } from "@/db/appointment"
-import { appointmentSchema } from "@/features/appointment/schemas/schema"
-import { prisma } from "@/lib/prisma"
-import { ZodError } from "zod"
+import { NextRequest, NextResponse } from 'next/server'
+import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
+import { getAppointmentById } from '@/db/appointment'
+import { appointmentSchema } from '@/app/(protected)/admin/appointment/_schema/appoinment'
+import { prisma } from '@/lib/prisma'
+import { ZodError } from 'zod'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
@@ -16,15 +16,15 @@ export async function GET(req: NextRequest, { params }: ParamsProps) {
 
     if (!announcement) {
       return NextResponse.json(
-        { error: "Appointment with id not found" },
-        { status: 404 }
+        { error: 'Appointment with id not found' },
+        { status: 404 },
       )
     }
     return NextResponse.json(announcement, { status: 200 })
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch appointment" },
-      { status: 500 }
+      { error: 'Failed to fetch appointment' },
+      { status: 500 },
     )
   }
 }
@@ -35,8 +35,8 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Appointment Id required!" },
-        { status: 400 }
+        { error: 'Appointment Id required!' },
+        { status: 400 },
       )
     }
 
@@ -45,8 +45,8 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
     if (!existingAppointment) {
       return NextResponse.json(
-        { error: "Appointment not found" },
-        { status: 404 }
+        { error: 'Appointment not found' },
+        { status: 404 },
       )
     }
 
@@ -75,25 +75,25 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
     if (!updatedService) {
       return NextResponse.json(
-        { error: "Failed to update appointment" },
-        { status: 500 }
+        { error: 'Failed to update appointment' },
+        { status: 500 },
       )
     }
 
     return NextResponse.json(
-      { message: "Appointment updated successfully", service: updatedService },
-      { status: 200 }
+      { message: 'Appointment updated successfully', service: updatedService },
+      { status: 200 },
     )
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error },
-        { status: 400 }
+        { error: 'Validation failed', details: error },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error", details: (error as Error).message },
-      { status: 500 }
+      { error: 'Internal server error', details: (error as Error).message },
+      { status: 500 },
     )
   }
 }
@@ -105,8 +105,8 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Appointment Id required!" },
-        { status: 400 }
+        { error: 'Appointment Id required!' },
+        { status: 400 },
       )
     }
 
@@ -114,8 +114,8 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
 
     if (!existingAppointment) {
       return NextResponse.json(
-        { error: "Appointment not found" },
-        { status: 404 }
+        { error: 'Appointment not found' },
+        { status: 404 },
       )
     }
 
@@ -125,22 +125,22 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
 
     if (!deletedAppointment) {
       return NextResponse.json(
-        { error: "Failed to delete appointment" },
-        { status: 500 }
+        { error: 'Failed to delete appointment' },
+        { status: 500 },
       )
     }
 
     return NextResponse.json(
-      { message: "Appointment deleted successfully" },
-      { status: 200 }
+      { message: 'Appointment deleted successfully' },
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
       {
-        error: "Failed to delete appointment",
+        error: 'Failed to delete appointment',
         details: error,
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }

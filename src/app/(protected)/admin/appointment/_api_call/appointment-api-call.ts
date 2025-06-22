@@ -1,31 +1,19 @@
-import { getBaseUrl } from "@/lib/baseUrl"
+import { getBaseUrl } from '@/lib/baseUrl'
 // import { Appointment } from "@prisma/client"
-import axios, { AxiosError, AxiosResponse } from "axios"
-import { Appointment, AppointmentStatus, AxioxResponseType } from "../_types/appointment"
-
+import axios, { AxiosError, AxiosResponse } from 'axios'
+import {
+  Appointment,
+  AppointmentStatus,
+  AxioxResponseType,
+  PostAppoinmentData,
+} from '../_types/appointment'
 
 const api = axios.create({
   baseURL: getBaseUrl(),
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 })
-
-export interface PostAppoinmentData {
-  id?: string
-  customerName: string
-  email: string
-  phone: string
-  serviceId: string
-  selectedDate: Date
-  selectedTime: string
-  message?: string
-  userId?: string
-  isForSelf?: boolean
-  bookedById?: string
-  createdById?: string
-  status?: AppointmentStatus
-}
 
 async function getAppointments(): Promise<{
   data?: Appointment[]
@@ -36,14 +24,14 @@ async function getAppointments(): Promise<{
   try {
     const {
       data: { data, success, error, message },
-    } = (await api.get("/api/appointment")) as AxioxResponseType<Appointment[]>
-    console.log("getAppointments: Response data =", data)
+    } = (await api.get('/api/appointment')) as AxioxResponseType<Appointment[]>
+    console.log('getAppointments: Response data =', data)
     return { data, success, message, error }
   } catch (error: any) {
     const errorMsg =
       error instanceof AxiosError && error.response?.data?.message
         ? error.response.data.message
-        : "An unknown error occurred"
+        : 'An unknown error occurred'
     // console.error("getAppointments: Error fetching appointments:", {
     //   message: errorMsg,
     //   status: error.response?.status,
@@ -67,7 +55,7 @@ async function getAppointmentById(id: string): Promise<{
     const {
       data: { data, success, error, message },
     } = (await api.get(
-      `/api/appointment/${id}`
+      `/api/appointment/${id}`,
     )) as AxioxResponseType<Appointment>
     return { data, success, message, error }
   } catch (error) {
@@ -78,7 +66,7 @@ async function getAppointmentById(id: string): Promise<{
         error: error.message,
       }
     }
-    return { error: "Failed to fetch appointment by Id", success: false }
+    return { error: 'Failed to fetch appointment by Id', success: false }
   }
 }
 
@@ -92,8 +80,8 @@ async function createAppointment(appointmentData: PostAppoinmentData): Promise<{
     const {
       data: { data, success, error, message },
     } = (await api.post(
-      "/api/appointment",
-      appointmentData
+      '/api/appointment',
+      appointmentData,
     )) as AxioxResponseType<Appointment>
     return {
       data,
@@ -109,13 +97,13 @@ async function createAppointment(appointmentData: PostAppoinmentData): Promise<{
         error: error.message,
       }
     }
-    return { error: "Failed to create appointment", success: false }
+    return { error: 'Failed to create appointment', success: false }
   }
 }
 
 async function updateAppointment(
   id: string,
-  appointmentData: PostAppoinmentData
+  appointmentData: PostAppoinmentData,
 ): Promise<{
   data?: Appointment
   success: boolean
@@ -127,7 +115,7 @@ async function updateAppointment(
       data: { data, success, error, message },
     } = (await api.put(`/api/appointment/${id}`, {
       ...appointmentData,
-      status: appointmentData.status || "SCHEDULED",
+      status: appointmentData.status || 'SCHEDULED',
     })) as AxioxResponseType<Appointment>
     return { data, success, message, error }
   } catch (error) {
@@ -138,18 +126,18 @@ async function updateAppointment(
         error: error.message,
       }
     }
-    return { error: "Failed to update appointment", success: false }
+    return { error: 'Failed to update appointment', success: false }
   }
 }
 
 async function deleteAppointment(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string; message?: string }> {
   try {
     const {
       data: { data, success, error, message },
     } = (await api.delete(
-      `/api/appointment/${id}`
+      `/api/appointment/${id}`,
     )) as AxioxResponseType<Appointment>
     return { success, message, error }
   } catch (error) {
@@ -160,7 +148,7 @@ async function deleteAppointment(
         error: error.message,
       }
     }
-    return { error: "Failed to delete appointment", success: false }
+    return { error: 'Failed to delete appointment', success: false }
   }
 }
 

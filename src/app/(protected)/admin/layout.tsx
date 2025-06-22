@@ -6,15 +6,28 @@ import SidebarDesktop from '@/components/shared/layout/sidebar-desktop'
 import SidebarMobile from '@/components/shared/layout/sidebar-mobile'
 import { currentUser } from '@/lib/auth'
 import { AuthInitializer } from '@/store/authInitializer'
+import { fetchAppointments } from '@/store/slices/appointmentSlice'
+import { fetchServices } from '@/store/slices/serviceslice'
+import { AppDispatch, RootState } from '@/store/store'
 import { redirect } from 'next/navigation'
+// import { use, useEffect } from 'react'
+// import { useDispatch } from 'react-redux'
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
-  const session = await currentUser()
-  console.log('Current User in Admin Layout:', session)
-  if (!session) {
-    // Redirect to login if not authenticated
-    redirect('/login')
-  }
+  // const session = await currentUser()
+  // console.log('Current User in Admin Layout:', session)
+  // if (!session) {
+  //   // Redirect to login if not authenticated
+  //   redirect('/login')
+  // }
+
+  // const dispatch = useDispatch<AppDispatch>()
+
+  // useEffect(() => {
+  //   console.log('Fetching appointments...')
+  //   dispatch(fetchAppointments())
+  //   dispatch(fetchServices())
+  // }, [dispatch]) // Only depend on dispatch to run once on mount
 
   return (
     // <AuthInitializer>

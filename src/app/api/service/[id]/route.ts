@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server"
-import { getAnnouncementOrOfferById } from "@/db/announcement-offer"
-import { getAppointmentById } from "@/db/appointment"
-import { getServiceById } from "@/db/service"
-import { prisma } from "@/lib/prisma"
-import { z, ZodError } from "zod"
-import { serviceSchema } from "@/features/service/schemas/schema"
-import { Service } from "@prisma/client"
+import { NextRequest, NextResponse } from 'next/server'
+import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
+import { getAppointmentById } from '@/db/appointment'
+import { getServiceById } from '@/db/service'
+import { prisma } from '@/lib/prisma'
+import { z, ZodError } from 'zod'
+import { serviceSchema } from '@/features/service/schemas/schema'
+import { Service } from '@prisma/client'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
@@ -18,15 +18,15 @@ export async function GET(req: NextRequest, { params }: ParamsProps) {
 
     if (!announcement) {
       return NextResponse.json(
-        { error: "Service with id not found" },
-        { status: 404 }
+        { error: 'Service with id not found' },
+        { status: 404 },
       )
     }
     return NextResponse.json(announcement, { status: 200 })
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch service" },
-      { status: 500 }
+      { error: 'Failed to fetch service' },
+      { status: 500 },
     )
   }
 }
@@ -38,8 +38,8 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Service Id required!" },
-        { status: 400 }
+        { error: 'Service Id required!' },
+        { status: 400 },
       )
     }
 
@@ -49,7 +49,7 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     const existingService = await getServiceById(id)
 
     if (!existingService) {
-      return NextResponse.json({ error: "Service not found" }, { status: 404 })
+      return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
     // Service Availability TimeSlot update logic
     const deledtedService = await prisma.service.delete({
@@ -79,8 +79,8 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
       })
       if (updatedService) {
         return NextResponse.json(
-          { message: "Service updated successfully", service: updatedService },
-          { status: 200 }
+          { message: 'Service updated successfully', service: updatedService },
+          { status: 200 },
         )
       }
     }
@@ -89,19 +89,19 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     // -------------------------_//
 
     return NextResponse.json(
-      { message: "Something went wrong" },
-      { status: 400 }
+      { message: 'Something went wrong' },
+      { status: 400 },
     )
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error },
-        { status: 400 }
+        { error: 'Validation failed', details: error },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error", message: error },
-      { status: 500 }
+      { error: 'Internal server error', message: error },
+      { status: 500 },
     )
   }
 }
@@ -234,15 +234,15 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Service Id required!" },
-        { status: 400 }
+        { error: 'Service Id required!' },
+        { status: 400 },
       )
     }
 
     const existingService = await getServiceById(id)
 
     if (!existingService) {
-      return NextResponse.json({ error: "Service not found" }, { status: 404 })
+      return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
 
     const deletedService = await prisma.service.delete({
@@ -251,18 +251,18 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
 
     if (!deletedService) {
       return NextResponse.json(
-        { error: "Service could not be deleted" },
-        { status: 404 }
+        { error: 'Service could not be deleted' },
+        { status: 404 },
       )
     }
     return NextResponse.json(
-      { message: "Service deleted successfully" },
-      { status: 200 }
+      { message: 'Service deleted successfully' },
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete service", message: error },
-      { status: 500 }
+      { error: 'Failed to delete service', message: error },
+      { status: 500 },
     )
   }
 }

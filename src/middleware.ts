@@ -12,6 +12,7 @@ import {
   DEFAULT_LOGGEDIN_USER_REDIRECT,
   DEFAULT_UNLOGGEDIN_REDIRECT,
   publicRoutes,
+  apiPrefix,
 } from './routes'
 // Import NextResponse for handling redirects in middleware
 import { NextResponse } from 'next/server'
@@ -33,6 +34,8 @@ export default auth((req) => {
 
   // Check if the route is an API authentication route (e.g., /api/auth/*)
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix)
+  // Check if the route is an API authentication route (e.g., /api/appoinments/*)
+  const isApiRoute = nextUrl.pathname.startsWith(apiPrefix)
   // Check if the route is an authentication route (e.g., /login, /register)
   const isAuthRoute = authRoutes.includes(nextUrl.pathname)
   // Check if the route is public (e.g., /)
@@ -40,7 +43,7 @@ export default auth((req) => {
 
   // Order matters for middleware logic:
   // 1. Allow API auth routes to bypass authentication checks
-  if (isApiAuthRoute) {
+  if (isApiAuthRoute || isApiRoute) {
     // Do nothing for API auth routes (e.g., /api/auth/signin) to allow authentication
     return
   }
