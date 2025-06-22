@@ -23,7 +23,7 @@ const FilterTabs = ({
   const backgroundColor = isActive
     ? option.background
     : isHovered
-      ? option.background
+      ? 'oklch(96.7% 0.003 264.542)'
       : undefined
 
   const border = isActive ? `1px solid ${option.border}` : 'none'
@@ -33,11 +33,12 @@ const FilterTabs = ({
       key={option.value}
       className={cn(
         `w-22 text-sm font-normal px-2 py-2 flex justify-center items-center 
-         transition-transform duration-300 cursor-pointer rounded-[8px] 
+         transition-transform duration-300 cursor-pointer rounded-[8px]  hover:bg-slate-50/80 dark:hover:bg-slate-800/50
          ${!isActive && 'hover:scale-105'}`,
       )}
       style={{
         backgroundColor,
+
         border,
       }}
       onMouseEnter={() => setIsHovered(true)}

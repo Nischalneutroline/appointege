@@ -1,4 +1,5 @@
 // pages/users.tsx
+'use client'
 
 import { TableColumn } from '@/components/table/data-table'
 import {
@@ -8,6 +9,12 @@ import {
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu'
 import { Pill } from '@/components/ui/pill'
+import { getInitials } from '@/lib/utils'
+import {
+  openAppointmentDeleteForm,
+  openAppointmentEditForm,
+  openAppointmentViewForm,
+} from '@/store/slices/appointmentSlice'
 import {
   Ellipsis,
   Eye,
@@ -16,7 +23,61 @@ import {
   SquarePen,
   Trash2,
 } from 'lucide-react'
+import { useDispatch } from 'react-redux'
+function AppointmentActions({ row }: { row: AppointmentColumnSchema }) {
+  const dispatch = useDispatch()
 
+  const handleViewClick = () => {
+    dispatch(
+      openAppointmentViewForm({ ...row, initials: getInitials(row.name) }),
+    )
+  }
+
+  const handleEditClick = () => {
+    dispatch(
+      openAppointmentEditForm({ ...row, initials: getInitials(row.name) }),
+    )
+  }
+
+  const handleDeleteClick = () => {
+    dispatch(
+      openAppointmentDeleteForm({ ...row, initials: getInitials(row.name) }),
+    )
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <Ellipsis size={16} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="">
+        <DropdownMenuItem
+          className="group/view text-gray-500 hover:bg-gray-50"
+          onClick={handleViewClick}
+        >
+          <Eye className="mr-1 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
+          <div className="group-hover/view:text-[#2563EB]">View</div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleEditClick}
+          className="group/edit text-gray-500 hover:bg-gray-50"
+        >
+          <SquarePen className="mr-2 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
+          <div className="group-hover/edit:text-[#10B981]">Edit</div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={handleDeleteClick}
+          className="group/delete text-gray-500 hover:bg-gray-50"
+        >
+          <Trash2 className="mr-2 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
+          <div className="group-hover/delete:text-red-500">Delete</div>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
 // Utility function to generate random color
 const getRandomColor = () => {
   const colors = [
@@ -126,42 +187,9 @@ export const columns: TableColumn<AppointmentColumnSchema>[] = [
   {
     header: 'Action',
     accessor: 'id',
-    render: (
-      value: string | number,
-      row: AppointmentColumnSchema,
-      index: number,
-    ) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="text-gray-400 hover:text-gray-600 cursor-pointer">
-            <Ellipsis size={16} />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="">
-          <DropdownMenuItem
-            className="group/view text-gray-500 hover:bg-gray-50"
-            onClick={() => console.log('Clicked Edit', row)}
-          >
-            <Eye className="mr-1 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
-            <div className="group-hover/view:text-[#2563EB]">View</div>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => console.log('Clicked Edit', row)}
-            className="group/edit text-gray-500 hover:bg-gray-50"
-          >
-            <SquarePen className="mr-2 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
-            <div className="group-hover/edit:text-[#10B981]">Edit</div>
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => console.log('Clicked Delete', row)}
-            className="group/delete text-gray-500 hover:bg-gray-50"
-          >
-            <Trash2 className="mr-2 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
-            <div className="group-hover/delete:text-red-500">Delete</div>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    render: (value: string | number, row: AppointmentColumnSchema) => {
+      return <AppointmentActions row={row} />
+    },
   },
 ]
 

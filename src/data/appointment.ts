@@ -2,6 +2,8 @@
 export interface Appointment {
   id: number
   name: string
+  email?: string
+  phone?: string
   initials: string
   color: string
   service: string
@@ -9,6 +11,7 @@ export interface Appointment {
   time: string
   type: string
   status: string
+  address?: string
 }
 ;[]
 

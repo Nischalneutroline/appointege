@@ -20,6 +20,9 @@ import {
 } from 'lucide-react'
 import { NavLinks, NavLinksMobile } from './nav-links'
 import CompanyProfile from '../company-profile'
+import { useDispatch, useSelector } from 'react-redux'
+import { RootState } from '@/store/store'
+import { toggleDesktopNav } from '@/store/slices/navSlice'
 
 export const navLinks = [
   { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={24} /> },
@@ -64,7 +67,8 @@ export const navLinks = [
 const SidebarDesktop = () => {
   // Hooks
 
-  const [isSidebarCollapsed, setCollapsed] = useState(false)
+  const { desktopNavCollapse } = useSelector((state: RootState) => state.nav)
+  const dispatch = useDispatch()
 
   /**
    * Navigation links configuration
@@ -83,16 +87,16 @@ const SidebarDesktop = () => {
     <aside
       className={cn(
         'flex flex-col bg-white h-full border-r-1 border-[#E5E7EB] transition-all duration-150 ease-in-out',
-        isSidebarCollapsed ? 'w-18 ' : 'w-70 items-center',
+        desktopNavCollapse ? 'w-18 ' : 'w-70 items-center',
       )}
     >
-      {!isSidebarCollapsed ? (
+      {!desktopNavCollapse ? (
         // Expanded Sidebar
         <div className=" relative flex flex-col w-full gap-6 h-full ">
           {/* Logo and Title Section */}
           <CompanyProfile
             name="Business Name"
-            setCollapsed={() => setCollapsed(!isSidebarCollapsed)}
+            setCollapsed={() => dispatch(toggleDesktopNav())}
           />
 
           {/* Navigation Links */}
@@ -148,7 +152,7 @@ const SidebarDesktop = () => {
           <div className="flex flex-col items-center gap-8 w-full">
             <ChevronRight
               className="w-6 h-6 text-[#6B7280] cursor-pointer hover:text-blue-700 transition-colors"
-              onClick={() => setCollapsed(false)}
+              onClick={() => dispatch(toggleDesktopNav())}
             />
 
             {/* Navigation Icons Only */}

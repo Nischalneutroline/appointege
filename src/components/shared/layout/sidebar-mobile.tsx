@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils'
 import { ArrowUpRight } from 'lucide-react'
 import CompanyProfile from '../company-profile'
-import { NavLinks } from './nav-links'
+import { NavLinks, NavLinksMobileSidebar } from './nav-links'
 import { navLinks } from './sidebar-desktop'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
@@ -44,7 +44,7 @@ const SidebarMobile = () => {
           <div className="flex-1 flex flex-col px-4 gap-4">
             <div className="flex flex-col gap-8 px-4">
               {navLinks.slice(0, 4).map((link) => (
-                <NavLinks key={link.name} {...link} />
+                <NavLinksMobileSidebar key={link.name} {...link} />
               ))}
             </div>
 
@@ -52,7 +52,7 @@ const SidebarMobile = () => {
 
             <div className="flex px-4">
               {navLinks.slice(4, 5).map((link) => (
-                <NavLinks key={link.name} {...link} />
+                <NavLinksMobileSidebar key={link.name} {...link} />
               ))}
             </div>
 
@@ -61,7 +61,7 @@ const SidebarMobile = () => {
 
               <div className="flex flex-col gap-8 px-4">
                 {navLinks.slice(5).map((link) => (
-                  <NavLinks key={link.name} {...link} />
+                  <NavLinksMobileSidebar key={link.name} {...link} />
                 ))}
               </div>
 

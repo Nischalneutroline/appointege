@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/navigation'
 import React from 'react'
+import { toggleMobileNav } from '@/store/slices/navSlice'
+import { useDispatch } from 'react-redux'
 
 interface NavLinksProps {
   name: string
@@ -42,12 +44,13 @@ export const NavLinks = (props: NavLinksProps) => {
 
 export const NavLinksMobile = (props: NavLinksProps) => {
   const { name, path, icon } = props
-  const { isOpen, closeSidebar } = useSidebar()
+
   const pathname = usePathname()
   const router = useRouter()
+  const dispatch = useDispatch()
   const handleNavClick = (path: string) => {
     router.push(path)
-    closeSidebar()
+    dispatch(toggleMobileNav())
   }
   return (
     <div
@@ -66,7 +69,7 @@ export const NavLinksMobile = (props: NavLinksProps) => {
 }
 export const NavLinksMobileSidebar = (props: NavLinksProps) => {
   const { name, path, icon } = props
-  const { isOpen, closeSidebar } = useSidebar()
+  const dispatch = useDispatch()
   const pathname = usePathname()
   const router = useRouter()
   return (
@@ -75,7 +78,7 @@ export const NavLinksMobileSidebar = (props: NavLinksProps) => {
       key={name}
       onClick={() => {
         router.push(path)
-        closeSidebar()
+        dispatch(toggleMobileNav())
       }}
       className={cn(
         'flex items-center gap-5 text-lg font-medium transition-all cursor-pointer ',
@@ -85,6 +88,7 @@ export const NavLinksMobileSidebar = (props: NavLinksProps) => {
       )}
     >
       <div className="font-medium">{icon}</div>
+      <span className="font-medium text-sm">{name}</span>
     </Link>
   )
 }

@@ -2,6 +2,9 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import React from 'react'
 import { Grid2x2, List, LayoutGrid } from 'lucide-react'
+import { AppDispatch, RootState } from '../../../store/store'
+import { useDispatch, useSelector } from 'react-redux'
+import { setViewMode } from '@/store/slices/viewSlice'
 
 export type ViewType = 'card' | 'list' | 'grid'
 
@@ -32,12 +35,9 @@ const defaultOptions: ViewOption[] = [
   },
 ]
 
-const ViewTabs = ({
-  viewMode,
-  setViewMode,
-  options = defaultOptions,
-  className,
-}: ViewTabsProps) => {
+const ViewTabs = ({ options = defaultOptions, className }: ViewTabsProps) => {
+  const dispatch = useDispatch<AppDispatch>()
+  const { viewMode } = useSelector((state: RootState) => state.view)
   return (
     <div className={cn('flex items-center gap-1 rounded-lg', className)}>
       {options.map((option) => (
@@ -45,7 +45,7 @@ const ViewTabs = ({
           key={option.value}
           size="sm"
           variant={viewMode === option.value ? 'cardActive' : 'ghost'}
-          onClick={() => setViewMode(option.value)}
+          onClick={() => dispatch(setViewMode({ viewMode: option.value }))}
           className={cn(
             'text-sm px-4 h-9 text-[#6a7380] cursor-pointer font-normal rounded-[9px]',
             viewMode === option.value && 'text-black',

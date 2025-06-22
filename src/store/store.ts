@@ -2,11 +2,15 @@
 import { configureStore } from '@reduxjs/toolkit'
 import authReducer from './slices/authSlice'
 import navReducer from './slices/navSlice'
+import viewReducer from './slices/viewSlice'
+import appointmentReducer from './slices/appointmentSlice'
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     nav: navReducer,
+    view: viewReducer,
+    appointment: appointmentReducer,
   },
 })
 

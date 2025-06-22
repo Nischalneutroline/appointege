@@ -6,36 +6,36 @@ import Heading from '@/components/admin/shared/heading'
 import { useState } from 'react'
 
 import CreateButton from '@/components/shared/create-action-button'
-import { filterOptions } from './_data/data'
+
 import ViewTabs from '@/components/shared/layout/view-tabs'
 import LayoutCards from '@/components/shared/layout/layout-cards'
-import NewAppoinment from './_component/new-appoinment'
-import { useSelector } from 'react-redux'
+
+import { filterOptions } from '../appointment/_data/data'
+import NewAppoinment from '../appointment/_component/new-appoinment'
+import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
-import ViewAppointment from './_component/view/view-appointment'
 import {
   closeAppointmentForm,
   openAppointmentCreateForm,
 } from '@/store/slices/appointmentSlice'
-import { useDispatch } from 'react-redux'
-import DeleteAppointment from './_component/delete-appointment'
+import ViewAppointment from '../appointment/_component/view/view-appointment'
+import DeleteAppointment from '../appointment/_component/delete-appointment'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
-  const dispatch = useDispatch()
+  const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
+
   const { isFormOpen, formMode, currentAppointment } = useSelector(
     (state: RootState) => state.appointment,
   )
-  const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
-
-  const [isViewOpen, setIsViewOpen] = useState(false)
+  const dispatch = useDispatch()
 
   return (
     <main className="flex flex-col gap-4 ">
       <div className="flex flex-col  justify-between gap-4">
         <div className="w-full flex  flex-col lg:flex-row  lg:items-center lg:justify-between gap-2 lg:gap-0">
           <Heading
-            title="Appointments"
-            description="Manage and schedule your appointment effortlessly."
+            title="Services"
+            description="Manage and schedule your services effortlessly."
           />
           <div className="flex flex-row gap-2 md:gap-0 justify-between  lg:gap-3 h-10">
             {/* View Tabs for Card List Grid */}
@@ -46,10 +46,8 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
             {/* Add Appointment Button */}
             <div className="">
               <CreateButton
-                label="New Appointment"
-                onClick={() => {
-                  dispatch(openAppointmentCreateForm())
-                }}
+                label="New Services"
+                onClick={() => dispatch(openAppointmentCreateForm())}
               />
             </div>
           </div>

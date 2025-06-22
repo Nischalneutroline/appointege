@@ -18,18 +18,18 @@ import TimePickerField from '@/components/custom-form-fields/time-field'
 import { Button } from '@/components/ui/button'
 import { useRouter, useParams } from 'next/navigation'
 import DatePickerField from '@/components/custom-form-fields/date-field'
-import {
-  CalendarIcon,
-  Clock,
-  Mail,
-  PhoneCallIcon,
-  ScrollText,
-  SlidersHorizontal,
-  UserPen,
-} from 'lucide-react'
+// import {
+//   CalendarIcon,
+//   Clock,
+//   Mail,
+//   PhoneCallIcon,
+//   ScrollText,
+//   SlidersHorizontal,
+//   UserPen,
+// } from 'lucide-react'
 import { useEffect, useState, useMemo } from 'react'
 import LoadingSpinner from '@/components/loading-spinner'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+// import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import {
   FormControl,
   FormField,
@@ -38,7 +38,18 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { isValidPhoneNumber } from 'libphonenumber-js'
+import {
+  CalendarIcon,
+  CircleCheckBig,
+  Clock,
+  HandHeart,
+  Mail,
+  Phone,
+  UserRound,
+} from 'lucide-react'
+import ViewItem from './view/view-item'
+import { format } from 'date-fns'
+// import { isValidPhoneNumber } from 'libphonenumber-js'
 
 interface ServiceOption {
   label: string
@@ -115,6 +126,8 @@ const NewAppoinment = ({
 
   const [isLoadingAppointment, setIsLoadingAppointment] = useState(isEditMode)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [filledData, setFilledData] = useState<FormData>()
 
   // Initialize react-hook-form with Zod validation
   const form = useForm<FormData>({
@@ -165,6 +178,15 @@ const NewAppoinment = ({
     { label: 'Virtual', value: 'virtual' },
   ]
 
+  // Helper function to get label from value
+  const getLabelFromValue = (
+    value: string,
+    options: { label: string; value: string }[],
+  ) => {
+    const option = options.find((opt) => opt.value === value)
+    return option ? option.label : value
+  }
+
   const hasFetchedServices = serviceOptions.length > 0
   const isLoadingServices = false
 
@@ -173,8 +195,10 @@ const NewAppoinment = ({
     setIsSubmitting(true)
     try {
       console.log('Form submitted:', formData)
+      setFilledData(formData)
       // onChange(false)
       // router.push('/admin/appointment')
+      setIsSubmitted(true)
     } catch (error) {
       console.error('Submission error:', error)
     } finally {
@@ -186,17 +210,122 @@ const NewAppoinment = ({
     onChange(false)
   }
 
+  if (isSubmitted) {
+    return (
+      <div className="max-w-md md:max-w-2xl">
+        <Dialog onOpenChange={setIsSubmitted} open={isSubmitted}>
+          <DialogContent className="md:max-w-lg overflow-y-scroll space-y-1 pb-3">
+            <DialogHeader className="gap-1">
+              <DialogTitle className="text-blue-700 text-xl flex flex-col gap-1 items-center">
+                <CircleCheckBig
+                  strokeWidth={2.5}
+                  className="text-[#4caf50] w-8 h-8"
+                />
+                Appointment Confirmed!
+              </DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground text-center">
+                Appointment successfully scheduled on behalf of the customer
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-5 px-4 py-6 bg-[#eff5ff] rounded-[8px]">
+              <ViewItem
+                title="Name"
+                value={filledData?.firstName + ' ' + filledData?.lastName}
+                icon={<UserRound className="w-4 h-4 " strokeWidth={2.5} />}
+                bgColor="#dae8fe"
+                textColor="#3d73ed"
+              />
+              <ViewItem
+                title="Email"
+                value={filledData?.email || ''}
+                icon={<Mail className="w-4 h-4 " strokeWidth={2} />}
+                bgColor="#dae8fe"
+                textColor="#3d73ed"
+              />
+              <ViewItem
+                title="Phone"
+                value={filledData?.phone || ''}
+                icon={<Phone className="w-4 h-4 " strokeWidth={2} />}
+                bgColor="#dae8fe"
+                textColor="#3d73ed"
+              />
+
+              <div className="border-t-2 border-[#BEDAFE] w-full" />
+              <ViewItem
+                title="Service"
+                value={
+                  filledData?.service
+                    ? getLabelFromValue(filledData.service, serviceOptions)
+                    : ''
+                }
+                icon={<HandHeart className="w-4.5 h-4.5" strokeWidth={2} />}
+                bgColor="#d2fae5"
+                textColor="#099668"
+              />
+              <ViewItem
+                title="Date & Time"
+                value={
+                  filledData?.date && filledData?.time
+                    ? `${format(new Date(filledData.date), 'MMM d yyyy')}, ${filledData.time}, ${format(new Date(filledData.date), 'EEE')}`
+                    : ''
+                }
+                icon={<Clock className="w-4 h-4" strokeWidth={2} />}
+                bgColor="#d2fae5"
+                textColor="#099668"
+              />
+              <ViewItem
+                title="Type"
+                value={
+                  filledData?.appointmentType
+                    ? getLabelFromValue(
+                        filledData.appointmentType,
+                        appointmentTypeOptions,
+                      )
+                    : ''
+                }
+                icon={<Clock className="w-4 h-4" strokeWidth={2} />}
+                bgColor="#d2fae5"
+                textColor="#099668"
+              />
+            </div>
+            <div className="flex flex-col gap-3 md:flex-row justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
+                onClick={handleBack}
+              >
+                ← Back
+              </Button>
+              <Button
+                type="submit"
+                variant="default"
+                onClick={() => {
+                  setIsSubmitted(false)
+                  onChange(false)
+                }}
+                className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
+              >
+                Save
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    )
+  }
+
   return (
     <Dialog onOpenChange={onChange} open={open}>
       <DialogContent className="md:max-w-2xl overflow-y-scroll">
         <DialogHeader className="gap-0">
-          <DialogTitle className="text-blue-700 text-lg">
+          <DialogTitle className="flex justify-center text-blue-700 text-xl">
             {isEditMode ? 'Edit Appointment' : 'Enter Appointment Details'}
           </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
+          <DialogDescription className="flex justify-center text-sm text-muted-foreground">
             {isEditMode
               ? 'Update existing appointment details'
-              : 'View and manage your upcoming appointments'}
+              : 'Fill the detail below to create appointment on behalf of customer'}
           </DialogDescription>
         </DialogHeader>
 

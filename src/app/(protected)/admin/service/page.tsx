@@ -1,25 +1,26 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { filterOptions } from './_data/data'
+
 import SearchBar from '@/components/shared/layout/search-bar'
 import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
-import { columns } from './_data/column'
+
 import { Appointment } from '@/data/appointment'
 import FilterTabs from '@/components/shared/layout/filter-tabs'
 
-import AppointmentCard from './_component/appointment-card'
 import Image from 'next/image'
-
-import AppointmentGrid from './_component/appointment-grid'
+import AppointmentCard from '../appointment/_component/appointment-card'
+import AppointmentGrid from '../appointment/_component/appointment-grid'
+import { columns } from '../appointment/_data/column'
+import { filterOptions } from '../appointment/_data/data'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
 
 const Page = () => {
+  const { viewMode } = useSelector((state: RootState) => state.view)
   const [seletedData, setSelectedData] = useState<Appointment[]>([])
   const [activeFilter, setActiveFilter] = useState<string>('Today')
-  const { viewMode } = useSelector((state: RootState) => state.view)
   useEffect(() => {
     setSelectedData(seletedData)
   }, [seletedData])
@@ -43,7 +44,7 @@ const Page = () => {
         <div className="flex flex-row gap-2 md:gap-0 lg:gap-3 justify-between  max-h-10">
           <SearchBar
             className="bg-white rounded-[8px]"
-            placeholder="Search appointment"
+            placeholder="Search services"
             width="w-[330px]"
             onSearch={(value) => console.log(value)}
           />
@@ -83,7 +84,7 @@ const Page = () => {
               </div>
             ) : viewMode === 'grid' ? (
               <div className="h-full overflow-y-visible">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 h-full overflow-y-auto max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)]">
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 h-full overflow-y-auto max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)]">
                   {seletedData.map((item) => (
                     <div key={item.id} className="p-2">
                       <AppointmentGrid item={item} />
@@ -103,10 +104,10 @@ const Page = () => {
                 height={140}
               />
               <div className="text-2xl text-[#4F7CFF] font-semibold">
-                No Appointments Found
+                No Service Found
               </div>
               <div className="text-[#9F9C9C] text-sm font-medium">
-                Create a new appointment
+                Create a new Services
               </div>
             </div>
           </div>
