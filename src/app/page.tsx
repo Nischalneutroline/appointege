@@ -15,10 +15,10 @@ import {
 import Link from 'next/link'
 import Image from 'next/image'
 import { currentUser } from '@/lib/auth'
-import { signOut } from '@/auth'
+import { auth, signOut } from '@/auth'
 
-export default function Page() {
-  // const session = await auth();
+export default async function Page() {
+  const session = await auth()
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -52,7 +52,7 @@ export default function Page() {
             >
               About
             </Link>
-            {user ? (
+            {session?.user ? (
               <form
                 action={async () => {
                   'use server'
