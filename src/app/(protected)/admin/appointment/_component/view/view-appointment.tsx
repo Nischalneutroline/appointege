@@ -198,12 +198,12 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 md:flex-row justify-end mt-6">
+        <div className="flex flex-col gap-3 md:flex-row justify-center mt-6">
           <Button
             type="button"
             onClick={() => dispatch(closeAppointmentForm())}
             variant="default"
-            className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
+            className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
             // disabled={isLoadingServices || isLoadingAppointment || isSubmitting}
           >
             Continue

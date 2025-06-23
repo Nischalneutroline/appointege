@@ -36,6 +36,24 @@ const AppointmentCard = ({ item }: { item: Appointment }) => {
   const variant =
     statusVariants[item.status as keyof typeof statusVariants] || 'default'
 
+  const handleViewClick = () => {
+    dispatch(
+      openAppointmentViewForm({ ...item, initials: getInitials(item.name) }),
+    )
+  }
+
+  const handleEditClick = () => {
+    dispatch(
+      openAppointmentEditForm({ ...item, initials: getInitials(item.name) }),
+    )
+  }
+
+  const handleDeleteClick = () => {
+    dispatch(
+      openAppointmentDeleteForm({ ...item, initials: getInitials(item.name) }),
+    )
+  }
+
   return (
     <div className="relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white cursor-pointer">
       <div
@@ -83,30 +101,24 @@ const AppointmentCard = ({ item }: { item: Appointment }) => {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="">
             <DropdownMenuItem
-              className="group/view text-gray-500 hover:bg-gray-50"
-              onClick={() => {
-                dispatch(openAppointmentViewForm(item))
-              }}
+              className="group/view text-gray-500 hover:bg-gray-50 gap-0"
+              onClick={handleViewClick}
             >
-              <Eye className="mr-1 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
-              <div className="group-hover/view:text-[#2563EB]">View</div>
+              <Eye className="mr-4 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
+              <div className=" group-hover/view:text-[#2563EB]">View</div>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => {
-                dispatch(openAppointmentEditForm(item))
-              }}
-              className="group/edit text-gray-500 hover:bg-gray-50"
+              onClick={handleEditClick}
+              className="group/edit text-gray-500 hover:bg-gray-50 gap-0"
             >
-              <SquarePen className="mr-2 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
+              <SquarePen className="mr-4 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
               <div className="group-hover/edit:text-[#10B981]">Edit</div>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => {
-                dispatch(openAppointmentDeleteForm(item))
-              }}
-              className="group/delete text-gray-500 hover:bg-gray-50"
+              onClick={handleDeleteClick}
+              className="group/delete text-gray-500 hover:bg-gray-50 gap-0"
             >
-              <Trash2 className="mr-2 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
+              <Trash2 className="mr-4 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
               <div className="group-hover/delete:text-red-500">Delete</div>
             </DropdownMenuItem>
           </DropdownMenuContent>

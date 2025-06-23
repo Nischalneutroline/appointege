@@ -137,8 +137,9 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
             title="Appointments"
             description="Manage and schedule your appointment effortlessly."
           />
-          <div className="flex flex-row gap-2 md:gap-0 justify-between lg:gap-3 h-10">
-            <div className="flex items-center bg-[#E5E7EB] w-fit rounded-[10px] p-0.5">
+          <div className="flex flex-row gap-2 md:gap-0 justify-between items-center  lg:gap-3 h-10">
+            {/* View Tabs for Card List Grid */}
+            <div className="flex items-center bg-[#E5E7EB] w-fit h-9 py-1  rounded-[8px]">
               <ViewTabs viewMode={viewMode} setViewMode={setViewMode} />
             </div>
             <div>

@@ -54,24 +54,24 @@ function AppointmentActions({ row }: { row: AppointmentColumnSchema }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="">
         <DropdownMenuItem
-          className="group/view text-gray-500 hover:bg-gray-50"
+          className="group/view text-gray-500 hover:bg-gray-50 gap-0"
           onClick={handleViewClick}
         >
-          <Eye className="mr-1 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
-          <div className="group-hover/view:text-[#2563EB]">View</div>
+          <Eye className="mr-4 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
+          <div className=" group-hover/view:text-[#2563EB]">View</div>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleEditClick}
-          className="group/edit text-gray-500 hover:bg-gray-50"
+          className="group/edit text-gray-500 hover:bg-gray-50 gap-0"
         >
-          <SquarePen className="mr-2 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
+          <SquarePen className="mr-4 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
           <div className="group-hover/edit:text-[#10B981]">Edit</div>
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={handleDeleteClick}
-          className="group/delete text-gray-500 hover:bg-gray-50"
+          className="group/delete text-gray-500 hover:bg-gray-50 gap-0"
         >
-          <Trash2 className="mr-2 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
+          <Trash2 className="mr-4 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
           <div className="group-hover/delete:text-red-500">Delete</div>
         </DropdownMenuItem>
       </DropdownMenuContent>
