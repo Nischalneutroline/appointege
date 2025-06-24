@@ -1,14 +1,15 @@
-import { AppointmentWithService } from '@/app/(protected)/admin/appointment/_data/column'
-import { FilterOption } from '@/app/(protected)/admin/appointment/_data/data'
 
+import { AppointmentFilterValue, FilterAppoinmentState } from '@/app/(protected)/admin/appointment/_data/data'
+import { Appointment } from '@/data/appointment'
 import { cn } from '@/lib/utils'
+
 import React, { useState } from 'react'
 
 interface FilterTabsProps {
-  option: FilterOption
+  option: FilterAppoinmentState
   activeFilter: string
-  setSelectedData: (data: AppointmentWithService[]) => void
-  setActiveFilter: (filter: string) => void
+  setSelectedData: (data: Appointment[]) => void
+  setActiveFilter: (filter: AppointmentFilterValue) => void
 }
 
 const FilterTabs = ({
@@ -18,6 +19,7 @@ const FilterTabs = ({
   setActiveFilter,
 }: FilterTabsProps) => {
   const [isHovered, setIsHovered] = useState(false)
+  console.log('activeFilter', activeFilter)
 
   const isActive = activeFilter === option.label
   const backgroundColor = isActive
@@ -45,10 +47,10 @@ const FilterTabs = ({
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {
         setSelectedData(option.data)
-        setActiveFilter(option.label)
+        setActiveFilter(option.value)
       }}
     >
-      {option.label === 'All Appointments' ? 'All' : option.label}
+      {option.label === 'All' ? 'All' : option.label}
     </div>
   )
 }

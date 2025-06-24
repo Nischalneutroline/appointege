@@ -25,7 +25,7 @@ interface ServiceOptions {
 export interface ServiceState {
   serviceOptions: ServiceOptions[]
   services: Service[]
-  loading: boolean
+  isLoading: boolean
   currentService: Service | null
   isFormOpen: boolean
   formMode: 'create' | 'edit' | 'view' | 'delete' | null
@@ -37,7 +37,7 @@ export interface ServiceState {
 const initialState: ServiceState = {
   services: [],
   serviceOptions: [],
-  loading: false,
+  isLoading: false,
   currentService: null,
   isFormOpen: false,
   formMode: null,
@@ -122,13 +122,13 @@ const serviceSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchServices.pending, (state) => {
-        state.loading = true
+        state.isLoading = true
         state.error = null
         state.message = null
         state.success = false
       })
       .addCase(fetchServices.fulfilled, (state, action) => {
-        state.loading = false
+        state.isLoading = false
         state.services = action.payload
         state.error = null
         state.message = null
@@ -141,7 +141,7 @@ const serviceSlice = createSlice({
         }))
       })
       .addCase(fetchServices.rejected, (state, action) => {
-        state.loading = false
+        state.isLoading = false
         state.error = action.payload?.error || 'Failed to fetch services'
         state.message = action.payload?.message || null
         state.success = false
