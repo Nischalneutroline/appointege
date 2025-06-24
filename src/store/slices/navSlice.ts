@@ -6,12 +6,14 @@ interface NavState {
   mobileNavCollapse: boolean
   desktopNavCollapse: boolean
   isMobileSidebarOpen: boolean
+  isLoading: boolean
 }
 
 const initialState: NavState = {
   mobileNavCollapse: false,
   desktopNavCollapse: false,
   isMobileSidebarOpen: false,
+  isLoading: false,
 }
 
 // create slice
