@@ -23,49 +23,51 @@ import {
   openAppointmentViewForm,
 } from '@/store/slices/appointmentSlice'
 import { useDispatch } from 'react-redux'
+import { AppointmentWithService } from '../_data/column'
+import { formatAppointmentDateTime } from '@/lib/date-time-format'
+import { getRandomColor } from '@/lib/color'
 
-const AppointmentCard = ({ item }: { item: Appointment }) => {
+const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
   const dispatch = useDispatch()
+  // Dynmaic Status Variants
   const statusVariants = {
-    Completed: 'success',
-    Missed: 'destructive',
-    Canceled: 'default',
-    Scheduled: 'warning',
+    COMPLETED: 'success',
+    MISSED: 'destructive',
+    CANCELED: 'default',
+    SCHEDULED: 'warning',
   } as const
-
   const variant =
     statusVariants[item.status as keyof typeof statusVariants] || 'default'
-
+  // OnClick Function for View Action
   const handleViewClick = () => {
-    dispatch(
-      openAppointmentViewForm({ ...item, initials: getInitials(item.name) }),
-    )
+    dispatch(openAppointmentViewForm({ ...item }))
   }
-
+  // OnClick Function for Edit Action
   const handleEditClick = () => {
-    dispatch(
-      openAppointmentEditForm({ ...item, initials: getInitials(item.name) }),
-    )
+    dispatch(openAppointmentEditForm({ ...item }))
+  }
+  // OnClick Function for Delete Action
+  const handleDeleteClick = () => {
+    dispatch(openAppointmentDeleteForm({ ...item }))
   }
 
-  const handleDeleteClick = () => {
-    dispatch(
-      openAppointmentDeleteForm({ ...item, initials: getInitials(item.name) }),
-    )
-  }
+  // Date formatting
+  const { formattedDate, formattedTime } = formatAppointmentDateTime(
+    item.selectedDate,
+  )
 
   return (
     <div className="relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white cursor-pointer">
       <div
         className="h-16 w-16 text-lg font-semibold text-white flex items-center justify-center rounded-[8px] "
-        style={{ backgroundColor: item.color }}
+        style={{ backgroundColor: getRandomColor() }}
       >
-        {getInitials(item.name)}
+        {getInitials(item.customerName)}
       </div>
       <div className="w-full flex flex-col gap-1">
         <div className="flex w-full justify-between pr-8 md:pr-20">
           <div className="text-[#111827] font-semibold text-sm">
-            {item.name}
+            {item.customerName}
           </div>
           <Pill variant={variant} withDot>
             {item.status}
@@ -73,7 +75,7 @@ const AppointmentCard = ({ item }: { item: Appointment }) => {
         </div>
         <div className="flex flex-col gap-2">
           <div className="flex gap-4 text-sm font-normal leading-[100%]">
-            <div className="text-[#6B7280]">{item.service}</div>
+            <div className="text-[#6B7280]">{item?.service?.title}</div>
             <div className="flex gap-2">
               <MapPin size={14} strokeWidth={2.5} color="#92AAF3" />
 
@@ -83,11 +85,13 @@ const AppointmentCard = ({ item }: { item: Appointment }) => {
           <div className="flex gap-4 text-sm font-normal leading-[100%]">
             <div className="flex gap-2">
               <Calendar size={14} strokeWidth={2.5} color="#4e7dff" />
-              <div className="text-[#6B7280]">{item.date}</div>
+              <div className="text-[#6B7280]">{formattedDate}</div>
             </div>
             <div className="flex gap-2">
               <Clock size={14} strokeWidth={2.6} color="#4e7dff" />
-              <div className="text-[#6B7280]">{item.time} (30 min)</div>
+              <div className="text-[#6B7280]">
+                {formattedTime} ({item  ?.service?.estimatedDuration} min)
+              </div>
             </div>
           </div>
         </div>

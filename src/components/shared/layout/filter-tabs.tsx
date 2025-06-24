@@ -1,13 +1,13 @@
+import { AppointmentWithService } from '@/app/(protected)/admin/appointment/_data/column'
 import { FilterOption } from '@/app/(protected)/admin/appointment/_data/data'
 
-import { Appointment } from '@/data/appointment'
 import { cn } from '@/lib/utils'
 import React, { useState } from 'react'
 
 interface FilterTabsProps {
   option: FilterOption
   activeFilter: string
-  setSelectedData: (data: Appointment[]) => void
+  setSelectedData: (data: AppointmentWithService[]) => void
   setActiveFilter: (filter: string) => void
 }
 

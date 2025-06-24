@@ -102,7 +102,7 @@
 import Heading from '@/components/admin/shared/heading'
 import { useEffect, useState } from 'react'
 import CreateButton from '@/components/shared/create-action-button'
-import { filterOptions } from './_data/data'
+
 import ViewTabs from '@/components/shared/layout/view-tabs'
 import LayoutCards from '@/components/shared/layout/layout-cards'
 import NewAppoinment from './_component/new-appoinment'
@@ -115,6 +115,8 @@ import {
   openAppointmentCreateForm,
 } from '@/store/slices/appointmentSlice'
 import DeleteAppointment from './_component/delete-appointment'
+import { useAppointmentFilterOptions } from './_data/data'
+import { AppointmentWithService } from './_data/column'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch<AppDispatch>() // Use typed dispatch  const { isFormOpen, formMode, currentAppointment, appointments } =
@@ -122,6 +124,12 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
     useSelector((state: RootState) => state.appointment)
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
   const [isViewOpen, setIsViewOpen] = useState(false)
+  console.log(appointments, 'appointments inside layout')
+  // Filtered Appointents
+
+  const filteredAppointments = useAppointmentFilterOptions(
+    appointments as AppointmentWithService[],
+  )
 
   // Fetch appointments on component mount
   // useEffect(() => {
@@ -151,7 +159,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
         <div className="hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {filterOptions.map((option) => (
+          {filteredAppointments.map((option) => (
             <LayoutCards key={option.value} option={option} />
           ))}
         </div>

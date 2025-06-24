@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { filterOptions } from './_data/data'
+import { useAppointmentFilterOptions } from './_data/data'
 import SearchBar from '@/components/shared/layout/search-bar'
 import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
-import { columns } from './_data/column'
-import { Appointment } from '@/data/appointment'
+import { AppointmentWithService, columns } from './_data/column'
+
 import FilterTabs from '@/components/shared/layout/filter-tabs'
 
 import AppointmentCard from './_component/appointment-card'
@@ -15,20 +15,28 @@ import Image from 'next/image'
 import AppointmentGrid from './_component/appointment-grid'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
+import { Appointment } from './_types/appointment'
 
 const Page = () => {
-  const [seletedData, setSelectedData] = useState<Appointment[]>([])
+  const [seletedData, setSelectedData] = useState<AppointmentWithService[]>([])
   const [activeFilter, setActiveFilter] = useState<string>('Today')
   const { viewMode } = useSelector((state: RootState) => state.view)
   useEffect(() => {
     setSelectedData(seletedData)
   }, [seletedData])
 
+  // Filtered Appointmemt
+  const { appointments } = useSelector((state: RootState) => state.appointment)
+  const filteredAppointment = useAppointmentFilterOptions(
+    appointments as AppointmentWithService[],
+  )
+  console.log(appointments, 'appointmentes in appoinment page')
+
   return (
     <div className="flex flex-col gap-4 overflow-visible">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
         <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
-          {filterOptions.map((option, index) => {
+          {filteredAppointment.map((option, index) => {
             return (
               <FilterTabs
                 key={index}
@@ -71,7 +79,11 @@ const Page = () => {
             {viewMode === 'list' ? (
               <div className="w-full overflow-x-auto">
                 <div className="min-w-max">
-                  <DataTable columns={columns} data={seletedData} rowKey="id" />
+                  <DataTable<AppointmentWithService>
+                    columns={columns}
+                    data={seletedData}
+                    rowKey="id"
+                  />
                 </div>
               </div>
             ) : viewMode === 'card' ? (

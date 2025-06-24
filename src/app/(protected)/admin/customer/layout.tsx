@@ -11,7 +11,7 @@ import ViewTabs from '@/components/shared/layout/view-tabs'
 import LayoutCards from '@/components/shared/layout/layout-cards'
 
 import NewAppoinment from '../appointment/_component/new-appoinment'
-import { filterCustomerOptions } from '../appointment/_data/data'
+
 import { openAppointmentCreateForm } from '@/store/slices/appointmentSlice'
 import { useDispatch } from 'react-redux'
 import { useSelector } from 'react-redux'
@@ -19,14 +19,18 @@ import { RootState } from '@/store/store'
 import { closeAppointmentForm } from '@/store/slices/appointmentSlice'
 import ViewAppointment from '../appointment/_component/view/view-appointment'
 import DeleteAppointment from '../appointment/_component/delete-appointment'
+import { useCustomerFilterOptions } from '../appointment/_data/data'
+import { apiAuthPrefix } from '@/routes'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch()
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
 
-  const { isFormOpen, formMode, currentAppointment } = useSelector(
-    (state: RootState) => state.appointment,
-  )
+  const { isFormOpen, formMode, currentAppointment, appointments } =
+    useSelector((state: RootState) => state.appointment)
+
+  // Filtered Customer
+  const filteredCustomer = useCustomerFilterOptions(appointments)
 
   return (
     <main className="flex flex-col gap-4 ">
@@ -60,7 +64,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
           ))}
         </div> */}
         <div className=" hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {filterCustomerOptions.map((option) => (
+          {filteredCustomer.map((option) => (
             <LayoutCards key={option.value} option={option} />
           ))}
         </div>

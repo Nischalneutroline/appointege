@@ -202,7 +202,6 @@
 
 //   // onSubmit function (Keep this as is, uses Appointment Store actions)
 //   const onSubmit = async (formData: FormData) => {
-//     // ... (existing logic using storeCreateAppointment/storeUpdateAppointment is correct)
 //     try {
 //       setIsSubmitting(true)
 //       const appointmentData: PostAppoinmentData = {
@@ -561,13 +560,18 @@ import ViewItem from './view/view-item'
 import { format } from 'date-fns'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from '@/store/store'
-import { PostAppoinmentData } from '../_types/appointment'
+import { AppointmentStatus, PostAppoinmentData } from '../_types/appointment'
 import { normalDateToIso } from '@/utils/utils'
 import {
   storeCreateAppointment,
   fetchAppointments,
+  updateAppointment,
 } from '@/store/slices/appointmentSlice'
 import { fetchServices } from '@/store/slices/serviceslice'
+import {
+  openAppointmentEditForm,
+  closeAppointmentForm,
+} from '@/store/slices/appointmentSlice'
 
 interface ServiceOption {
   label: string
@@ -617,6 +621,9 @@ const NewAppoinment = ({
   const { serviceOptions, loading: isLoadingServices } = useSelector(
     (state: RootState) => state.servcie,
   )
+  const { isFormOpen, formMode, currentAppointment } = useSelector(
+    (state: RootState) => state.appointment,
+  )
 
   console.log('NewAppoinment: serviceOptions =', serviceOptions)
 
@@ -649,7 +656,36 @@ const NewAppoinment = ({
     if (serviceOptions.length === 0) {
       dispatch(fetchServices())
     }
-  }, [dispatch])
+    if (isFormOpen && formMode === 'edit' && currentAppointment) {
+      // Split the customer name if it exists
+      const [firstName = '', ...lastNameParts] =
+        currentAppointment.customerName.split(' ')
+      const lastName = lastNameParts.join(' ')
+
+      // Pre-fill the form with existing appointment data
+      form.reset({
+        firstName,
+        lastName,
+        email: currentAppointment.email,
+        phone: currentAppointment.phone,
+        service: currentAppointment.serviceId,
+        date: new Date(currentAppointment.selectedDate),
+        time: currentAppointment.selectedTime,
+        message: currentAppointment.message || '',
+        appointmentType: 'in-person', // Set default or get from appointment
+      })
+    } else if (!isFormOpen) {
+      // Reset form when closing
+      form.reset()
+    }
+  }, [isFormOpen, formMode, currentAppointment, form])
+
+  // Handle dialog close
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      dispatch(closeAppointmentForm())
+    }
+  }
 
   const appointmentTypeOptions = [
     { label: 'In-Person', value: 'in-person' },
@@ -681,22 +717,45 @@ const NewAppoinment = ({
         isForSelf: false,
         bookedById: user?.id,
         createdById: user?.id,
-        status: 'SCHEDULED',
+        status: AppointmentStatus.SCHEDULED,
       }
       console.log('Submitting appointment via store:', appointmentData)
 
-      if (isEditMode && id) {
-        // await storeUpdateAppointment(id, appointmentData)
+      if (formMode === 'edit' && currentAppointment?.id) {
+        console.log('Updating appointment with ID:', currentAppointment.id)
+        const result = await dispatch(
+          updateAppointment({
+            id: currentAppointment.id,
+            appointmentData,
+          }),
+        ).unwrap()
+        console.log('Update successful:', result)
       } else {
-        await dispatch(storeCreateAppointment(appointmentData)).unwrap()
+        console.log('Creating new appointment')
+        const result = await dispatch(
+          storeCreateAppointment(appointmentData),
+        ).unwrap()
+        console.log('Creation successful:', result)
       }
       setFilledData(formData)
       setIsSubmitted(true)
     } catch (error: any) {
       console.error(
-        `Error ${isEditMode ? 'updating' : 'creating'} appointment in form:`,
-        error,
+        `Error ${formMode === 'edit' ? 'updating' : 'creating'} appointment in form:`,
+        {
+          error,
+          name: error?.name,
+          message: error?.message,
+          response: error?.response?.data,
+          stack: error?.stack,
+        },
       )
+      // Optionally show error to user
+      // toast.error(
+      //   `Failed to ${formMode === 'edit' ? 'update' : 'create'} appointment: ${
+      //     error?.response?.data?.message || error?.message || 'Unknown error'
+      //   }`,
+      // )
     } finally {
       setIsSubmitting(false)
     }

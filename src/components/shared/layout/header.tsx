@@ -10,7 +10,7 @@ const Header = async () => {
   console.log('Current User in Header:', session?.user)
 
   return (
-    <div className="flex items-center gap-4 w-full bg-white border-b-1 px-6 py-4.5 border-b-[#E5E7EB]">
+    <div className="flex items-center gap-4 w-full bg-white border-b-1 px-6 py-[16px] border-b-[#E5E7EB]">
       <div className="flex items-center justify-between lg:justify-end  w-full rounded-md">
         {/* Search Bar */}
         {/* <SearchBar className="hidden lg:block w-[371px]" /> */}

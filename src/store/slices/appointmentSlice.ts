@@ -12,6 +12,7 @@ import {
   PostAppoinmentData,
 } from '@/app/(protected)/admin/appointment/_types/appointment'
 import { AxiosResponseType } from '@/app/(protected)/admin/customer/_types/customer'
+import { AppointmentWithService } from '@/app/(protected)/admin/appointment/_data/column'
 
 const api = axios.create({
   baseURL: getBaseUrl(),
@@ -28,7 +29,7 @@ interface RejectError {
 interface AppointmentState {
   appointments: Appointment[]
   loading: boolean
-  currentAppointment: Appointment | null
+  currentAppointment: AppointmentWithService | null
   isFormOpen: boolean
   formMode: 'create' | 'edit' | 'view' | 'delete' | null
   error: string | null // Specific type instead of 'any'
@@ -157,6 +158,92 @@ const storeCreateAppointment = createAsyncThunk<
   },
 )
 
+// Update Appointment
+const updateAppointment = createAsyncThunk<
+  Appointment,
+  { id: string; appointmentData: Partial<Appointment> },
+  { rejectValue: RejectError }
+>(
+  'appointment/updateAppointment',
+  async ({ id, appointmentData }, { rejectWithValue }) => {
+    try {
+      console.log('Sending update request with data:', { id, appointmentData })
+      const response = await api.patch(
+        `/api/appointment/${id}`,
+        appointmentData,
+      )
+      console.log('Update response:', response.data)
+      const { data, success, error, message } = response.data
+
+      if (success && data) {
+        return data
+      } else {
+        console.error('Update failed with response:', {
+          data,
+          success,
+          error,
+          message,
+        })
+        return rejectWithValue({
+          error: error || 'Failed to update appointment',
+          message: message || 'No error message provided',
+        })
+      }
+    } catch (error: any) {
+      console.error('Error in updateAppointment thunk:', {
+        error,
+        response: error?.response?.data,
+        status: error?.response?.status,
+        config: {
+          url: error?.config?.url,
+          method: error?.config?.method,
+          data: error?.config?.data,
+        },
+      })
+
+      const errorMsg =
+        error?.response?.data?.message ||
+        error?.message ||
+        'An unknown error occurred'
+
+      return rejectWithValue({
+        error: errorMsg,
+        message: errorMsg,
+      })
+    }
+  },
+)
+
+// Delete Appointment
+const deleteAppointment = createAsyncThunk<
+  string, // Return the deleted appointment ID
+  string, // ID of the appointment to delete
+  { rejectValue: RejectError }
+>('appointment/deleteAppointment', async (id, { rejectWithValue }) => {
+  try {
+    const response = await api.delete(`/api/appointment/${id}`)
+    const { success, error, message } = response.data
+
+    if (success) {
+      return id
+    } else {
+      return rejectWithValue({
+        error: error || 'Failed to delete appointment',
+        message: message || null,
+      })
+    }
+  } catch (error: any) {
+    const errorMsg =
+      error instanceof AxiosError && error.response?.data?.message
+        ? error.response.data.message
+        : 'An unknown error occurred'
+    return rejectWithValue({
+      error: error.message,
+      message: errorMsg,
+    })
+  }
+})
+
 const appointmentSlice = createSlice({
   name: 'appointment',
   initialState,
@@ -169,22 +256,31 @@ const appointmentSlice = createSlice({
     },
 
     // Open form in edit mode
-    openAppointmentEditForm: (state, action: PayloadAction<Appointment>) => {
+    openAppointmentEditForm: (
+      state,
+      action: PayloadAction<AppointmentWithService>,
+    ) => {
       state.isFormOpen = true
       state.formMode = 'edit'
       state.currentAppointment = action.payload
     },
 
     // Open form in view mode
-    openAppointmentViewForm: (state, action: PayloadAction<Appointment>) => {
-      state.isFormOpen = false
+    openAppointmentViewForm: (
+      state,
+      action: PayloadAction<AppointmentWithService>,
+    ) => {
+      state.isFormOpen = true
       state.formMode = 'view'
       state.currentAppointment = action.payload
     },
 
     // Open modal in delete mode
-    openAppointmentDeleteForm: (state, action: PayloadAction<Appointment>) => {
-      state.isFormOpen = false
+    openAppointmentDeleteForm: (
+      state,
+      action: PayloadAction<AppointmentWithService>,
+    ) => {
+      state.isFormOpen = true
       state.formMode = 'delete'
       state.currentAppointment = action.payload
     },
@@ -199,7 +295,7 @@ const appointmentSlice = createSlice({
     // Set current appointment (for view/edit)
     setCurrentAppointment: (
       state,
-      action: PayloadAction<Appointment | null>,
+      action: PayloadAction<AppointmentWithService | null>,
     ) => {
       state.currentAppointment = action.payload
     },
@@ -246,6 +342,57 @@ const appointmentSlice = createSlice({
       state.message = action.payload?.message || null
       state.success = false
     })
+    //  Update appointment
+    builder.addCase(updateAppointment.pending, (state) => {
+      state.loading = true
+      state.error = null
+      state.message = null
+      state.success = false
+    })
+    builder.addCase(updateAppointment.fulfilled, (state, action) => {
+      state.loading = false
+      const index = state.appointments.findIndex(
+        (apt) => apt.id === action.payload.id,
+      )
+      if (index !== -1) {
+        state.appointments[index] = action.payload
+      }
+      state.currentAppointment = action.payload as AppointmentWithService
+      state.error = null
+      state.message = 'Appointment updated successfully'
+      state.success = true
+    })
+    builder.addCase(updateAppointment.rejected, (state, action) => {
+      state.loading = false
+      state.error = action.payload?.error || 'Failed to update appointment'
+      state.message = action.payload?.message || null
+      state.success = false
+    })
+    // Delete Appointment
+    builder.addCase(deleteAppointment.pending, (state) => {
+      state.loading = true
+      state.error = null
+      state.message = null
+      state.success = false
+    })
+    builder.addCase(deleteAppointment.fulfilled, (state, action) => {
+      state.loading = false
+      state.appointments = state.appointments.filter(
+        (apt) => apt.id !== action.payload,
+      )
+      state.currentAppointment = null
+      state.isFormOpen = false
+      state.formMode = null
+      state.error = null
+      state.message = 'Appointment deleted successfully'
+      state.success = true
+    })
+    builder.addCase(deleteAppointment.rejected, (state, action) => {
+      state.loading = false
+      state.error = action.payload?.error || 'Failed to delete appointment'
+      state.message = action.payload?.message || null
+      state.success = false
+    })
   },
 })
 
@@ -267,8 +414,8 @@ export {
   fetchAppointments,
   storeCreateAppointment,
   // createAppointment,
-  // updateAppointment,
-  // deleteAppointment,
+  updateAppointment,
+  deleteAppointment,
 }
 
 export default appointmentSlice.reducer

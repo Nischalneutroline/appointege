@@ -12,17 +12,11 @@ import { Button } from '@/components/ui/button'
 import { getInitials } from '@/lib/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
-import {
-  Calendar,
-  CalendarDays,
-  Mail,
-  Phone,
-  ShieldUser,
-  UserRound,
-} from 'lucide-react'
+import { CalendarDays, Mail, Phone, ShieldUser, UserRound } from 'lucide-react'
 import { Pill } from '@/components/ui/pill'
-import { format } from 'date-fns'
 import { closeAppointmentForm } from '@/store/slices/appointmentSlice'
+import { getRandomColor } from '@/lib/color'
+import { formatAppointmentDateTime } from '@/lib/date-time-format'
 
 interface ViewAppointmentProps {
   open: boolean
@@ -36,18 +30,24 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
     (state: RootState) => state.appointment,
   )
 
-  if (!currentAppointment) return null
-
   const statusVariants = {
-    Completed: 'success',
-    Missed: 'destructive',
-    Canceled: 'default',
-    Scheduled: 'warning',
+    COMPLETED: 'success',
+    MISSED: 'destructive',
+    CANCELED: 'default',
+    SCHEDULED: 'warning',
   } as const
-
   const variant =
-    statusVariants[currentAppointment.status as keyof typeof statusVariants] ||
+    statusVariants[currentAppointment?.status as keyof typeof statusVariants] ||
     'default'
+
+  // Date formatting
+  const { formattedDate, formattedTime } = formatAppointmentDateTime(
+    currentAppointment?.selectedDate,
+  )
+  const { formattedDate: lastUpdatedDate, formattedTime: lastUpdatedTime } =
+    formatAppointmentDateTime(currentAppointment?.updatedAt)
+
+  if (!currentAppointment) return null
 
   return (
     <Dialog onOpenChange={onChange} open={open}>
@@ -66,13 +66,13 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
           <div className="w-full flex border border-[#E6E6EA] rounded-[8px] p-3 gap-3">
             <div
               className="h-12 w-12 text-lg font-semibold text-white flex items-center justify-center rounded-[8px] "
-              style={{ backgroundColor: currentAppointment.color }}
+              style={{ backgroundColor: getRandomColor() }}
             >
-              {getInitials(currentAppointment.name)}
+              {getInitials(currentAppointment.customerName)}
             </div>
             <div className=" flex-1 flex-col justify-center items-center">
               <div className="text-[#2563EB] text-base font-semibold">
-                {currentAppointment.name}
+                {currentAppointment.customerName}
               </div>
               <div className="flex gap-2">
                 <div className="flex gap-1 items-center">
@@ -105,31 +105,25 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Service</div>
                   <div className=" text-sm font-normal">
-                    {currentAppointment.service}
+                    {currentAppointment?.service?.title}
                   </div>
                 </div>
                 {/* Type */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Type</div>
-                  <div className=" text-sm font-normal">
-                    {currentAppointment.type}
-                  </div>
+                  <div className=" text-sm font-normal">{'Physical'}</div>
                 </div>
               </div>
               <div className="flex w-full items-center ">
                 {/* Date */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Date</div>
-                  <div className=" text-sm font-normal">
-                    {currentAppointment.date}
-                  </div>
+                  <div className=" text-sm font-normal">{formattedDate}</div>
                 </div>
                 {/* Time */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Time</div>
-                  <div className=" text-sm font-normal">
-                    {currentAppointment.time}
-                  </div>
+                  <div className=" text-sm font-normal">{formattedTime}</div>
                 </div>
               </div>
               {/* Customer Note */}
@@ -153,27 +147,29 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
                 {/* Service */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Booked for</div>
-                  <div className=" text-sm font-normal">Self</div>
+                  <div className=" text-sm font-normal">
+                    {currentAppointment.isForSelf ? 'Self' : 'Other'}
+                  </div>
                 </div>
                 {/* Type */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Created by</div>
-                  <div className=" text-sm font-normal">Dr. Shara Willson</div>
+                  <div className=" text-sm font-normal">
+                    {currentAppointment?.user?.name}
+                  </div>
                 </div>
               </div>
               <div className="flex w-full items-center ">
                 {/* Date */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Date</div>
-                  <div className=" text-sm font-normal">
-                    {format(new Date(currentAppointment.date), 'MMM d, yyyy')}
-                  </div>
+                  <div className=" text-sm font-normal">{formattedDate}</div>
                 </div>
                 {/* Time */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Last Updated</div>
                   <div className=" text-sm font-normal">
-                    {format(new Date(currentAppointment.date), 'MMM d, yyyy')}
+                    {lastUpdatedDate} {lastUpdatedTime}
                   </div>
                 </div>
               </div>
@@ -190,8 +186,7 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
               <div className="w-full flex flex-col items-start text-[#111827]">
                 <div className="text-sm font-semibold">Admin's Note</div>
                 <div className=" text-sm font-normal">
-                  Patient has sensitivity to cold. Please use warm water during
-                  cleaning.
+                  {currentAppointment.message}
                 </div>
               </div>
             </div>

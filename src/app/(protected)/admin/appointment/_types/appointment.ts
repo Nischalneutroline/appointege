@@ -24,6 +24,7 @@ export interface Appointment {
   createdById: string // Required: ID of the user who created the appointment
   resourceId?: string // Optional: Resource ID for the appointment
   reminderOffsets?: AppointmentReminderOffset[]
+  updatedAt?: string // Optional: Updated at timestamp
 }
 
 export interface PostAppoinmentData {
@@ -39,7 +40,7 @@ export interface PostAppoinmentData {
   isForSelf?: boolean
   bookedById?: string
   createdById?: string
-  status?: string
+  status?: AppointmentStatus
 }
 
 export interface AxioxResponseType<T> {

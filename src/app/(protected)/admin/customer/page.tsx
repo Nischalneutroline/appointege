@@ -6,16 +6,17 @@ import SearchBar from '@/components/shared/layout/search-bar'
 import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
 
-import { Appointment } from '@/data/appointment'
+import { Appointment, appointments } from '@/data/appointment'
 import FilterTabs from '@/components/shared/layout/filter-tabs'
 
 import Image from 'next/image'
-import { filterCustomerOptions, filterOptions } from '../appointment/_data/data'
+
 import AppointmentCard from '../appointment/_component/appointment-card'
 import AppointmentGrid from '../appointment/_component/appointment-grid'
 import { columns } from '../appointment/_data/column'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
+import { useCustomerFilterOptions } from '../appointment/_data/data'
 
 const Page = () => {
   const { viewMode } = useSelector((state: RootState) => state.view)
@@ -25,11 +26,14 @@ const Page = () => {
     setSelectedData(seletedData)
   }, [seletedData])
 
+  const { appointments } = useSelector((state: RootState) => state.appointment)
+  const filteredCustomer = useCustomerFilterOptions(appointments)
+
   return (
     <div className="flex flex-col gap-4 overflow-visible">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
         <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
-          {filterCustomerOptions.map((option, index) => {
+          {filteredCustomer.map((option, index) => {
             return (
               <FilterTabs
                 key={index}
