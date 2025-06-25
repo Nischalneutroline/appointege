@@ -104,16 +104,16 @@ export type AppointmentFilterValue =
   | 'missed'
   | 'all'
 
-export interface FilterData {
+export interface FilterData<T> {
   textColor: string
   count: number
-  data: Appointment[]
+  data: T[]
   border: string
   background: string
   icon: React.ReactNode
 }
 
-export interface FilterAppoinmentState extends FilterData {
+export interface FilterAppoinmentState extends FilterData<Appointment> {
   label: AppointmentFilterLabel
   value: AppointmentFilterValue
 }
@@ -246,35 +246,35 @@ export const createFilterOptions = (
 }
 
 // Customer filter options
-export const filterCustomerOptions = [
-  {
-    label: 'All',
-    value: 'all',
-    textColor: '#103064',
-    count: 0,
-    data: [],
-    border: '#DCE9F9',
-    background: '#E9F1FD',
-    icon: <CalendarDays className="text-[#1C55B2]" size={24} />,
-  },
-  {
-    label: 'Active',
-    value: 'active',
-    textColor: '#166534',
-    count: 0,
-    data: [],
-    border: '#D1FAE5',
-    background: '#ECFDF5',
-    icon: <CircleCheckBig className="text-[#059669]" size={24} />,
-  },
-  {
-    label: 'Inactive',
-    value: 'inactive',
-    textColor: '#991B1B',
-    count: 0,
-    data: [],
-    border: '#FEE2E2',
-    background: '#FEF2F2',
-    icon: <Clock className="text-[#DC2626]" size={24} />,
-  },
-]
+// export const filterCustomerOptions = [
+//   {
+//     label: 'All',
+//     value: 'all',
+//     textColor: '#103064',
+//     count: 0,
+//     data: [],
+//     border: '#DCE9F9',
+//     background: '#E9F1FD',
+//     icon: <CalendarDays className="text-[#1C55B2]" size={24} />,
+//   },
+//   {
+//     label: 'Active',
+//     value: 'active',
+//     textColor: '#166534',
+//     count: 0,
+//     data: [],
+//     border: '#D1FAE5',
+//     background: '#ECFDF5',
+//     icon: <CircleCheckBig className="text-[#059669]" size={24} />,
+//   },
+//   {
+//     label: 'Inactive',
+//     value: 'inactive',
+//     textColor: '#991B1B',
+//     count: 0,
+//     data: [],
+//     border: '#FEE2E2',
+//     background: '#FEF2F2',
+//     icon: <Clock className="text-[#DC2626]" size={24} />,
+//   },
+// ]

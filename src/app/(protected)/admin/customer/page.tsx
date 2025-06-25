@@ -1,44 +1,115 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import SearchBar from '@/components/shared/layout/search-bar'
 import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
 
 import { Appointment } from '@/data/appointment'
-import FilterTabs from '@/components/shared/layout/filter-tabs'
 
 import Image from 'next/image'
-import { filterCustomerOptions } from '../appointment/_data/data'
+
 import AppointmentCard from '../appointment/_component/appointment-card'
 import AppointmentGrid from '../appointment/_component/appointment-grid'
-import { columns } from '../appointment/_data/column'
+import { columns } from '../customer/_data/column'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
+import { customersData, filterCustomerOptions } from './_data/data'
+import FilterTabs from './_component/filter-tabs-customer'
+import { User } from './_types/customer'
+import CustomerCard from './_component/customer-card'
 
 const Page = () => {
+  // const {
+  //   isLoading,
+  //   isRefreshing,
+  //   appointments,
+  //   hasFetched,
+  //   activeFilter,
+  //   filteredAppointments,
+  // } = useSelector((state: RootState) => state.appointment)
+  // const { viewMode } = useSelector((state: RootState) => state.view)
+  // const dispatch = useDispatch<AppDispatch>()
+  // const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
+  // const hasFetchedOnce = useRef(false)
   const { viewMode } = useSelector((state: RootState) => state.view)
-  const [seletedData, setSelectedData] = useState<Appointment[]>([])
-  const [activeFilter, setActiveFilter] = useState<string>('Today')
+  const [seletedData, setSelectedData] = useState<User[]>([])
+  const [activeFilter, setActiveFilter] = useState<string>('member')
   useEffect(() => {
     setSelectedData(seletedData)
   }, [seletedData])
+
+  // Dynamic filterOptions
+  const filterOptions = useMemo(
+    () => filterCustomerOptions(customersData),
+    [customersData],
+  )
+
+  // Initial fetch
+  // useEffect(() => {
+  //   if (hasFetchedOnce.current || isLoading || isRefreshing || hasFetched) {
+  //     return
+  //   }
+  //   console.log('Initial fetch triggered: no data fetched')
+  //   hasFetchedOnce.current = true
+  //   dispatch(fetchAppointments(false))
+  // }, [isLoading, isRefreshing, hasFetched, dispatch])
+
+  // Auto-refresh every 5 minutes (silent)
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     console.log('Silent auto-refresh triggered')
+  //     dispatch(fetchAppointments(false))
+  //   }, 300000) // 5 minutes
+  //   return () => clearInterval(interval)
+  // }, [dispatch])
+
+  // // Cleanup debounce on unmount
+  // useEffect(() => {
+  //   return () => {
+  //     if (debounceTimeout.current) {
+  //       clearTimeout(debounceTimeout.current)
+  //     }
+  //   }
+  // }, [])
+
+  // Manual refresh handler
+  // const handleRefresh = useCallback(() => {
+  //   if (debounceTimeout.current) {
+  //     return
+  //   }
+  //   console.log('Manual refresh triggered')
+  //   debounceTimeout.current = setTimeout(() => {
+  //     dispatch(fetchCustomer(true))
+  //     debounceTimeout.current = null
+  //   }, 300)
+  // }, [dispatch])
+
+  // // Delete handler
+  // const handleDelete = useCallback(
+  //   async (id: string) => {
+  //     await dispatch(deleteCustomer(id))
+  //   },
+  //   [dispatch],
+  // )
+
+  // Memoized columns with delete handler
+  // const memoizedColumns = useMemo(() => columns, [handleDelete])
 
   return (
     <div className="flex flex-col gap-4 overflow-visible">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
         <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
-          {filterCustomerOptions.map((option, index) => {
+          {filterOptions.map((option, index) => {
             return (
-              // <FilterTabs
-              //   key={index}
-              //   option={option}
-              //   activeFilter={activeFilter}
-              //   setSelectedData={setSelectedData}
-              //   setActiveFilter={setActiveFilter}
-              // />
-              <></>
+              <FilterTabs
+                key={index}
+                option={option}
+                activeFilter={activeFilter}
+                setSelectedData={setSelectedData}
+                setActiveFilter={setActiveFilter}
+              />
             )
           })}
         </div>
@@ -70,17 +141,23 @@ const Page = () => {
         {' '}
         {seletedData.length > 0 ? (
           <>
-            {/* {viewMode === 'list' ? (
+            {viewMode === 'list' ? (
               <div className="w-full overflow-x-auto">
                 <div className="min-w-max">
-                  <DataTable columns={columns} data={seletedData} rowKey="id" />
+                  <DataTable
+                    columns={columns}
+                    data={seletedData}
+                    rowKey="id"
+                    // columns={memoizedColumns}
+                    // data={filteredCustomer}
+                  />
                 </div>
               </div>
             ) : viewMode === 'card' ? (
               // <div className="flex flex-col gap-2  max-h-[calc(100vh-19.5rem)] sm:max-h-[calc(100vh-19.5rem)]  lg:max-h-[calc(100vh-27.5rem)] xl:max-h-[calc(100vh-21.5rem)] ">
               <div className="flex flex-col max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)] overflow-y-auto gap-2">
                 {seletedData.map((item) => (
-                  <AppointmentCard item={item} key={item.id} />
+                  <CustomerCard item={item} key={item.id} />
                 ))}
               </div>
             ) : viewMode === 'grid' ? (
@@ -93,7 +170,7 @@ const Page = () => {
                   ))}
                 </div>
               </div>
-            ) : null} */}
+            ) : null}
           </>
         ) : (
           <div className="py-18 h-full flex items-center justify-center text-gray-500">
@@ -105,10 +182,23 @@ const Page = () => {
                 height={140}
               />
               <div className="text-2xl text-[#4F7CFF] font-semibold">
-                No Customer Found
+                No Appointments Found
               </div>
               <div className="text-[#9F9C9C] text-sm font-medium">
-                Create a new customer
+                No appointments found for{' '}
+                {activeFilter !== 'all'
+                  ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
+                  : ''}
+                .
+                <button
+                  className="p-1 ml-1 text-blue-600 hover:underline"
+                  // onClick={handleRefresh}
+                  // disabled={isRefreshing}
+                  aria-label="Retry fetching appointments"
+                >
+                  Try refreshing
+                </button>{' '}
+                or creating a new appointment.
               </div>
             </div>
           </div>

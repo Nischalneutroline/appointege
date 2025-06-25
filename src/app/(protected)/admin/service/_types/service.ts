@@ -6,8 +6,8 @@ export interface Service {
   status?: Status // ACTIVE or INACTIVE
   serviceAvailability?: ServiceAvailability[]
   resourceId?: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
   businessDetailId: string
 }
 

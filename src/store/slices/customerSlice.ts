@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Appointment } from '@/data/appointment'
 import { appointments } from '@/data/appointment'
 import { User } from '@/app/(protected)/admin/customer/_types/customer'
-import { customers } from '@/data/customer'
+
 interface CusotmerState {
   cusotmers: User[]
   currentCustomer: User | null
@@ -12,7 +12,7 @@ interface CusotmerState {
 
 // Get initial state from your data file
 const initialState: CusotmerState = {
-  cusotmers: [...customers],
+  cusotmers: [],
   currentCustomer: null,
   isFormOpen: false,
   formMode: null,

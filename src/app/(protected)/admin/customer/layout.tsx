@@ -21,8 +21,9 @@ import ViewAppointment from '../appointment/_component/view/view-appointment'
 import DeleteAppointment from '../appointment/_component/delete-appointment'
 // import { useCustomerFilterOptions } from '../appointment/_data/data'
 import { createFilterOptions } from '../appointment/_data/data'
+import { customersData, filterCustomerOptions } from './_data/data'
 
-const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
+const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch()
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
 
@@ -30,7 +31,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
     useSelector((state: RootState) => state.appointment)
 
   // Filtered Customer
-  const filteredCustomer = createFilterOptions(appointments)
+  const filteredCustomer = filterCustomerOptions(customersData)
 
   return (
     <main className="flex flex-col gap-4 ">
@@ -94,4 +95,4 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   )
 }
 
-export default AppointmentLayout
+export default CustomerLayout
