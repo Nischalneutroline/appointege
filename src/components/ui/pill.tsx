@@ -2,6 +2,7 @@ import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/lib/utils'
+import { capitalizeFirstLetter } from '@/lib/capitalize-text'
 
 const variantStyles = {
   // Gray Pill
@@ -123,7 +124,7 @@ const Pill = React.forwardRef<HTMLDivElement, PillProps>(
           pillVariants({ variant, size, rounded, className }),
           withShadow && 'shadow-sm',
           fullWidth && 'w-full',
-          'inline-flex items-center justify-start gap-2',
+          'inline-flex items-center justify-start gap-2 w-24 ',
         )}
         ref={ref}
         {...props}
@@ -137,7 +138,9 @@ const Pill = React.forwardRef<HTMLDivElement, PillProps>(
           <span className="flex items-center">{leftElement}</span>
         )}
         {children && (
-          <span className="flex items-center text-xs ">{children}</span>
+          <span className="flex items-center text-xs ">
+            {capitalizeFirstLetter(children as string)}
+          </span>
         )}
         {rightElement && (
           <span className="flex items-center">{rightElement}</span>

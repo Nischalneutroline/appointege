@@ -1,5 +1,7 @@
-
-import { AppointmentFilterValue, FilterAppoinmentState } from '@/app/(protected)/admin/appointment/_data/data'
+import {
+  AppointmentFilterValue,
+  FilterAppoinmentState,
+} from '@/app/(protected)/admin/appointment/_data/data'
 
 import { Appointment } from '@/app/(protected)/admin/appointment/_types/appointment'
 import { cn } from '@/lib/utils'
@@ -20,9 +22,8 @@ const FilterTabs = ({
   setActiveFilter,
 }: FilterTabsProps) => {
   const [isHovered, setIsHovered] = useState(false)
-  console.log('activeFilter', activeFilter)
 
-  const isActive = activeFilter === option.label
+  const isActive = activeFilter === option.value
   const backgroundColor = isActive
     ? option.background
     : isHovered
@@ -40,7 +41,7 @@ const FilterTabs = ({
          ${!isActive && 'hover:scale-105'}`,
       )}
       style={{
-        backgroundColor,
+        backgroundColor: backgroundColor,
 
         border,
       }}

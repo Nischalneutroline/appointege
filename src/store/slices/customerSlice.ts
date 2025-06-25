@@ -1,17 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { Appointment } from '@/data/appointment'
 import { appointments } from '@/data/appointment'
-
+import { User } from '@/app/(protected)/admin/customer/_types/customer'
+import { customers } from '@/data/customer'
 interface CusotmerState {
-  cusotmers: Appointment[]
-  currentCustomer: Appointment | null
+  cusotmers: User[]
+  currentCustomer: User | null
   isFormOpen: boolean
   formMode: 'create' | 'edit' | 'view' | 'delete' | null
 }
 
 // Get initial state from your data file
 const initialState: CusotmerState = {
-  cusotmers: [...appointments],
+  cusotmers: [...customers],
   currentCustomer: null,
   isFormOpen: false,
   formMode: null,
@@ -29,21 +30,21 @@ const customerSlice = createSlice({
     },
 
     // Open form in edit mode
-    openCustomerEditForm: (state, action: PayloadAction<Appointment>) => {
+    openCustomerEditForm: (state, action: PayloadAction<User>) => {
       state.isFormOpen = true
       state.formMode = 'edit'
       state.currentCustomer = action.payload
     },
 
     // Open form in view mode
-    openCustomerViewForm: (state, action: PayloadAction<Appointment>) => {
+    openCustomerViewForm: (state, action: PayloadAction<User>) => {
       state.isFormOpen = true
       state.formMode = 'view'
       state.currentCustomer = action.payload
     },
 
     // Open modal in delete mode
-    openCustomerDeleteForm: (state, action: PayloadAction<Appointment>) => {
+    openCustomerDeleteForm: (state, action: PayloadAction<User>) => {
       state.isFormOpen = true
       state.formMode = 'delete'
       state.currentCustomer = action.payload
@@ -85,7 +86,7 @@ const customerSlice = createSlice({
     // },
 
     // Set current appointment (for view/edit)
-    setCurrentCustomer: (state, action: PayloadAction<Appointment | null>) => {
+    setCurrentCustomer: (state, action: PayloadAction<User | null>) => {
       state.currentCustomer = action.payload
     },
   },

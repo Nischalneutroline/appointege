@@ -20,8 +20,7 @@ import { closeAppointmentForm } from '@/store/slices/appointmentSlice'
 import ViewAppointment from '../appointment/_component/view/view-appointment'
 import DeleteAppointment from '../appointment/_component/delete-appointment'
 // import { useCustomerFilterOptions } from '../appointment/_data/data'
-
-import { filterCustomerOptions } from './_data/data'
+import { createFilterOptions } from '../appointment/_data/data'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch()
@@ -31,7 +30,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
     useSelector((state: RootState) => state.appointment)
 
   // Filtered Customer
-  const filteredCustomer = filterCustomerOptions(appointments)
+  const filteredCustomer = createFilterOptions(appointments)
 
   return (
     <main className="flex flex-col gap-4 ">
