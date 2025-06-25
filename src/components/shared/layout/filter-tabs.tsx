@@ -1,6 +1,7 @@
 
 import { AppointmentFilterValue, FilterAppoinmentState } from '@/app/(protected)/admin/appointment/_data/data'
-import { Appointment } from '@/data/appointment'
+
+import { Appointment } from '@/app/(protected)/admin/appointment/_types/appointment'
 import { cn } from '@/lib/utils'
 
 import React, { useState } from 'react'

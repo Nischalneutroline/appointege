@@ -1,3 +1,5 @@
+import { Service } from '../../service/_types/service'
+
 export enum AppointmentStatus {
   SCHEDULED = 'SCHEDULED',
   COMPLETED = 'COMPLETED',
@@ -40,7 +42,8 @@ export interface PostAppoinmentData {
   isForSelf?: boolean
   bookedById?: string
   createdById?: string
-  status?: AppointmentStatus
+  status?: AppointmentStatus | string
+  // service?: Service
 }
 
 export interface AxioxResponseType<T> {

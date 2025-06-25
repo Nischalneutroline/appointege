@@ -90,7 +90,7 @@ const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
             <div className="flex gap-2">
               <Clock size={14} strokeWidth={2.6} color="#4e7dff" />
               <div className="text-[#6B7280]">
-                {formattedTime} ({item  ?.service?.estimatedDuration} min)
+                {formattedTime} ({item?.service?.estimatedDuration} min)
               </div>
             </div>
           </div>

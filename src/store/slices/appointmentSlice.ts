@@ -638,12 +638,12 @@ const appointmentSlice = createSlice({
       state.currentAppointment = action.payload
     },
     openAppointmentViewForm: (state, action: PayloadAction<Appointment>) => {
-      state.isFormOpen = false
+      state.isFormOpen = true
       state.formMode = 'view'
       state.currentAppointment = action.payload
     },
     openAppointmentDeleteForm: (state, action: PayloadAction<Appointment>) => {
-      state.isFormOpen = false
+      state.isFormOpen = true
       state.formMode = 'delete'
       state.currentAppointment = action.payload
     },

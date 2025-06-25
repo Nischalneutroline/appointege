@@ -1,67 +1,183 @@
 // 'use client'
 
-// import { auth } from '@/auth'
-import Header from '@/components/shared/layout/header'
-import SidebarDesktop from '@/components/shared/layout/sidebar-desktop'
-import SidebarMobile from '@/components/shared/layout/sidebar-mobile'
-import { currentUser } from '@/lib/auth'
-import { AuthInitializer } from '@/store/authInitializer'
-import { fetchAppointments } from '@/store/slices/appointmentSlice'
-import { fetchServices } from '@/store/slices/serviceslice'
-import { AppDispatch, RootState } from '@/store/store'
-import { redirect } from 'next/navigation'
-// import { use, useEffect } from 'react'
+// // app/(admin)/appointments/layout.tsx
+// import Heading from '@/components/admin/shared/heading'
+
+// import { useEffect, useState } from 'react'
+
+// import CreateButton from '@/components/shared/create-action-button'
+// import { filterOptions } from './_data/data'
+// import ViewTabs from '@/components/shared/layout/view-tabs'
+// import LayoutCards from '@/components/shared/layout/layout-cards'
+// import NewAppoinment from './_component/new-appoinment'
+// import { useSelector } from 'react-redux'
+// import { RootState } from '@/store/store'
+// import ViewAppointment from './_component/view/view-appointment'
+// import {
+//   closeAppointmentForm,
+//   fetchAppointments,
+//   openAppointmentCreateForm,
+// } from '@/store/slices/appointmentSlice'
 // import { useDispatch } from 'react-redux'
+// import DeleteAppointment from './_component/delete-appointment'
 
-const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
-  // const session = await currentUser()
-  // console.log('Current User in Admin Layout:', session)
-  // if (!session) {
-  //   // Redirect to login if not authenticated
-  //   redirect('/login')
-  // }
+// const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
+//   const dispatch = useDispatch()
+// const { isFormOpen, formMode, currentAppointment, appointments } =
+//   useSelector((state: RootState) => state.appointment)
+//   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
 
-  // const dispatch = useDispatch<AppDispatch>()
+//   const [isViewOpen, setIsViewOpen] = useState(false)
 
+//   useEffect(() => {
+//     fetchAppointments()
+//   }, [appointments])
+
+//   return (
+//     <main className="flex flex-col gap-4 ">
+//       <div className="flex flex-col  justify-between gap-4">
+//         <div className="w-full flex  flex-col lg:flex-row  lg:items-center lg:justify-between gap-2 lg:gap-0">
+//           <Heading
+//             title="Appointments"
+//             description="Manage and schedule your appointment effortlessly."
+//           />
+//           <div className="flex flex-row gap-2 md:gap-0 justify-between  lg:gap-3 h-10">
+//             {/* View Tabs for Card List Grid */}
+//             <div className="flex items-center bg-[#E5E7EB] w-fit  rounded-[10px] p-0.5">
+//               <ViewTabs viewMode={viewMode} setViewMode={setViewMode} />
+//             </div>
+
+//             {/* Add Appointment Button */}
+//             <div className="">
+//               <CreateButton
+//                 label="New Appointment"
+//                 onClick={() => {
+//                   dispatch(openAppointmentCreateForm())
+//                 }}
+//               />
+//             </div>
+//           </div>
+//         </div>
+//         {/* Cards in layout */}
+//         {/* <div className="flex gap-4 w-full">
+//           {filterOptions.map((option) => (
+//             <LayoutCards key={option.value} option={option} />
+//           ))}
+//         </div> */}
+//         <div className=" hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+//           {filterOptions.map((option) => (
+//             <LayoutCards key={option.value} option={option} />
+//           ))}
+//         </div>
+//       </div>
+
+//       <div className="flex-1 h-full overflow-visible">{children}</div>
+
+//       {isFormOpen && (formMode === 'create' || formMode === 'edit') && (
+//         <NewAppoinment
+//           open={isFormOpen}
+//           onChange={() => dispatch(closeAppointmentForm())}
+//         />
+//       )}
+//       {isFormOpen && formMode === 'view' && currentAppointment && (
+//         <ViewAppointment
+//           open={isFormOpen}
+//           onChange={() => dispatch(closeAppointmentForm())}
+//         />
+//       )}
+//       {isFormOpen && formMode === 'delete' && currentAppointment && (
+//         <DeleteAppointment
+//           open={isFormOpen}
+//           onChange={() => dispatch(closeAppointmentForm())}
+//         />
+//       )}
+//     </main>
+//   )
+// }
+
+// export default AppointmentLayout
+
+'use client'
+
+import Heading from '@/components/admin/shared/heading'
+import { useState } from 'react'
+import CreateButton from '@/components/shared/create-action-button'
+import { createFilterOptions } from './_data/data'
+import ViewTabs from '@/components/shared/layout/view-tabs'
+import LayoutCards from '@/components/shared/layout/layout-cards'
+import NewAppoinment from './_component/new-appoinment'
+import { useSelector, useDispatch } from 'react-redux'
+import { AppDispatch, RootState } from '@/store/store'
+import ViewAppointment from './_component/view/view-appointment'
+import {
+  closeAppointmentForm,
+  openAppointmentCreateForm,
+} from '@/store/slices/appointmentSlice'
+import DeleteAppointment from './_component/delete-appointment'
+import { fetchServices } from '@/store/slices/serviceslice'
+
+const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
+  const dispatch = useDispatch<AppDispatch>() // Use typed dispatch  const { isFormOpen, formMode, currentAppointment, appointments } =
+  const { isFormOpen, formMode, currentAppointment, appointments } =
+    useSelector((state: RootState) => state.appointment)
+  const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
+  const [isViewOpen, setIsViewOpen] = useState(false)
+  console.log(appointments, 'appointments inside layout')
+  // dispatch(fetchServices())
+  // Fetch appointments on component mount
   // useEffect(() => {
   //   console.log('Fetching appointments...')
   //   dispatch(fetchAppointments())
-  //   dispatch(fetchServices())
   // }, [dispatch]) // Only depend on dispatch to run once on mount
 
   return (
-    // <AuthInitializer>
-    <div className="relative min-h-screen bg-stone-100 overflow-hidden border-r-2">
-      {/* Top Background Gradient */}
-      {/* <div className="absolute inset-0 h-[30vh] rounded-b-lg z-0 pointer-events-none bg-gradient" /> */}
-
-      {/* Layout */}
-      <div className="relative z-10 flex  h-screen">
-        {/* Sidebar */}
-        {/* Desktop Sidebar */}
-        <div className=" hidden lg:block ">
-          <SidebarDesktop />
-        </div>
-
-        {/* Mobile Navbar */}
-        <div className="block lg:hidden fixed top-0 w-full z-50">
-          <SidebarMobile />
-        </div>
-
-        {/* Content Area */}
-        <div className="flex-1 flex flex-col w-full h-full">
-          {/* Header */}
-          <Header />
-          {/* Main Content */}
-          {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1  shadow p-6 bg-[#fbfbfb] overflow-hidden">
-            {children}
+    <main className="flex flex-col gap-4">
+      <div className="flex flex-col justify-between gap-4">
+        <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-0">
+          <Heading
+            title="Appointments"
+            description="Manage and schedule your appointment effortlessly."
+          />
+          <div className="flex flex-row gap-2 md:gap-0 justify-between items-center  lg:gap-3 h-10">
+            {/* View Tabs for Card List Grid */}
+            <div className="flex items-center bg-[#E5E7EB] w-fit h-9 py-1  rounded-[8px]">
+              <ViewTabs viewMode={viewMode} setViewMode={setViewMode} />
+            </div>
+            <div>
+              <CreateButton
+                label="New Appointment"
+                onClick={() => dispatch(openAppointmentCreateForm())}
+              />
+            </div>
           </div>
         </div>
+        <div className="hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
+          {createFilterOptions(appointments).map((option) => (
+            <LayoutCards key={option.value} option={option} />
+          ))}
+        </div>
       </div>
-    </div>
-    // </AuthInitializer>
+      <div className="flex-1 h-full overflow-visible">{children}</div>
+      {isFormOpen && (formMode === 'create' || formMode === 'edit') && (
+        <NewAppoinment
+          open={isFormOpen}
+          onChange={() => dispatch(closeAppointmentForm())}
+        />
+      )}
+      {isFormOpen && formMode === 'view' && currentAppointment && (
+        <ViewAppointment
+          open={isFormOpen}
+          onChange={() => dispatch(closeAppointmentForm())}
+        />
+      )}
+      {isFormOpen && formMode === 'delete' && currentAppointment && (
+        <DeleteAppointment
+          open={isFormOpen}
+          onChange={() => dispatch(closeAppointmentForm())}
+        />
+      )}
+    </main>
   )
 }
 
-export default AdminLayout
+export default AppointmentLayout

@@ -85,10 +85,7 @@ const customerSlice = createSlice({
     // },
 
     // Set current appointment (for view/edit)
-    setCurrentCustomer: (
-      state,
-      action: PayloadAction<Appointment | null>,
-    ) => {
+    setCurrentCustomer: (state, action: PayloadAction<Appointment | null>) => {
       state.currentCustomer = action.payload
     },
   },

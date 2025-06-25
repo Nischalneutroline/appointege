@@ -6,17 +6,16 @@ import SearchBar from '@/components/shared/layout/search-bar'
 import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
 
-import { Appointment, appointments } from '@/data/appointment'
+import { Appointment } from '@/data/appointment'
 import FilterTabs from '@/components/shared/layout/filter-tabs'
 
 import Image from 'next/image'
-
+import { filterCustomerOptions } from '../appointment/_data/data'
 import AppointmentCard from '../appointment/_component/appointment-card'
 import AppointmentGrid from '../appointment/_component/appointment-grid'
 import { columns } from '../appointment/_data/column'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
-import { useCustomerFilterOptions } from '../appointment/_data/data'
 
 const Page = () => {
   const { viewMode } = useSelector((state: RootState) => state.view)
@@ -26,22 +25,20 @@ const Page = () => {
     setSelectedData(seletedData)
   }, [seletedData])
 
-  const { appointments } = useSelector((state: RootState) => state.appointment)
-  const filteredCustomer = useCustomerFilterOptions(appointments)
-
   return (
     <div className="flex flex-col gap-4 overflow-visible">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
         <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-white h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
-          {filteredCustomer.map((option, index) => {
+          {filterCustomerOptions.map((option, index) => {
             return (
-              <FilterTabs
-                key={index}
-                option={option}
-                activeFilter={activeFilter}
-                setSelectedData={setSelectedData}
-                setActiveFilter={setActiveFilter}
-              />
+              // <FilterTabs
+              //   key={index}
+              //   option={option}
+              //   activeFilter={activeFilter}
+              //   setSelectedData={setSelectedData}
+              //   setActiveFilter={setActiveFilter}
+              // />
+              <></>
             )
           })}
         </div>
@@ -73,7 +70,7 @@ const Page = () => {
         {' '}
         {seletedData.length > 0 ? (
           <>
-            {viewMode === 'list' ? (
+            {/* {viewMode === 'list' ? (
               <div className="w-full overflow-x-auto">
                 <div className="min-w-max">
                   <DataTable columns={columns} data={seletedData} rowKey="id" />
@@ -96,7 +93,7 @@ const Page = () => {
                   ))}
                 </div>
               </div>
-            ) : null}
+            ) : null} */}
           </>
         ) : (
           <div className="py-18 h-full flex items-center justify-center text-gray-500">

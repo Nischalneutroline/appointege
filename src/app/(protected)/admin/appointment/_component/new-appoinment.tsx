@@ -618,8 +618,8 @@ const NewAppoinment = ({
   const dispatch = useDispatch<AppDispatch>()
   const { user } = useSelector((state: RootState) => state.auth)
   const { success } = useSelector((state: RootState) => state.appointment)
-  const { serviceOptions, loading: isLoadingServices } = useSelector(
-    (state: RootState) => state.servcie,
+  const { serviceOptions, isLoading: isLoadingServices } = useSelector(
+    (state: RootState) => state.service,
   )
   const { isFormOpen, formMode, currentAppointment } = useSelector(
     (state: RootState) => state.appointment,
@@ -717,7 +717,7 @@ const NewAppoinment = ({
         isForSelf: false,
         bookedById: user?.id,
         createdById: user?.id,
-        status: AppointmentStatus.SCHEDULED,
+        status: currentAppointment?.status,
       }
       console.log('Submitting appointment via store:', appointmentData)
 
@@ -726,7 +726,7 @@ const NewAppoinment = ({
         const result = await dispatch(
           updateAppointment({
             id: currentAppointment.id,
-            appointmentData,
+            data: appointmentData,
           }),
         ).unwrap()
         console.log('Update successful:', result)
@@ -745,6 +745,7 @@ const NewAppoinment = ({
         {
           error,
           name: error?.name,
+          // data: error?.data,
           message: error?.message,
           response: error?.response?.data,
           stack: error?.stack,

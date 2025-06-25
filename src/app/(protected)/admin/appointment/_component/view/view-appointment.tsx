@@ -30,6 +30,8 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
     (state: RootState) => state.appointment,
   )
 
+  const { services } = useSelector((state: RootState) => state.service)
+
   const statusVariants = {
     COMPLETED: 'success',
     MISSED: 'destructive',
@@ -48,6 +50,9 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
     formatAppointmentDateTime(currentAppointment?.updatedAt)
 
   if (!currentAppointment) return null
+
+  const service = services.find((s) => s.id === currentAppointment?.serviceId)
+  console.log(services, 'service')
 
   return (
     <Dialog onOpenChange={onChange} open={open}>
@@ -104,9 +109,7 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
                 {/* Service */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Service</div>
-                  <div className=" text-sm font-normal">
-                    {currentAppointment?.service?.title}
-                  </div>
+                  <div className=" text-sm font-normal">{service?.title}</div>
                 </div>
                 {/* Type */}
                 <div className="w-full flex flex-col items-start text-[#111827]">
@@ -130,8 +133,7 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
               <div className="flex flex-col w-full text-[#111827]">
                 <div className="text-sm font-semibold">Customer Note</div>
                 <div className=" text-sm font-normal text-[#B57200]">
-                  Patient has sensitivity to cold. Please use warm water during
-                  cleaning.
+                  {currentAppointment?.message}
                 </div>
               </div>
             </div>
@@ -155,7 +157,7 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
                 <div className="w-full flex flex-col items-start text-[#111827]">
                   <div className="text-sm font-semibold">Created by</div>
                   <div className=" text-sm font-normal">
-                    {currentAppointment?.user?.name}
+                    {currentAppointment?.createdById}
                   </div>
                 </div>
               </div>
@@ -186,7 +188,7 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
               <div className="w-full flex flex-col items-start text-[#111827]">
                 <div className="text-sm font-semibold">Admin's Note</div>
                 <div className=" text-sm font-normal">
-                  {currentAppointment.message}
+                  {currentAppointment?.message}
                 </div>
               </div>
             </div>

@@ -12,7 +12,7 @@ export const store = configureStore({
     nav: navReducer,
     view: viewReducer,
     appointment: appointmentReducer,
-    servcie: serviceReducer,
+    service: serviceReducer,
   },
 })
 
