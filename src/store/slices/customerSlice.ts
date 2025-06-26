@@ -7,7 +7,7 @@
 //   cusotmers: User[]
 //   currentCustomer: User | null
 //   isFormOpen: boolean
-//   formMode: 'create' | 'edit' | 'view' | 'delete' | null
+//   customerFormMode: 'create' | 'edit' | 'view' | 'delete' | null
 // }
 
 // // Get initial state from your data file
@@ -15,7 +15,7 @@
 //   cusotmers: [],
 //   currentCustomer: null,
 //   isFormOpen: false,
-//   formMode: null,
+//   customerFormMode: null,
 // }
 
 // const customerSlice = createSlice({
@@ -25,35 +25,35 @@
 //     // Open form in create mode
 //     openCustomerCreateForm: (state) => {
 //       state.isFormOpen = true
-//       state.formMode = 'create'
+//       state.customerFormMode = 'create'
 //       state.currentCustomer = null
 //     },
 
 //     // Open form in edit mode
 //     openCustomerEditForm: (state, action: PayloadAction<User>) => {
 //       state.isFormOpen = true
-//       state.formMode = 'edit'
+//       state.customerFormMode = 'edit'
 //       state.currentCustomer = action.payload
 //     },
 
 //     // Open form in view mode
 //     openCustomerViewForm: (state, action: PayloadAction<User>) => {
 //       state.isFormOpen = true
-//       state.formMode = 'view'
+//       state.customerFormMode = 'view'
 //       state.currentCustomer = action.payload
 //     },
 
 //     // Open modal in delete mode
 //     openCustomerDeleteForm: (state, action: PayloadAction<User>) => {
 //       state.isFormOpen = true
-//       state.formMode = 'delete'
+//       state.customerFormMode = 'delete'
 //       state.currentCustomer = action.payload
 //     },
 
 //     // Close form
 //     closeCustomerForm: (state) => {
 //       state.isFormOpen = false
-//       state.formMode = null
+//       state.customerFormMode = null
 //       state.currentCustomer = null
 //     },
 
@@ -134,7 +134,7 @@ interface CustomerState {
   hasFetched: boolean
   currentCustomer: User | null
   isFormOpen: boolean
-  formMode: 'create' | 'edit' | 'view' | 'delete' | null
+  customerFormMode: 'create' | 'edit' | 'view' | 'delete' | null
   error: string | null
   message: string | null
   success: boolean
@@ -149,7 +149,7 @@ const initialState: CustomerState = {
   hasFetched: false,
   currentCustomer: null,
   isFormOpen: false,
-  formMode: null,
+  customerFormMode: null,
   error: null,
   message: null,
   success: false,
@@ -339,27 +339,27 @@ const customerSlice = createSlice({
   reducers: {
     openCustomerCreateForm: (state) => {
       state.isFormOpen = true
-      state.formMode = 'create'
+      state.customerFormMode = 'create'
       state.currentCustomer = null
     },
     openCustomerEditForm: (state, action: PayloadAction<User>) => {
       state.isFormOpen = true
-      state.formMode = 'edit'
+      state.customerFormMode = 'edit'
       state.currentCustomer = action.payload
     },
     openCustomerViewForm: (state, action: PayloadAction<User>) => {
       state.isFormOpen = true
-      state.formMode = 'view'
+      state.customerFormMode = 'view'
       state.currentCustomer = action.payload
     },
     openCustomerDeleteForm: (state, action: PayloadAction<User>) => {
       state.isFormOpen = true
-      state.formMode = 'delete'
+      state.customerFormMode = 'delete'
       state.currentCustomer = action.payload
     },
     closeCustomerForm: (state) => {
       state.isFormOpen = false
-      state.formMode = null
+      state.customerFormMode = null
       state.currentCustomer = null
       state.success = false
     },

@@ -28,7 +28,7 @@
 //   isLoading: boolean
 //   currentService: Service | null
 //   isFormOpen: boolean
-//   formMode: 'create' | 'edit' | 'view' | 'delete' | null
+//   serviceFormMode: 'create' | 'edit' | 'view' | 'delete' | null
 //   error: string | null // Specific type instead of 'any'
 //   message: string | null
 //   success: boolean
@@ -40,7 +40,7 @@
 //   isLoading: false,
 //   currentService: null,
 //   isFormOpen: false,
-//   formMode: null,
+//   serviceFormMode: null,
 //   error: null,
 //   message: null,
 //   success: false,
@@ -86,35 +86,35 @@
 //     // Open form in create mode
 //     openAppointmentCreateForm: (state) => {
 //       state.isFormOpen = true
-//       state.formMode = 'create'
+//       state.serviceFormMode = 'create'
 //       state.currentService = null
 //     },
 
 //     // Open form in edit mode
 //     openAppointmentEditForm: (state, action: PayloadAction<Service>) => {
 //       state.isFormOpen = true
-//       state.formMode = 'edit'
+//       state.serviceFormMode = 'edit'
 //       state.currentService = action.payload
 //     },
 
 //     // Open form in view mode
 //     openAppointmentViewForm: (state, action: PayloadAction<Service>) => {
 //       state.isFormOpen = false
-//       state.formMode = 'view'
+//       state.serviceFormMode = 'view'
 //       state.currentService = action.payload
 //     },
 
 //     // Open modal in delete mode
 //     openAppointmentDeleteForm: (state, action: PayloadAction<Service>) => {
 //       state.isFormOpen = false
-//       state.formMode = 'delete'
+//       state.serviceFormMode = 'delete'
 //       state.currentService = action.payload
 //     },
 
 //     // Close form
 //     closeAppointmentForm: (state) => {
 //       state.isFormOpen = false
-//       state.formMode = null
+//       state.serviceFormMode = null
 //       state.currentService = null
 //     },
 //   },
@@ -200,7 +200,7 @@ interface ServiceState {
   hasFetched: boolean
   currentService: Service | null
   isFormOpen: boolean
-  formMode: 'create' | 'edit' | 'view' | 'delete' | null
+  serviceFormMode: 'create' | 'edit' | 'view' | 'delete' | null
   error: string | null
   message: string | null
   success: boolean
@@ -216,7 +216,7 @@ const initialState: ServiceState = {
   hasFetched: false,
   currentService: null,
   isFormOpen: false,
-  formMode: null,
+  serviceFormMode: null,
   error: null,
   message: null,
   success: false,
@@ -414,27 +414,27 @@ const serviceSlice = createSlice({
   reducers: {
     openServiceCreateForm: (state) => {
       state.isFormOpen = true
-      state.formMode = 'create'
+      state.serviceFormMode = 'create'
       state.currentService = null
     },
     openServiceEditForm: (state, action: PayloadAction<Service>) => {
       state.isFormOpen = true
-      state.formMode = 'edit'
+      state.serviceFormMode = 'edit'
       state.currentService = action.payload
     },
     openServiceViewForm: (state, action: PayloadAction<Service>) => {
       state.isFormOpen = true
-      state.formMode = 'view'
+      state.serviceFormMode = 'view'
       state.currentService = action.payload
     },
     openServiceDeleteForm: (state, action: PayloadAction<Service>) => {
       state.isFormOpen = true
-      state.formMode = 'delete'
+      state.serviceFormMode = 'delete'
       state.currentService = action.payload
     },
     closeServiceForm: (state) => {
       state.isFormOpen = false
-      state.formMode = null
+      state.serviceFormMode = null
       state.currentService = null
       state.success = false
     },
