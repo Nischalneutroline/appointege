@@ -6,9 +6,10 @@ import React from 'react'
 interface DeleteAppointmentProps {
   open: boolean
   onChange: (open: boolean) => void
+  onDelete: () => void
 }
 
-const DeleteAppointment = ({ open, onChange }: DeleteAppointmentProps) => {
+const DeleteModal = ({ open, onChange, onDelete }: DeleteAppointmentProps) => {
   return (
     <Dialog onOpenChange={onChange} open={open}>
       <DialogContent className="flex flex-col gap-4">
@@ -29,7 +30,7 @@ const DeleteAppointment = ({ open, onChange }: DeleteAppointmentProps) => {
           <button
             type="button"
             className="w-30 flex justify-center items-center px-4 py-1.5 bg-[#EF4444] text-white rounded-md text-sm font-semibold cursor-pointer"
-            onClick={() => onChange(false)}
+            onClick={() => onDelete()}
           >
             Delete
           </button>
@@ -45,4 +46,4 @@ const DeleteAppointment = ({ open, onChange }: DeleteAppointmentProps) => {
   )
 }
 
-export default DeleteAppointment
+export default DeleteModal

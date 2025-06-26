@@ -35,6 +35,7 @@ export enum WeekDays {
   FRIDAY = 'FRIDAY',
   SATURDAY = 'SATURDAY',
 }
+export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 
 export interface ApiReturnType<T = any> {
   data?: T

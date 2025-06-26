@@ -89,6 +89,7 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
         <DeleteAppointment
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
+          onDelete={() => console.log('clicked delete')}
         />
       )}
     </main>

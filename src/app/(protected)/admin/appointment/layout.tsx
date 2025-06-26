@@ -111,10 +111,12 @@ import { AppDispatch, RootState } from '@/store/store'
 import ViewAppointment from './_component/view/view-appointment'
 import {
   closeAppointmentForm,
+  deleteAppointment,
   openAppointmentCreateForm,
 } from '@/store/slices/appointmentSlice'
 import DeleteAppointment from './_component/delete-appointment'
 import { fetchServices } from '@/store/slices/serviceslice'
+import DeleteModal from './_component/delete-appointment'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch<AppDispatch>() // Use typed dispatch  const { isFormOpen, formMode, currentAppointment, appointments } =
@@ -171,9 +173,10 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
         />
       )}
       {isFormOpen && formMode === 'delete' && currentAppointment && (
-        <DeleteAppointment
+        <DeleteModal
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
+          onDelete={() => dispatch(deleteAppointment(currentAppointment.id))}
         />
       )}
     </main>

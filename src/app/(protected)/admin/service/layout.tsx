@@ -21,6 +21,7 @@ import ViewAppointment from '../appointment/_component/view/view-appointment'
 import DeleteAppointment from '../appointment/_component/delete-appointment'
 import { fetchServices } from '@/store/slices/serviceslice'
 import { filterServiceOptions, serviceData } from './_data/data'
+import NewServiceForm from './_components/new-service'
 
 const ServiceLayout = ({ children }: { children: React.ReactNode }) => {
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
@@ -77,7 +78,7 @@ const ServiceLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 h-full overflow-visible">{children}</div>
 
       {isFormOpen && (formMode === 'create' || formMode === 'edit') && (
-        <NewAppoinment
+        <NewServiceForm
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
         />
@@ -92,6 +93,7 @@ const ServiceLayout = ({ children }: { children: React.ReactNode }) => {
         <DeleteAppointment
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
+          onDelete={() => console.log('delete clicked')}
         />
       )}
     </main>

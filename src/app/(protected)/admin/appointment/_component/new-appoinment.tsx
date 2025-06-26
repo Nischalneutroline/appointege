@@ -875,10 +875,12 @@ const NewAppoinment = ({
       <DialogContent className="md:max-w-2xl overflow-y-scroll">
         <DialogHeader className="gap-0">
           <DialogTitle className="flex justify-center text-blue-700 text-xl">
-            {isEditMode ? 'Edit Appointment' : 'Enter Appointment Details'}
+            {formMode === 'edit'
+              ? 'Edit Appointment'
+              : 'Enter Appointment Details'}
           </DialogTitle>
           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
-            {isEditMode
+            {formMode === 'edit'
               ? 'Update existing appointment details'
               : 'Fill the detail below to create appointment on behalf of customer'}
           </DialogDescription>
