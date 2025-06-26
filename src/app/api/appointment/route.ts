@@ -6,9 +6,13 @@ import { getAppointmentById } from '@/db/appointment'
 import { createAppointment } from '@/lib/appointment'
 import { Appointment } from '@/app/(protected)/admin/appointment/_types/appointment'
 import { appointmentSchema } from '@/app/(protected)/admin/appointment/_schema/appoinment'
+import { ReturnType } from '@/features/shared/api-route-types'
+import { Prisma } from '@prisma/client'
 
 //create new appointment
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest,
+): Promise<NextResponse<ReturnType>> {
   try {
     // Parse the request body
     const body = await req.json()
@@ -38,33 +42,60 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         data: newAppointment,
+        status: 201,
+        sucess: true,
         success: true,
         message: 'Appointment booked successfully!',
+        errorDetail: null,
       },
       { status: 201 },
     )
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientValidationError) {
+      // Handle the validation error specifically
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          sucess: false,
+          message: 'Prisma Validation failed',
+          errorDetail: error,
+        },
+        { status: 400 },
+      )
+    }
+
     // Handle validation errors
     if (error instanceof ZodError) {
       return NextResponse.json(
         {
-          message: 'Validation failed!',
-          error: error.errors[0].message,
+          data: null,
+          status: 400,
+          sucess: false,
           success: false,
+          message: 'Zod Validation failed!',
+          errorDetail: error.errors[0].message,
         },
         { status: 400 },
       )
     }
     // Handle other errors
     return NextResponse.json(
-      { message: 'Failed to book appointment!', success: false, error: error },
+      {
+        data: null,
+        status: 500,
+        sucess: false,
+        success: false,
+        message: 'Failed to book appointment!',
+        errorDetail: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 },
     )
   }
 }
 
 //read all appointment
-export async function GET() {
+export async function GET(): Promise<NextResponse<ReturnType>> {
   try {
     const appointments = await prisma.appointment.findMany({
       include: {
@@ -75,7 +106,14 @@ export async function GET() {
     })
     if (appointments.length === 0) {
       return NextResponse.json(
-        { message: 'No appointments found!', success: false },
+        {
+          data: null,
+          status: 404,
+          sucess: false,
+          success: false,
+          message: 'No appointments found!',
+          errorDetail: null,
+        },
         { status: 404 },
       )
     }
@@ -83,17 +121,23 @@ export async function GET() {
     return NextResponse.json(
       {
         data: appointments,
+        status: 200,
+        sucess: true,
         success: true,
         message: 'Appointment fetched successfully!',
+        errorDetail: null,
       },
       { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
       {
-        message: 'Failed to fetch appointments!',
+        data: null,
+        status: 500,
+        sucess: false,
         success: false,
-        error: error,
+        message: 'Failed to fetch appointments!',
+        errorDetail: error instanceof Error ? error.message : String(error),
       },
       { status: 500 },
     )

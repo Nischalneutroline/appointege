@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
-import { getAppointmentById } from '@/db/appointment'
-import { appointmentSchema } from '@/app/(protected)/admin/appointment/_schema/appoinment'
-import { prisma } from '@/lib/prisma'
+import { getUserById } from '@/db/user'
 import { ZodError } from 'zod'
+import { prisma } from '@/lib/prisma'
+import { userSchema } from '@/app/(protected)/admin/customer/_schema/schema'
 import { ReturnType } from '@/features/shared/api-route-types'
 import { Prisma } from '@prisma/client'
 
@@ -17,24 +16,24 @@ export async function GET(
 ): Promise<NextResponse<ReturnType>> {
   try {
     const { id } = await params
-    const announcement = await getAppointmentById(id)
+    const user = await getUserById(id)
 
-    if (!announcement) {
+    if (!user) {
       return NextResponse.json(
         {
-          message: 'Appointment with id not found',
+          message: 'User with id not found',
           data: null,
           status: 404,
           sucess: false,
-          errorDetail: 'Appointment with id not found',
+          errorDetail: null,
         },
         { status: 404 },
       )
     }
     return NextResponse.json(
       {
-        message: 'Appointment fetched successfully',
-        data: announcement,
+        message: 'User fetched successfully',
+        data: user,
         status: 200,
         sucess: true,
         errorDetail: null,
@@ -44,93 +43,68 @@ export async function GET(
   } catch (error) {
     return NextResponse.json(
       {
-        message: 'Failed to fetch appointment',
+        message: 'Failed to fetch user',
         data: null,
         status: 500,
         sucess: false,
-        errorDetail: error instanceof Error ? error.message : 'Unknown error',
+        errorDetail: null,
       },
       { status: 500 },
     )
   }
 }
 
+// PUT: Update an existing User
 export async function PUT(
   req: NextRequest,
   { params }: ParamsProps,
 ): Promise<NextResponse<ReturnType>> {
   try {
     const { id } = await params
+    const body = await req.json()
 
-    if (!id) {
+    const parsedData = userSchema.parse(body)
+
+    // Find the user by email (in a real scenario, use a unique identifier like userId)
+    const existingUser = await getUserById(id)
+
+    if (!existingUser) {
       return NextResponse.json(
         {
-          message: 'Appointment Id required!',
-          data: null,
-          status: 400,
-          sucess: false,
-          errorDetail: 'Appointment Id required!',
-        },
-        { status: 400 },
-      )
-    }
-
-    // Find the service by ID
-    const existingAppointment = await getAppointmentById(id)
-
-    if (!existingAppointment) {
-      return NextResponse.json(
-        {
-          message: 'Appointment not found',
+          message: 'User not found!',
           data: null,
           status: 404,
           sucess: false,
-          errorDetail: 'Appointment not found',
+          errorDetail: null,
         },
         { status: 404 },
       )
     }
 
-    const body = await req.json()
-    const parsedData = appointmentSchema.parse(body)
-
-    // update appointment in prisma database
-    const updatedService = await prisma.appointment.update({
+    // Update the user in primsa
+    const updatedUser = await prisma.user.update({
       where: { id },
       data: {
-        customerName: parsedData.customerName,
         email: parsedData.email,
+        password: parsedData.password,
+        name: parsedData.name,
         phone: parsedData.phone,
-        status: parsedData.status,
-        userId: parsedData.userId,
-        bookedById: parsedData.bookedById,
-        serviceId: parsedData.serviceId,
-        selectedDate: parsedData.selectedDate,
-        selectedTime: parsedData.selectedTime,
-        message: parsedData.message,
-        isForSelf: parsedData.isForSelf,
-        createdById: parsedData.createdById,
-        resourceId: parsedData.resourceId,
+        address: parsedData.address && {
+          update: {
+            street: parsedData.address.street,
+            city: parsedData.address.city,
+            country: parsedData.address.country,
+            zipCode: parsedData.address.zipCode,
+          },
+        },
+        role: parsedData.role,
       },
     })
 
-    if (!updatedService) {
-      return NextResponse.json(
-        {
-          message: 'Failed to update appointment',
-          data: null,
-          status: 500,
-          sucess: false,
-          errorDetail: 'Failed to update appointment',
-        },
-        { status: 500 },
-      )
-    }
-
     return NextResponse.json(
       {
-        message: 'Appointment updated successfully',
-        data: updatedService,
+        message: 'User updated successfully!',
+        data: updatedUser,
         status: 200,
         sucess: true,
         errorDetail: null,
@@ -176,7 +150,7 @@ export async function PUT(
   }
 }
 
-//delete appointment
+// DELETE: Delete a User
 export async function DELETE(
   req: NextRequest,
   { params }: ParamsProps,
@@ -184,25 +158,12 @@ export async function DELETE(
   try {
     const { id } = await params
 
-    if (!id) {
+    const existingUser = await getUserById(id)
+
+    if (!existingUser) {
       return NextResponse.json(
         {
-          message: 'Appointment Id required!',
-          data: null,
-          status: 400,
-          sucess: false,
-          errorDetail: null,
-        },
-        { status: 400 },
-      )
-    }
-
-    const existingAppointment = await getAppointmentById(id)
-
-    if (!existingAppointment) {
-      return NextResponse.json(
-        {
-          message: 'Appointment not found',
+          message: 'User not found!',
           data: null,
           status: 404,
           sucess: false,
@@ -212,14 +173,14 @@ export async function DELETE(
       )
     }
 
-    const deletedAppointment = await prisma.appointment.delete({
+    await prisma.user.delete({
       where: { id },
     })
 
     return NextResponse.json(
       {
-        message: 'Appointment deleted successfully',
-        data: deletedAppointment,
+        message: 'User deleted successfully',
+        data: existingUser,
         status: 200,
         sucess: true,
         errorDetail: null,
@@ -233,7 +194,7 @@ export async function DELETE(
         data: null,
         status: 500,
         sucess: false,
-        errorDetail: error,
+        errorDetail: (error as Error).message,
       },
       { status: 500 },
     )

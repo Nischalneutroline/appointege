@@ -100,7 +100,7 @@
 'use client'
 
 import Heading from '@/components/admin/shared/heading'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CreateButton from '@/components/shared/create-action-button'
 import { createFilterOptions } from './_data/data'
 import ViewTabs from '@/components/shared/layout/view-tabs'
@@ -111,6 +111,7 @@ import { AppDispatch, RootState } from '@/store/store'
 import ViewAppointment from './_component/view/view-appointment'
 import {
   closeAppointmentForm,
+  deleteAppointment,
   openAppointmentCreateForm,
 } from '@/store/slices/appointmentSlice'
 import DeleteAppointment from './_component/delete-appointment'
@@ -118,7 +119,7 @@ import { fetchServices } from '@/store/slices/serviceslice'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch<AppDispatch>() // Use typed dispatch  const { isFormOpen, formMode, currentAppointment, appointments } =
-  const { isFormOpen, formMode, currentAppointment, appointments } =
+  const { isFormOpen, isLoading, formMode, currentAppointment, appointments } =
     useSelector((state: RootState) => state.appointment)
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
   const [isViewOpen, setIsViewOpen] = useState(false)
@@ -129,6 +130,20 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   //   console.log('Fetching appointments...')
   //   dispatch(fetchAppointments())
   // }, [dispatch]) // Only depend on dispatch to run once on mount
+
+  const handleAppoinmentDelete = () => {
+    if (!currentAppointment) {
+      return
+    }
+    dispatch(deleteAppointment(currentAppointment?.id))
+  }
+
+  // if there is no currentAppoinment then close the form
+  // useEffect(() => {
+  //   if (!currentAppointment) {
+  //     dispatch(closeAppointmentForm())
+  //   }
+  // }, [currentAppointment])
 
   return (
     <main className="flex flex-col gap-4">
@@ -174,6 +189,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
         <DeleteAppointment
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
+          isLoading={isLoading}
         />
       )}
     </main>

@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { ZodError } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { getServiceById } from '@/db/service'
-import { serviceSchema } from '@/app/(protected)/admin/service/_schemas/service'
+import { Prisma } from '@prisma/client'
 import { Service } from '@/app/(protected)/admin/service/_types/service'
+import { serviceSchema } from '@/app/(protected)/admin/service/_schemas/service'
+import { ReturnType } from '@/features/shared/api-route-types'
 
-export async function POST(req: NextRequest) {
+export async function POST(
+  req: NextRequest,
+): Promise<NextResponse<ReturnType>> {
   try {
     const body = (await req.json()) as Service
 
@@ -18,10 +22,10 @@ export async function POST(req: NextRequest) {
         estimatedDuration: parsedData.estimatedDuration,
         status: parsedData.status || 'ACTIVE', // Fallback to default if undefined
         serviceAvailability: {
-          create: parsedData.serviceAvailability.map((availability) => ({
+          create: parsedData.serviceAvailability?.map((availability) => ({
             weekDay: availability.weekDay,
             timeSlots: {
-              create: availability.timeSlots.map((timeSlot) => ({
+              create: availability.timeSlots?.map((timeSlot) => ({
                 startTime: timeSlot.startTime, // Explicitly convert to Date
                 endTime: timeSlot.endTime, // Explicitly convert to Date
               })),
@@ -34,24 +38,61 @@ export async function POST(req: NextRequest) {
 
     if (!newService) {
       return NextResponse.json(
-        { error: 'Failed to create service' },
+        {
+          data: null,
+          status: 500,
+          sucess: false,
+          message: 'Failed to create service',
+          errorDetail: 'Service creation returned null',
+        },
         { status: 500 },
       )
     }
 
     return NextResponse.json(
-      { message: 'New Service created successfully', service: newService },
+      {
+        data: newService,
+        status: 201,
+        sucess: true,
+        message: 'New Service created successfully!',
+        errorDetail: null,
+      },
       { status: 201 },
     )
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientValidationError) {
+      // Handle the validation error specifically
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          sucess: false,
+          message: 'Prisma Validation failed',
+          errorDetail: error,
+        },
+        { status: 400 },
+      )
+    }
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error },
+        {
+          data: null,
+          status: 400,
+          sucess: false,
+          message: 'Zod Validation failed!',
+          errorDetail: error,
+        },
         { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: 'Internal server error', message: error },
+      {
+        data: null,
+        status: 500,
+        sucess: false,
+        message: 'Failed to create service!',
+        errorDetail: error,
+      },
       { status: 500 },
     )
   }
@@ -93,120 +134,19 @@ export async function GET() {
       {
         data: services,
         success: true,
-        message: 'Service fetched successfully!',
+        message: 'Services fetched successfully!',
       },
       { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
       {
+        data: null,
+        status: 500,
+        sucess: false,
         message: 'Failed to fetch services!',
-        success: false,
-        error: error,
+        errorDetail: error,
       },
-      { status: 500 },
-    )
-  }
-}
-
-//edit or  update service
-export async function PUT(req: NextRequest) {
-  try {
-    const body = await req.json()
-
-    const { id } = body
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Service Id required!' },
-        { status: 400 },
-      )
-    }
-
-    const parsedData = serviceSchema.parse(body)
-
-    const existingService = await getServiceById(id)
-
-    if (!existingService) {
-      return NextResponse.json({ error: 'Service not found' }, { status: 404 })
-    }
-
-    // update service
-    const updatedService = await prisma.service.update({
-      where: { id },
-      data: {
-        title: parsedData.title,
-        description: parsedData.description,
-        estimatedDuration: parsedData.estimatedDuration,
-        status: parsedData.status,
-        // businessDetailId: parsedData.businessDetailId,
-        serviceAvailability: {
-          create: parsedData.serviceAvailability?.map((availability) => ({
-            weekDay: availability.weekDay,
-            timeSlots: {
-              create: availability.timeSlots?.map((timeSlot) => ({
-                startTime: timeSlot.startTime,
-                endTime: timeSlot.endTime,
-              })),
-            },
-          })),
-        },
-      },
-    })
-
-    return NextResponse.json(
-      { message: 'Service updated successfully', service: updatedService },
-      { status: 200 },
-    )
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: error.errors[0].message },
-        { status: 400 },
-      )
-    }
-    return NextResponse.json(
-      { error: 'Internal server error', message: error },
-      { status: 500 },
-    )
-  }
-}
-
-//delete service
-export async function DELETE(req: NextRequest) {
-  try {
-    const { id } = await req.json()
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Service Id required!' },
-        { status: 400 },
-      )
-    }
-
-    const existingService = await getServiceById(id)
-
-    if (!existingService) {
-      return NextResponse.json({ error: 'Service not found' }, { status: 404 })
-    }
-
-    const deletedService = await prisma.service.delete({
-      where: { id },
-    })
-
-    if (!deletedService) {
-      return NextResponse.json(
-        { error: 'Service could not be deleted' },
-        { status: 404 },
-      )
-    }
-    return NextResponse.json(
-      { message: 'Service deleted successfully' },
-      { status: 200 },
-    )
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to delete service', message: error },
       { status: 500 },
     )
   }

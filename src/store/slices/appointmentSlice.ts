@@ -763,6 +763,7 @@ const appointmentSlice = createSlice({
       state.error = null
       state.message = null
       state.success = true
+      state.currentAppointment = null
     })
     builder.addCase(deleteAppointment.rejected, (state, action) => {
       state.isLoading = false
