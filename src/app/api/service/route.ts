@@ -41,7 +41,7 @@ export async function POST(
         {
           data: null,
           status: 500,
-          sucess: false,
+          success: false,
           message: 'Failed to create service',
           errorDetail: 'Service creation returned null',
         },
@@ -53,7 +53,7 @@ export async function POST(
       {
         data: newService,
         status: 201,
-        sucess: true,
+        success: true,
         message: 'New Service created successfully!',
         errorDetail: null,
       },
@@ -66,7 +66,7 @@ export async function POST(
         {
           data: null,
           status: 400,
-          sucess: false,
+          success: false,
           message: 'Prisma Validation failed',
           errorDetail: error,
         },
@@ -78,7 +78,7 @@ export async function POST(
         {
           data: null,
           status: 400,
-          sucess: false,
+          success: false,
           message: 'Zod Validation failed!',
           errorDetail: error,
         },
@@ -89,7 +89,7 @@ export async function POST(
       {
         data: null,
         status: 500,
-        sucess: false,
+        success: false,
         message: 'Failed to create service!',
         errorDetail: error,
       },
@@ -99,7 +99,7 @@ export async function POST(
 }
 
 //fetch all service
-export async function GET() {
+export async function GET(): Promise<NextResponse<ReturnType>> {
   try {
     // get all services
     const services = await prisma.service.findMany({
@@ -125,7 +125,13 @@ export async function GET() {
 
     if (services.length === 0) {
       return NextResponse.json(
-        { message: 'No services found!', success: false },
+        {
+          data: null,
+          status: 404,
+          success: false,
+          message: 'No services found!',
+          errorDetail: null,
+        },
         { status: 404 },
       )
     }
@@ -133,8 +139,10 @@ export async function GET() {
     return NextResponse.json(
       {
         data: services,
+        status: 200,
         success: true,
         message: 'Services fetched successfully!',
+        errorDetail: null,
       },
       { status: 200 },
     )
@@ -143,7 +151,7 @@ export async function GET() {
       {
         data: null,
         status: 500,
-        sucess: false,
+        success: false,
         message: 'Failed to fetch services!',
         errorDetail: error,
       },

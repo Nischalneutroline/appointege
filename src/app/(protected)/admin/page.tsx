@@ -10,7 +10,7 @@ const AdminDashboard = () => {
   const dispatch = useDispatch<AppDispatch>()
   useEffect(() => {
     console.log('Fetching appointments.. fro dashboard')
-    dispatch(fetchAppointments())
+    dispatch(fetchAppointments(false))
     dispatch(fetchServices())
   }, [dispatch]) // Only depend on dispatch to run once on mount
 

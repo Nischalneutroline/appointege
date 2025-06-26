@@ -42,12 +42,12 @@ export interface PostAppoinmentData {
   isForSelf?: boolean
   bookedById?: string
   createdById?: string
-  status?: AppointmentStatus | string
+  status?: AppointmentStatus
   // service?: Service
 }
 
 export interface AxioxResponseType<T> {
-  data: { success: boolean; error?: string; message?: string; data: T }
+  data: { success: boolean; errorDetail?: any; message?: string; data: T }
 }
 
 // ----- Reminder

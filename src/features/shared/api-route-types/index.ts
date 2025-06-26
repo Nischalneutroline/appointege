@@ -4,6 +4,6 @@ export type ReturnType = {
   message: string
   data: User | User[] | Appointment | Appointment[] | Service | Service[] | null
   status: number
-  sucess: boolean
+  success: boolean
   errorDetail: any | null
 }

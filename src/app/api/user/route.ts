@@ -39,7 +39,7 @@ export async function POST(
       if (existingUser) {
         return NextResponse.json({
           message: 'User with this email already exists!',
-          sucess: false,
+          success: false,
           status: 409,
           data: null,
           errorDetail: null,
@@ -62,7 +62,7 @@ export async function POST(
       return NextResponse.json(
         {
           message: 'User created successfully',
-          sucess: true,
+          success: true,
           status: 201,
           data: newUser,
           errorDetail: null,
@@ -77,7 +77,7 @@ export async function POST(
           {
             data: null,
             status: 400,
-            sucess: false,
+            success: false,
             message: 'Prisma Validation failed',
             errorDetail: error,
           },
@@ -90,7 +90,7 @@ export async function POST(
         return NextResponse.json(
           {
             message: 'Zod Validation failed',
-            sucess: false,
+            success: false,
             status: 400,
             data: null,
             errorDetail: error,
@@ -102,7 +102,7 @@ export async function POST(
       return NextResponse.json(
         {
           message: 'Internal server error',
-          sucess: false,
+          success: false,
           status: 500,
           data: null,
           errorDetail: error,
@@ -125,7 +125,7 @@ export async function GET(): Promise<NextResponse<ReturnType>> {
       return NextResponse.json(
         {
           message: 'No users found!',
-          sucess: false,
+          success: false,
           status: 404,
           data: null,
           errorDetail: null,
@@ -138,7 +138,7 @@ export async function GET(): Promise<NextResponse<ReturnType>> {
     return NextResponse.json(
       {
         message: 'Users fetched successfully',
-        sucess: true,
+        success: true,
         status: 200,
         data: users,
         errorDetail: null,
@@ -150,7 +150,7 @@ export async function GET(): Promise<NextResponse<ReturnType>> {
     return NextResponse.json(
       {
         message: 'Failed to fetch users!',
-        sucess: false,
+        success: false,
         status: 500,
         data: null,
         errorDetail:
@@ -179,7 +179,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ReturnType>> {
       return NextResponse.json(
         {
           message: 'User not found!',
-          sucess: false,
+          success: false,
           status: 404,
           data: null,
           errorDetail: null,
@@ -211,7 +211,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ReturnType>> {
     return NextResponse.json(
       {
         message: 'User updated successfully!',
-        sucess: true,
+        success: true,
         status: 200,
         data: updatedUser,
         errorDetail: null,
@@ -226,7 +226,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ReturnType>> {
         {
           data: null,
           status: 400,
-          sucess: false,
+          success: false,
           message: 'Prisma Validation failed',
           errorDetail: error,
         },
@@ -239,7 +239,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ReturnType>> {
       return NextResponse.json(
         {
           message: 'Zod Validation failed',
-          sucess: false,
+          success: false,
           status: 400,
           data: null,
           errorDetail: error,
@@ -251,7 +251,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ReturnType>> {
     return NextResponse.json(
       {
         message: 'Internal server error',
-        sucess: false,
+        success: false,
         status: 500,
         data: null,
         errorDetail: error,
@@ -276,7 +276,7 @@ export async function DELETE(
       return NextResponse.json(
         {
           message: 'User not found!',
-          sucess: false,
+          success: false,
           status: 404,
           data: null,
           errorDetail: null,
@@ -292,7 +292,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         message: 'User deleted successfully',
-        sucess: true,
+        success: true,
         status: 200,
         data: null,
         errorDetail: null,
@@ -303,7 +303,7 @@ export async function DELETE(
     return NextResponse.json(
       {
         message: 'Failed to delete user!',
-        sucess: false,
+        success: false,
         status: 500,
         data: null,
         errorDetail: error,

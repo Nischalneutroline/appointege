@@ -25,7 +25,7 @@ export async function GET(
         {
           data: null,
           status: 404,
-          sucess: false,
+          success: false,
           message: 'Service with id not found!',
           errorDetail: 'Service not found',
         },
@@ -36,7 +36,7 @@ export async function GET(
       {
         data: service,
         status: 200,
-        sucess: true,
+        success: true,
         message: 'Service fetched successfully!',
         errorDetail: null,
       },
@@ -47,7 +47,7 @@ export async function GET(
       {
         data: null,
         status: 500,
-        sucess: false,
+        success: false,
         message: 'Failed to fetch service!',
         errorDetail: error instanceof Error ? error.message : String(error),
       },
@@ -69,7 +69,7 @@ export async function PUT(
         {
           data: null,
           status: 400,
-          sucess: false,
+          success: false,
           message: 'Service Id required!',
           errorDetail: 'Service Id required!',
         },
@@ -87,7 +87,7 @@ export async function PUT(
         {
           data: null,
           status: 404,
-          sucess: false,
+          success: false,
           message: 'Service not found!',
           errorDetail: 'Service not found',
         },
@@ -135,7 +135,7 @@ export async function PUT(
           {
             data: updatedService,
             status: 200,
-            sucess: true,
+            success: true,
             message: 'Service updated successfully!',
             errorDetail: null,
           },
@@ -151,7 +151,7 @@ export async function PUT(
       {
         data: null,
         status: 400,
-        sucess: false,
+        success: false,
         message: 'Failed to update service!',
         errorDetail: 'Failed to update service!',
       },
@@ -164,7 +164,7 @@ export async function PUT(
         {
           data: null,
           status: 400,
-          sucess: false,
+          success: false,
           message: 'Prisma Validation failed',
           errorDetail: error,
         },
@@ -176,7 +176,7 @@ export async function PUT(
         {
           data: null,
           status: 400,
-          sucess: false,
+          success: false,
           message: 'Zod Validation failed!',
           errorDetail: error.errors[0].message,
         },
@@ -187,7 +187,7 @@ export async function PUT(
       {
         data: null,
         status: 500,
-        sucess: false,
+        success: false,
         message: 'Failed to update service!',
         errorDetail: error,
       },
@@ -361,7 +361,7 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
       {
         data: null,
         status: 500,
-        sucess: false,
+        success: false,
         message: 'Failed to delete service!',
         errorDetail: error instanceof Error ? error.message : String(error),
       },

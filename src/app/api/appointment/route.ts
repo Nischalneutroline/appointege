@@ -19,6 +19,7 @@ export async function POST(
 
     // Validate the request body
     const parsedData: Appointment = appointmentSchema.parse(body)
+
     console.log(parsedData, 'parsedData')
 
     // Create a new appointment in prisma
@@ -43,7 +44,6 @@ export async function POST(
       {
         data: newAppointment,
         status: 201,
-        sucess: true,
         success: true,
         message: 'Appointment booked successfully!',
         errorDetail: null,
@@ -57,7 +57,7 @@ export async function POST(
         {
           data: null,
           status: 400,
-          sucess: false,
+          success: false,
           message: 'Prisma Validation failed',
           errorDetail: error,
         },
@@ -71,10 +71,9 @@ export async function POST(
         {
           data: null,
           status: 400,
-          sucess: false,
           success: false,
           message: 'Zod Validation failed!',
-          errorDetail: error.errors[0].message,
+          errorDetail: error,
         },
         { status: 400 },
       )
@@ -84,10 +83,9 @@ export async function POST(
       {
         data: null,
         status: 500,
-        sucess: false,
         success: false,
         message: 'Failed to book appointment!',
-        errorDetail: error instanceof Error ? error.message : String(error),
+        errorDetail: error,
       },
       { status: 500 },
     )
@@ -109,7 +107,7 @@ export async function GET(): Promise<NextResponse<ReturnType>> {
         {
           data: null,
           status: 404,
-          sucess: false,
+
           success: false,
           message: 'No appointments found!',
           errorDetail: null,
@@ -122,7 +120,6 @@ export async function GET(): Promise<NextResponse<ReturnType>> {
       {
         data: appointments,
         status: 200,
-        sucess: true,
         success: true,
         message: 'Appointment fetched successfully!',
         errorDetail: null,
@@ -134,10 +131,10 @@ export async function GET(): Promise<NextResponse<ReturnType>> {
       {
         data: null,
         status: 500,
-        sucess: false,
+
         success: false,
         message: 'Failed to fetch appointments!',
-        errorDetail: error instanceof Error ? error.message : String(error),
+        errorDetail: error,
       },
       { status: 500 },
     )
