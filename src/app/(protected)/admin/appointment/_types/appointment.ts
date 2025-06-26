@@ -22,8 +22,8 @@ export interface Appointment {
   selectedDate: string // Required: ISO string for the appointment date
   selectedTime: string // Required: ISO string for the appointment time
   message?: string // Optional: Message from the user
-  isForSelf: boolean // Required: Indicates if the appointment is for the logged-in user or someone else
-  createdById: string // Required: ID of the user who created the appointment
+  isForSelf?: boolean // Required: Indicates if the appointment is for the logged-in user or someone else
+  createdById?: string // Required: ID of the user who created the appointment
   resourceId?: string // Optional: Resource ID for the appointment
   reminderOffsets?: AppointmentReminderOffset[]
   updatedAt?: string // Optional: Updated at timestamp

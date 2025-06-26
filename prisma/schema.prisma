@@ -235,9 +235,9 @@ model Appointment {
   selectedDate    DateTime // Date of appointment
   selectedTime    String // Time of appointment
   message         String? // Optional notes
-  isForSelf       Boolean                     @default(true) // True if booked for self
-  createdBy       User                        @relation("CreatedBy", fields: [createdById], references: [id])
-  createdById     String // User who created the appointment
+  isForSelf       Boolean?                    @default(true) // True if booked for self
+  createdBy       User?                       @relation("CreatedBy", fields: [createdById], references: [id])
+  createdById     String? // User who created the appointment
   createdAt       DateTime                    @default(now()) // Creation timestamp
   updatedAt       DateTime                    @updatedAt // Last update timestamp
   Resource        Resource?                   @relation(fields: [resourceId], references: [id])
