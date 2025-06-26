@@ -182,10 +182,10 @@ const Page = () => {
                 height={140}
               />
               <div className="text-2xl text-[#4F7CFF] font-semibold">
-                No Appointments Found
+                No Customer Found
               </div>
               <div className="text-[#9F9C9C] text-sm font-medium">
-                No appointments found for{' '}
+                No customer found for{' '}
                 {activeFilter !== 'all'
                   ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
                   : ''}
@@ -198,7 +198,7 @@ const Page = () => {
                 >
                   Try refreshing
                 </button>{' '}
-                or creating a new appointment.
+                or creating a new customer.
               </div>
             </div>
           </div>

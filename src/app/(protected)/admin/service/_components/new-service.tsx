@@ -21,6 +21,7 @@ import { Status, WeekDays } from '../_types/service'
 import FileUploadField from '@/components/custom-form-fields/image-upload'
 import ServiceDaySelector from '@/components/custom-form-fields/serivce/service-day-selector'
 import ServiceHoursSelector from '@/components/custom-form-fields/serivce/service-hours-selector'
+import { Button } from '@/components/ui/button'
 
 export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 export type BusinessAvailability = {
@@ -145,7 +146,7 @@ const NewServiceForm = ({
 
   return (
     <Dialog onOpenChange={onChange} open={open}>
-      <DialogContent className="md:max-w-2xl overflow-y-scroll">
+      <DialogContent className="md:max-w-2xl overflow-y-scroll max-h-[40rem]">
         <DialogHeader className="gap-0">
           <DialogTitle className="flex justify-center text-blue-700 text-xl">
             {formMode === 'edit' ? 'Edit Service' : 'Enter Service Details'}
@@ -172,18 +173,18 @@ const NewServiceForm = ({
             className="space-y-5"
             aria-busy={isSubmitting}
           >
-            <div className="grid grid-cols-2 gap-4">
-              <InputField
-                name="title"
-                label="Service Name"
-                placeholder="Enter Service Name"
-              />
-              {/* <InputField
+            {/* <div className="grid grid-cols-2 gap-4"> */}
+            <InputField
+              name="title"
+              label="Service Name"
+              placeholder="Enter Service Name"
+            />
+            {/* <InputField
                   name="lastName"
                   label="Last Name"
                   placeholder="Doe"
                 /> */}
-            </div>
+            {/* </div> */}
 
             <TextAreaField
               name="description"
@@ -205,10 +206,10 @@ const NewServiceForm = ({
                 disabled={isSubmitting}
               /> */}
 
-            <div className="flex flex-col gap-3 md:flex-row items-center justify-center">
-              <AvailabilityTabs name="status" />
-              <DurationSelect name="duration" label="Duration:" />
-            </div>
+            {/* <div className="flex flex-col gap-3 md:flex-row items-center justify-center"> */}
+            {/* <AvailabilityTabs name="status" /> */}
+            <DurationSelect name="duration" label="Duration:" />
+            {/* </div> */}
             <ServiceDaySelector
               name="serviceDays"
               businessAvailability={businessAvailability}
@@ -284,15 +285,15 @@ const NewServiceForm = ({
               >
                 ← Back
               </Button> */}
-              {/* <Button
-                  type="submit"
-                  variant="default"
-                  className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
-                  disabled={
-                    isLoadingServices || isLoadingAppointment || isSubmitting
-                  }
-                >
-                  {isEditMode ? (
+              <Button
+                type="submit"
+                variant="default"
+                className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
+                // disabled={
+                //   isLoadingServices || isLoadingAppointment || isSubmitting
+                // }
+              >
+                {/* {isEditMode ? (
                     isSubmitting ? (
                       <LoadingSpinner text="Updating..." />
                     ) : (
@@ -300,10 +301,10 @@ const NewServiceForm = ({
                     )
                   ) : isSubmitting ? (
                     <LoadingSpinner text="Creating..." />
-                  ) : (
-                    'Submit'
-                  )}
-                </Button> */}
+                  ) : ( */}
+                Submit
+                {/* )} */}
+              </Button>
             </div>
           </form>
         </FormProvider>

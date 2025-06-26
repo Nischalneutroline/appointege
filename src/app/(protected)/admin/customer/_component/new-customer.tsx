@@ -160,13 +160,13 @@ const NewCustomerForm = ({
         <DialogHeader className="gap-0">
           <DialogTitle className="flex justify-center text-blue-700 text-xl">
             {formMode === 'edit'
-              ? 'Edit Appointment'
-              : 'Enter Appointment Details'}
+              ? 'Edit Customer'
+              : 'Enter Customer Details'}
           </DialogTitle>
           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
             {formMode === 'edit'
-              ? 'Update existing appointment details'
-              : 'Fill the details below to create an appointment on behalf of the customer'}
+              ? 'Update existing customer details'
+              : 'Fill the details below to create an customer on behalf of the customer'}
           </DialogDescription>
         </DialogHeader>
 
@@ -176,8 +176,10 @@ const NewCustomerForm = ({
             className="space-y-5"
             aria-busy={isSubmitting}
           >
+            {/* <div className="grid grid-cols-2 items-center gap-4"> */}
             <InputField name="name" label="Name" placeholder="John" />
-            <InputField name="lastName" label="Last Name" placeholder="Doe" />
+            {/* <InputField name="lastName" label="Last Name" placeholder="Doe" /> */}
+            {/* </div> */}
 
             <InputField
               name="email"
