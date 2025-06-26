@@ -248,6 +248,7 @@ const Page = () => {
         <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
           {filterOptions.map((option, index) => (
             <FilterTabs
+              key={index}
               option={option}
               activeFilter={activeFilter}
               setSelectedData={() => {}} // No longer needed

@@ -131,12 +131,12 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   //   dispatch(fetchAppointments())
   // }, [dispatch]) // Only depend on dispatch to run once on mount
 
-  const handleAppoinmentDelete = () => {
-    if (!currentAppointment) {
-      return
-    }
-    dispatch(deleteAppointment(currentAppointment?.id))
-  }
+  // const handleAppoinmentDelete = () => {
+  //   if (!currentAppointment) {
+  //     return
+  //   }
+  //   dispatch(deleteAppointment(currentAppointment?.id))
+  // }
 
   // if there is no currentAppoinment then close the form
   // useEffect(() => {

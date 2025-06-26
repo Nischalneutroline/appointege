@@ -31,6 +31,11 @@ const DeleteAppointment = ({
       return
     }
 
+    if (!currentAppointment.id) {
+      console.warn('Current appointment has no id')
+      return
+    }
+
     try {
       // Dispatch the deleteAppointment async thunk
       const resultAction = await dispatch(
