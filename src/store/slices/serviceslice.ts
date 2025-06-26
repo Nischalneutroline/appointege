@@ -165,9 +165,10 @@
 // export default serviceSlice.reducer
 
 // File: @/store/slices/serviceSlice.ts
+// File: @/store/slices/serviceSlice.ts
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
-import { axiosApi, getBaseUrl } from '@/lib/baseUrl'
+import { axiosApi } from '@/lib/baseUrl'
 import { toast } from 'sonner'
 import { Service, Status } from '@/app/(protected)/admin/service/_types/service'
 
@@ -185,9 +186,15 @@ interface RejectError {
   message: string | null
 }
 
+interface ServiceOptions {
+  value: string
+  label: string
+}
+
 interface ServiceState {
   services: Service[]
   filteredServices: Service[]
+  serviceOptions: ServiceOptions[]
   isLoading: boolean
   isRefreshing: boolean
   hasFetched: boolean
@@ -197,12 +204,13 @@ interface ServiceState {
   error: string | null
   message: string | null
   success: boolean
-  activeFilter: 'all' | 'active' | 'inactive' // Example filters
+  activeFilter: 'all' | 'active' | 'inactive'
 }
 
 const initialState: ServiceState = {
   services: [],
   filteredServices: [],
+  serviceOptions: [],
   isLoading: false,
   isRefreshing: false,
   hasFetched: false,
@@ -213,6 +221,13 @@ const initialState: ServiceState = {
   message: null,
   success: false,
   activeFilter: 'all',
+}
+
+const generateServiceOptions = (services: Service[]): ServiceOptions[] => {
+  return services.map((service) => ({
+    value: service.id,
+    label: service.title,
+  }))
 }
 
 const filterServices = (
@@ -366,7 +381,6 @@ const deleteService = createAsyncThunk<
 >('service/deleteService', async (id, { rejectWithValue }) => {
   try {
     const response = await axiosApi.delete(`/api/service/${id}`)
-
     const { success, errorDetail, message } = response.data
     if (success) {
       toast.success(message || 'Service deleted successfully', {
@@ -436,106 +450,112 @@ const serviceSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchServices.pending, (state, action) => {
-      state.error = null
-      state.message = null
-      state.hasFetched = false
-      state[action.meta.arg ? 'isRefreshing' : 'isLoading'] = true
-    })
-    builder.addCase(fetchServices.fulfilled, (state, action) => {
-      state.isLoading = false
-      state.isRefreshing = false
-      state.services = action.payload
-      state.filteredServices = filterServices(
-        action.payload,
-        state.activeFilter,
-      )
-      state.error = null
-      state.message = null
-      state.hasFetched = true
-    })
-    builder.addCase(fetchServices.rejected, (state, action) => {
-      state.isLoading = false
-      state.isRefreshing = false
-      state.error = action.payload?.error || 'Failed to fetch services'
-      state.message = action.payload?.message || null
-      state.hasFetched = false
-      state.filteredServices = []
-    })
-    builder.addCase(storeCreateService.pending, (state) => {
-      state.isLoading = true
-      state.error = null
-      state.message = null
-      state.success = false
-    })
-    builder.addCase(storeCreateService.fulfilled, (state, action) => {
-      state.isLoading = false
-      state.services.push(action.payload)
-      state.filteredServices = filterServices(
-        state.services,
-        state.activeFilter,
-      )
-      state.error = null
-      state.message = null
-      state.success = true
-    })
-    builder.addCase(storeCreateService.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.payload?.error || 'Failed to create service'
-      state.message = action.payload?.message || null
-      state.success = false
-    })
-    builder.addCase(updateService.pending, (state) => {
-      state.isLoading = true
-      state.error = null
-      state.message = null
-      state.success = false
-    })
-    builder.addCase(updateService.fulfilled, (state, action) => {
-      state.isLoading = false
-      state.services = state.services.map((service) =>
-        service.id === action.payload.id ? action.payload : service,
-      )
-      state.filteredServices = filterServices(
-        state.services,
-        state.activeFilter,
-      )
-      state.error = null
-      state.message = null
-      state.success = true
-    })
-    builder.addCase(updateService.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.payload?.error || 'Failed to update service'
-      state.message = action.payload?.message || null
-      state.success = false
-    })
-    builder.addCase(deleteService.pending, (state) => {
-      state.isLoading = true
-      state.error = null
-      state.message = null
-      state.success = false
-    })
-    builder.addCase(deleteService.fulfilled, (state, action) => {
-      state.isLoading = false
-      state.services = state.services.filter(
-        (service) => service.id !== action.payload,
-      )
-      state.filteredServices = filterServices(
-        state.services,
-        state.activeFilter,
-      )
-      state.error = null
-      state.message = null
-      state.success = true
-      state.currentService = null
-    })
-    builder.addCase(deleteService.rejected, (state, action) => {
-      state.isLoading = false
-      state.error = action.payload?.error || 'Failed to delete service'
-      state.message = action.payload?.message || null
-      state.success = false
-    })
+    builder
+      .addCase(fetchServices.pending, (state, action) => {
+        state.error = null
+        state.message = null
+        state.hasFetched = false
+        state[action.meta.arg ? 'isRefreshing' : 'isLoading'] = true
+      })
+      .addCase(fetchServices.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.isRefreshing = false
+        state.services = action.payload
+        state.filteredServices = filterServices(
+          action.payload,
+          state.activeFilter,
+        )
+        state.serviceOptions = generateServiceOptions(action.payload)
+        state.error = null
+        state.message = null
+        state.hasFetched = true
+      })
+      .addCase(fetchServices.rejected, (state, action) => {
+        state.isLoading = false
+        state.isRefreshing = false
+        state.error = action.payload?.error || 'Failed to fetch services'
+        state.message = action.payload?.message || null
+        state.hasFetched = false
+        state.filteredServices = []
+        state.serviceOptions = []
+      })
+      .addCase(storeCreateService.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+        state.message = null
+        state.success = false
+      })
+      .addCase(storeCreateService.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.services.push(action.payload)
+        state.filteredServices = filterServices(
+          state.services,
+          state.activeFilter,
+        )
+        state.serviceOptions = generateServiceOptions(state.services)
+        state.error = null
+        state.message = null
+        state.success = true
+      })
+      .addCase(storeCreateService.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload?.error || 'Failed to create service'
+        state.message = action.payload?.message || null
+        state.success = false
+      })
+      .addCase(updateService.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+        state.message = null
+        state.success = false
+      })
+      .addCase(updateService.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.services = state.services.map((service) =>
+          service.id === action.payload.id ? action.payload : service,
+        )
+        state.filteredServices = filterServices(
+          state.services,
+          state.activeFilter,
+        )
+        state.serviceOptions = generateServiceOptions(state.services)
+        state.error = null
+        state.message = null
+        state.success = true
+      })
+      .addCase(updateService.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload?.error || 'Failed to update service'
+        state.message = action.payload?.message || null
+        state.success = false
+      })
+      .addCase(deleteService.pending, (state) => {
+        state.isLoading = true
+        state.error = null
+        state.message = null
+        state.success = false
+      })
+      .addCase(deleteService.fulfilled, (state, action) => {
+        state.isLoading = false
+        state.services = state.services.filter(
+          (service) => service.id !== action.payload,
+        )
+        state.filteredServices = filterServices(
+          state.services,
+          state.activeFilter,
+        )
+        state.serviceOptions = generateServiceOptions(state.services)
+        state.error = null
+        state.message = null
+        state.success = true
+        state.currentService = null
+      })
+      .addCase(deleteService.rejected, (state, action) => {
+        state.isLoading = false
+        state.error = action.payload?.error || 'Failed to delete service'
+        state.message = action.payload?.message || null
+        state.success = false
+      })
   },
 })
 
