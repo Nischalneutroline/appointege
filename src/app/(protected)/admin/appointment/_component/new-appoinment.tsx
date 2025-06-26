@@ -614,13 +614,14 @@ const NewAppointment = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const { user } = useSelector((state: RootState) => state.auth)
-  const { services, isLoading: isLoadingServices } = useSelector(
-    (state: RootState) => state.service,
-  )
+  const {
+    services,
+    isLoading: isLoadingServices,
+    serviceOptions,
+  } = useSelector((state: RootState) => state.service)
   const { isFormOpen, appoinmentFormMode, currentAppointment, success } =
     useSelector((state: RootState) => state.appointment)
 
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [filledData, setFilledData] = useState<FormData | null>(null)
@@ -641,13 +642,8 @@ const NewAppointment = ({
   })
 
   useEffect(() => {
-<<<<<<< HEAD
     if (services.length === 0 && !isLoadingServices) {
-      dispatch(fetchServices(true)).catch((error) => {
-=======
-    if (serviceOptions.length === 0 && !isLoadingServices) {
       dispatch(fetchServices(false)).catch((error) => {
->>>>>>> origin/nischal
         console.error('Failed to fetch services:', error)
         toast.error('Failed to load services. Please try again.')
       })
@@ -804,7 +800,7 @@ const NewAppointment = ({
                 title="Service"
                 value={
                   filledData?.service
-                    ? getLabelFromValue(filledData.service, services)
+                    ? getLabelFromValue(filledData.service, serviceOptions)
                     : ''
                 }
                 icon={<HandHeart className="w-4.5 h-4.5" strokeWidth={2} />}
@@ -913,7 +909,7 @@ const NewAppointment = ({
               <SelectField
                 name="service"
                 label="Select a Service"
-                options={services}
+                options={serviceOptions}
                 placeholder="Select service"
                 disabled={isSubmitting}
               />

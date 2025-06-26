@@ -20,20 +20,43 @@ import { closeAppointmentForm } from '@/store/slices/appointmentSlice'
 import ViewAppointment from '../appointment/_component/view/view-appointment'
 import DeleteAppointment from '../appointment/_component/delete-appointment'
 // import { useCustomerFilterOptions } from '../appointment/_data/data'
-import { createFilterOptions } from '../appointment/_data/data'
-import { customersData, filterCustomerOptions } from './_data/data'
+
+import { filterCustomerOptions } from './_data/data'
 import DeleteModal from '../appointment/_component/delete-appointment'
 import NewCustomerForm from './_component/new-customer'
+import {
+  closeCustomerForm,
+  openCustomerCreateForm,
+} from '@/store/slices/customerSlice'
 
 const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch()
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
 
-  const { isFormOpen, formMode, currentAppointment, appointments } =
-    useSelector((state: RootState) => state.appointment)
+  // customers: User[]
+  // filteredCustomers: User[]
+  // isLoading: boolean
+  // isRefreshing: boolean
+  // hasFetched: boolean
+  // currentCustomer: User | null
+  // isFormOpen: boolean
+  // customerFormMode: 'create' | 'edit' | 'view' | 'delete' | null
+  // error: string | null
+  // message: string | null
+  // success: boolean
+  // activeFilter: 'all' | 'active' | 'inactive'
+
+  const {
+    isFormOpen,
+    customerFormMode,
+    currentCustomer,
+    filteredCustomers,
+    hasFetched,
+    customers,
+  } = useSelector((state: RootState) => state.customer)
 
   // Filtered Customer
-  const filteredCustomer = filterCustomerOptions(customersData)
+  // const filteredCustomer = filterCustomerOptions(customersData)
 
   return (
     <main className="flex flex-col gap-4 ">
@@ -54,7 +77,7 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
               <CreateButton
                 label="New Customer"
                 onClick={() => {
-                  dispatch(openAppointmentCreateForm())
+                  dispatch(openCustomerCreateForm())
                 }}
               />
             </div>
@@ -67,7 +90,10 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
           ))}
         </div> */}
         <div className=" hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {filteredCustomer.map((option) => (
+          {/* {filteredCustomers.map((option) => (
+            <LayoutCards key={option.id} option={option} />
+          ))} */}
+          {filterCustomerOptions(customers).map((option) => (
             <LayoutCards key={option.value} option={option} />
           ))}
         </div>
@@ -75,22 +101,23 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
 
       <div className="flex-1 h-full overflow-visible">{children}</div>
 
-      {isFormOpen && (formMode === 'create' || formMode === 'edit') && (
-        <NewCustomerForm
-          open={isFormOpen}
-          onChange={() => dispatch(closeAppointmentForm())}
-        />
-      )}
-      {isFormOpen && formMode === 'view' && currentAppointment && (
+      {isFormOpen &&
+        (customerFormMode === 'create' || customerFormMode === 'edit') && (
+          <NewCustomerForm
+            open={isFormOpen}
+            onChange={() => dispatch(closeCustomerForm())}
+          />
+        )}
+      {isFormOpen && customerFormMode === 'view' && currentCustomer && (
         <ViewAppointment
           open={isFormOpen}
-          onChange={() => dispatch(closeAppointmentForm())}
+          onChange={() => dispatch(closeCustomerForm())}
         />
       )}
-      {isFormOpen && formMode === 'delete' && currentAppointment && (
+      {isFormOpen && customerFormMode === 'delete' && currentCustomer && (
         <DeleteModal
           open={isFormOpen}
-          onChange={() => dispatch(closeAppointmentForm())}
+          onChange={() => dispatch(closeCustomerForm())}
           isLoading={false}
           // onDelete={() => console.log('clicked delete')}
         />

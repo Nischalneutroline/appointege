@@ -3,32 +3,36 @@
 // app/(admin)/appointments/layout.tsx
 import Heading from '@/components/admin/shared/heading'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import CreateButton from '@/components/shared/create-action-button'
 
 import ViewTabs from '@/components/shared/layout/view-tabs'
 import LayoutCards from '@/components/shared/layout/layout-cards'
-
-import NewAppoinment from '../appointment/_component/new-appoinment'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
+
 import {
-  closeAppointmentForm,
-  openAppointmentCreateForm,
-} from '@/store/slices/appointmentSlice'
-import ViewAppointment from '../appointment/_component/view/view-appointment'
-import DeleteAppointment from '../appointment/_component/delete-appointment'
-import { fetchServices } from '@/store/slices/serviceslice'
-import { filterServiceOptions, serviceData } from './_data/data'
+  closeServiceForm,
+  fetchServices,
+  openServiceCreateForm,
+} from '@/store/slices/serviceslice'
+import { filterServiceOptions } from './_data/data'
 import NewServiceForm from './_components/new-service'
+
+import DeleteModal from '../appointment/_component/delete-appointment'
 
 const ServiceLayout = ({ children }: { children: React.ReactNode }) => {
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
 
-  const { isFormOpen, formMode, currentAppointment } = useSelector(
-    (state: RootState) => state.appointment,
-  )
+  const {
+    isFormOpen,
+    serviceFormMode,
+    currentService,
+    serviceOptions,
+    services,
+    isLoading,
+  } = useSelector((state: RootState) => state.service)
   const dispatch = useDispatch<AppDispatch>()
 
   // useEffect(() => {
@@ -37,10 +41,10 @@ const ServiceLayout = ({ children }: { children: React.ReactNode }) => {
   // })
 
   // Filtered Customer
-  const filterOptions = filterServiceOptions(serviceData)
+  // const filterOptions = filterServiceOptions(services)
 
   return (
-    <main className="flex flex-col gap-4 ">
+    <div className="flex flex-col gap-4 ">
       <div className="flex flex-col  justify-between gap-4">
         <div className="w-full flex  flex-col lg:flex-row  lg:items-center lg:justify-between gap-2 lg:gap-0">
           <Heading
@@ -57,7 +61,7 @@ const ServiceLayout = ({ children }: { children: React.ReactNode }) => {
             <div className="">
               <CreateButton
                 label="New Services"
-                onClick={() => dispatch(openAppointmentCreateForm())}
+                onClick={() => dispatch(openServiceCreateForm())}
               />
             </div>
           </div>
@@ -69,7 +73,7 @@ const ServiceLayout = ({ children }: { children: React.ReactNode }) => {
           ))}
         </div> */}
         <div className=" hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {filterOptions.map((option) => (
+          {filterServiceOptions(services).map((option) => (
             <LayoutCards key={option.value} option={option} />
           ))}
         </div>
@@ -77,26 +81,27 @@ const ServiceLayout = ({ children }: { children: React.ReactNode }) => {
 
       <div className="flex-1 h-full overflow-visible">{children}</div>
 
-      {isFormOpen && (formMode === 'create' || formMode === 'edit') && (
-        <NewServiceForm
+      {isFormOpen &&
+        (serviceFormMode === 'create' || serviceFormMode === 'edit') && (
+          <NewServiceForm
+            open={isFormOpen}
+            onChange={() => dispatch(closeServiceForm())}
+          />
+        )}
+      {/* {isFormOpen && serviceFormMode === 'view' && currentService && (
+        <ViewService
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
         />
-      )}
-      {isFormOpen && formMode === 'view' && currentAppointment && (
-        <ViewAppointment
+      )} */}
+      {isFormOpen && serviceFormMode === 'delete' && currentService && (
+        <DeleteModal
           open={isFormOpen}
-          onChange={() => dispatch(closeAppointmentForm())}
+          onChange={() => dispatch(closeServiceForm())}
+          isLoading={isLoading}
         />
       )}
-      {isFormOpen && formMode === 'delete' && currentAppointment && (
-        <DeleteAppointment
-          open={isFormOpen}
-          onChange={() => dispatch(closeAppointmentForm())}
-          onDelete={() => console.log('delete clicked')}
-        />
-      )}
-    </main>
+    </div>
   )
 }
 

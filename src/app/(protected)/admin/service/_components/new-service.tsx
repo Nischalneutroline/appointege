@@ -78,8 +78,8 @@ const NewServiceForm = ({
   const dispatch = useDispatch<AppDispatch>()
   // User state`
   const { user } = useSelector((state: RootState) => state.auth)
-  const { isFormOpen, formMode } = useSelector(
-    (state: RootState) => state.appointment,
+  const { isFormOpen, serviceFormMode } = useSelector(
+    (state: RootState) => state.service,
   )
 
   // Handle dialog close
@@ -149,10 +149,10 @@ const NewServiceForm = ({
       <DialogContent className="md:max-w-2xl overflow-y-scroll max-h-[40rem]">
         <DialogHeader className="gap-0">
           <DialogTitle className="flex justify-center text-blue-700 text-xl">
-            {formMode === 'edit' ? 'Edit Service' : 'Enter Service Details'}
+            {serviceFormMode === 'edit' ? 'Edit Service' : 'Enter Service Details'}
           </DialogTitle>
           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
-            {formMode === 'edit'
+            {serviceFormMode === 'edit'
               ? 'Update existing service details'
               : 'Fill the detail below to create a new service'}
           </DialogDescription>

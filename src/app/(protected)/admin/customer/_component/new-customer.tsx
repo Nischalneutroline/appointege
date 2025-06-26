@@ -36,9 +36,10 @@ import {
 } from '@/components/ui/form'
 import { RadioGroup } from '@radix-ui/react-dropdown-menu'
 import { RadioGroupItem } from '@radix-ui/react-radio-group'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
 import PhoneInputField from '@/components/custom-form-fields/phone-field'
+import { closeCustomerForm } from '@/store/slices/customerSlice'
 
 // Form data type
 type FormData = z.infer<typeof userSchema>
@@ -50,6 +51,7 @@ const NewCustomerForm = ({
   open: boolean
   onChange: (open: boolean) => void
 }) => {
+  const dispatch = useDispatch()
   const router = useRouter()
   const params = useParams()
   const id = params.id as string | undefined
@@ -58,9 +60,8 @@ const NewCustomerForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoading, setIsLoading] = useState(isEditMode)
 
-  const { isFormOpen, formMode, currentCustomer, success } = useSelector(
-    (state: RootState) => state.customer,
-  )
+  const { isFormOpen, customerFormMode, currentCustomer, success } =
+    useSelector((state: RootState) => state.customer)
 
   // Initialize form with appropriate schema
   const form = useForm<FormData>({
@@ -150,8 +151,11 @@ const NewCustomerForm = ({
     //   setIsSubmitting(false)
     // }
   }
+
   const handleBack = () => {
-    router.push('/customer')
+    dispatch(closeCustomerForm())
+    console.log('clicked in the exit button')
+    onChange(false)
   }
 
   return (
@@ -159,12 +163,12 @@ const NewCustomerForm = ({
       <DialogContent className="md:max-w-2xl overflow-y-scroll">
         <DialogHeader className="gap-0">
           <DialogTitle className="flex justify-center text-blue-700 text-xl">
-            {formMode === 'edit'
+            {customerFormMode === 'edit'
               ? 'Edit Customer'
               : 'Enter Customer Details'}
           </DialogTitle>
           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
-            {formMode === 'edit'
+            {customerFormMode === 'edit'
               ? 'Update existing customer details'
               : 'Fill the details below to create an customer on behalf of the customer'}
           </DialogDescription>
@@ -274,9 +278,13 @@ const NewCustomerForm = ({
               >
                 {isSubmitting ? (
                   <LoadingSpinner
-                    text={formMode === 'edit' ? 'Updating...' : 'Creating...'}
+                    text={
+                      customerFormMode === 'edit'
+                        ? 'Updating...'
+                        : 'Creating...'
+                    }
                   />
-                ) : formMode === 'edit' ? (
+                ) : customerFormMode === 'edit' ? (
                   'Update'
                 ) : (
                   'Submit'

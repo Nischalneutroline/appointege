@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import SearchBar from '@/components/shared/layout/search-bar'
 import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
@@ -13,27 +13,25 @@ import Image from 'next/image'
 import AppointmentCard from '../appointment/_component/appointment-card'
 import AppointmentGrid from '../appointment/_component/appointment-grid'
 import { columns } from '../customer/_data/column'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/store/store'
-import { customersData, filterCustomerOptions } from './_data/data'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '@/store/store'
+import { filterCustomerOptions } from './_data/data'
 import FilterTabs from './_component/filter-tabs-customer'
 import { User } from './_types/customer'
 import CustomerCard from './_component/customer-card'
+import { deleteCustomer } from './_api-call/customer-api-call'
+import { fetchCustomers } from '@/store/slices/customerSlice'
 
 const Page = () => {
-  // const {
-  //   isLoading,
-  //   isRefreshing,
-  //   appointments,
-  //   hasFetched,
-  //   activeFilter,
-  //   filteredAppointments,
-  // } = useSelector((state: RootState) => state.appointment)
+  // const dispatch = useDispatch()
+  const { isLoading, isRefreshing, customers, hasFetched, filteredCustomers } =
+    useSelector((state: RootState) => state.customer)
   // const { viewMode } = useSelector((state: RootState) => state.view)
-  // const dispatch = useDispatch<AppDispatch>()
-  // const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
-  // const hasFetchedOnce = useRef(false)
+  const dispatch = useDispatch<AppDispatch>()
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
+  const hasFetchedOnce = useRef(false)
   const { viewMode } = useSelector((state: RootState) => state.view)
+
   const [seletedData, setSelectedData] = useState<User[]>([])
   const [activeFilter, setActiveFilter] = useState<string>('member')
   useEffect(() => {
@@ -42,60 +40,60 @@ const Page = () => {
 
   // Dynamic filterOptions
   const filterOptions = useMemo(
-    () => filterCustomerOptions(customersData),
-    [customersData],
+    () => filterCustomerOptions(customers),
+    [customers],
   )
 
   // Initial fetch
-  // useEffect(() => {
-  //   if (hasFetchedOnce.current || isLoading || isRefreshing || hasFetched) {
-  //     return
-  //   }
-  //   console.log('Initial fetch triggered: no data fetched')
-  //   hasFetchedOnce.current = true
-  //   dispatch(fetchAppointments(false))
-  // }, [isLoading, isRefreshing, hasFetched, dispatch])
+  useEffect(() => {
+    if (hasFetchedOnce.current || isLoading || isRefreshing || hasFetched) {
+      return
+    }
+    console.log('Initial fetch triggered: no data fetched')
+    hasFetchedOnce.current = true
+    // dispatch(fetchCustomers(false))
+  }, [isLoading, isRefreshing, hasFetched, dispatch])
 
   // Auto-refresh every 5 minutes (silent)
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     console.log('Silent auto-refresh triggered')
-  //     dispatch(fetchAppointments(false))
-  //   }, 300000) // 5 minutes
-  //   return () => clearInterval(interval)
-  // }, [dispatch])
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log('Silent auto-refresh triggered')
+      dispatch(fetchCustomers(false))
+    }, 300000) // 5 minutes
+    return () => clearInterval(interval)
+  }, [dispatch])
 
   // // Cleanup debounce on unmount
-  // useEffect(() => {
-  //   return () => {
-  //     if (debounceTimeout.current) {
-  //       clearTimeout(debounceTimeout.current)
-  //     }
-  //   }
-  // }, [])
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current)
+      }
+    }
+  }, [])
 
   // Manual refresh handler
-  // const handleRefresh = useCallback(() => {
-  //   if (debounceTimeout.current) {
-  //     return
-  //   }
-  //   console.log('Manual refresh triggered')
-  //   debounceTimeout.current = setTimeout(() => {
-  //     dispatch(fetchCustomer(true))
-  //     debounceTimeout.current = null
-  //   }, 300)
-  // }, [dispatch])
+  const handleRefresh = useCallback(() => {
+    if (debounceTimeout.current) {
+      return
+    }
+    console.log('Manual refresh triggered')
+    debounceTimeout.current = setTimeout(() => {
+      dispatch(fetchCustomers(true))
+      debounceTimeout.current = null
+    }, 300)
+  }, [dispatch])
 
-  // // Delete handler
-  // const handleDelete = useCallback(
-  //   async (id: string) => {
-  //     await dispatch(deleteCustomer(id))
-  //   },
-  //   [dispatch],
-  // )
+  // Delete handler
+  const handleDelete = useCallback(
+    async (id: string) => {
+      // await dispatch(deleteCustomer(id))
+    },
+    [dispatch],
+  )
 
   // Memoized columns with delete handler
-  // const memoizedColumns = useMemo(() => columns, [handleDelete])
+  const memoizedColumns = useMemo(() => columns, [handleDelete])
 
   return (
     <div className="flex flex-col gap-4 overflow-visible">
@@ -136,37 +134,34 @@ const Page = () => {
       {/* <DataTable columns={columns} data={seletedData} rowKey="id" /> */}
 
       {/* Main Data Section */}
-
-      <div className="flex-1 ">
-        {' '}
-        {seletedData.length > 0 ? (
+      <div className="flex-1">
+        {isLoading && !hasFetched ? (
+          <div className="text-center py-8 text-sm text-gray-500 italic">
+            Loading csutomers...
+          </div>
+        ) : filteredCustomers.length > 0 ? (
           <>
             {viewMode === 'list' ? (
               <div className="w-full overflow-x-auto">
                 <div className="min-w-max">
                   <DataTable
-                    columns={columns}
-                    data={seletedData}
+                    columns={memoizedColumns}
+                    data={filteredCustomers}
                     rowKey="id"
-                    // columns={memoizedColumns}
-                    // data={filteredCustomer}
                   />
                 </div>
               </div>
             ) : viewMode === 'card' ? (
-              // <div className="flex flex-col gap-2  max-h-[calc(100vh-19.5rem)] sm:max-h-[calc(100vh-19.5rem)]  lg:max-h-[calc(100vh-27.5rem)] xl:max-h-[calc(100vh-21.5rem)] ">
               <div className="flex flex-col max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)] overflow-y-auto gap-2">
-                {seletedData.map((item) => (
+                {filteredCustomers.map((item) => (
                   <CustomerCard item={item} key={item.id} />
                 ))}
               </div>
             ) : viewMode === 'grid' ? (
               <div className="h-full overflow-y-visible">
-                <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 h-full overflow-y-auto max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)]">
-                  {seletedData.map((item) => (
-                    <div key={item.id} className="p-2">
-                      <AppointmentGrid item={item} />
-                    </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 h-full overflow-y-auto max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)]">
+                  {filteredCustomers.map((item) => (
+                    <AppointmentGrid item={item} key={item.id} />
                   ))}
                 </div>
               </div>
@@ -182,18 +177,18 @@ const Page = () => {
                 height={140}
               />
               <div className="text-2xl text-[#4F7CFF] font-semibold">
-                No Customer Found
+                No Customers Found
               </div>
               <div className="text-[#9F9C9C] text-sm font-medium">
-                No customer found for{' '}
+                No customers found for{' '}
                 {activeFilter !== 'all'
                   ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
                   : ''}
                 .
                 <button
                   className="p-1 ml-1 text-blue-600 hover:underline"
-                  // onClick={handleRefresh}
-                  // disabled={isRefreshing}
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
                   aria-label="Retry fetching appointments"
                 >
                   Try refreshing
