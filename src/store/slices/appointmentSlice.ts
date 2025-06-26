@@ -39,7 +39,7 @@
 //   hasFetched: boolean
 //   currentAppointment: Appointment | null
 //   isFormOpen: boolean
-//   formMode: 'create' | 'edit' | 'view' | 'delete' | null
+//   appoinmentFormMode: 'create' | 'edit' | 'view' | 'delete' | null
 //   error: string | null
 //   message: string | null
 //   success: boolean
@@ -54,7 +54,7 @@
 //   hasFetched: false,
 //   currentAppointment: null,
 //   isFormOpen: false,
-//   formMode: null,
+//   appoinmentFormMode: null,
 //   error: null,
 //   message: null,
 //   success: false,
@@ -290,27 +290,27 @@
 //   reducers: {
 //     openAppointmentCreateForm: (state) => {
 //       state.isFormOpen = true
-//       state.formMode = 'create'
+//       state.appoinmentFormMode = 'create'
 //       state.currentAppointment = null
 //     },
 //     openAppointmentEditForm: (state, action: PayloadAction<Appointment>) => {
 //       state.isFormOpen = true
-//       state.formMode = 'edit'
+//       state.appoinmentFormMode = 'edit'
 //       state.currentAppointment = action.payload
 //     },
 //     openAppointmentViewForm: (state, action: PayloadAction<Appointment>) => {
 //       state.isFormOpen = true
-//       state.formMode = 'view'
+//       state.appoinmentFormMode = 'view'
 //       state.currentAppointment = action.payload
 //     },
 //     openAppointmentDeleteForm: (state, action: PayloadAction<Appointment>) => {
 //       state.isFormOpen = true
-//       state.formMode = 'delete'
+//       state.appoinmentFormMode = 'delete'
 //       state.currentAppointment = action.payload
 //     },
 //     closeAppointmentForm: (state) => {
 //       state.isFormOpen = false
-//       state.formMode = null
+//       state.appoinmentFormMode = null
 //       state.currentAppointment = null
 //     },
 //     setCurrentAppointment: (
@@ -500,7 +500,7 @@ interface AppointmentState {
   hasFetched: boolean
   currentAppointment: Appointment | null
   isFormOpen: boolean
-  formMode: 'create' | 'edit' | 'view' | 'delete' | null
+  appoinmentFormMode: 'create' | 'edit' | 'view' | 'delete' | null
   error: string | null
   message: string | null
   success: boolean
@@ -515,7 +515,7 @@ const initialState: AppointmentState = {
   hasFetched: false,
   currentAppointment: null,
   isFormOpen: false,
-  formMode: null,
+  appoinmentFormMode: null,
   error: null,
   message: null,
   success: false,
@@ -749,27 +749,27 @@ const appointmentSlice = createSlice({
   reducers: {
     openAppointmentCreateForm: (state) => {
       state.isFormOpen = true
-      state.formMode = 'create'
+      state.appoinmentFormMode = 'create'
       state.currentAppointment = null
     },
     openAppointmentEditForm: (state, action: PayloadAction<Appointment>) => {
       state.isFormOpen = true
-      state.formMode = 'edit'
+      state.appoinmentFormMode = 'edit'
       state.currentAppointment = action.payload
     },
     openAppointmentViewForm: (state, action: PayloadAction<Appointment>) => {
       state.isFormOpen = true
-      state.formMode = 'view'
+      state.appoinmentFormMode = 'view'
       state.currentAppointment = action.payload
     },
     openAppointmentDeleteForm: (state, action: PayloadAction<Appointment>) => {
       state.isFormOpen = true
-      state.formMode = 'delete'
+      state.appoinmentFormMode = 'delete'
       state.currentAppointment = action.payload
     },
     closeAppointmentForm: (state) => {
       state.isFormOpen = false
-      state.formMode = null
+      state.appoinmentFormMode = null
       state.currentAppointment = null
       state.success = false
     },

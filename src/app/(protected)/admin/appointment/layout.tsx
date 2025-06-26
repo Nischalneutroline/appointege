@@ -23,7 +23,7 @@
 
 // const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
 //   const dispatch = useDispatch()
-// const { isFormOpen, formMode, currentAppointment, appointments } =
+// const { isFormOpen, appoinmentFormMode, currentAppointment, appointments } =
 //   useSelector((state: RootState) => state.appointment)
 //   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
 
@@ -73,19 +73,19 @@
 
 //       <div className="flex-1 h-full overflow-visible">{children}</div>
 
-//       {isFormOpen && (formMode === 'create' || formMode === 'edit') && (
+//       {isFormOpen && (appoinmentFormMode === 'create' || appoinmentFormMode === 'edit') && (
 //         <NewAppoinment
 //           open={isFormOpen}
 //           onChange={() => dispatch(closeAppointmentForm())}
 //         />
 //       )}
-//       {isFormOpen && formMode === 'view' && currentAppointment && (
+//       {isFormOpen && appoinmentFormMode === 'view' && currentAppointment && (
 //         <ViewAppointment
 //           open={isFormOpen}
 //           onChange={() => dispatch(closeAppointmentForm())}
 //         />
 //       )}
-//       {isFormOpen && formMode === 'delete' && currentAppointment && (
+//       {isFormOpen && appoinmentFormMode === 'delete' && currentAppointment && (
 //         <DeleteAppointment
 //           open={isFormOpen}
 //           onChange={() => dispatch(closeAppointmentForm())}
@@ -117,9 +117,14 @@ import {
 import DeleteModal from './_component/delete-appointment'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
-  const dispatch = useDispatch<AppDispatch>() // Use typed dispatch  const { isFormOpen, formMode, currentAppointment, appointments } =
-  const { isFormOpen, isLoading, formMode, currentAppointment, appointments } =
-    useSelector((state: RootState) => state.appointment)
+  const dispatch = useDispatch<AppDispatch>() // Use typed dispatch  const { isFormOpen, appoinmentFormMode, currentAppointment, appointments } =
+  const {
+    isFormOpen,
+    isLoading,
+    appoinmentFormMode,
+    currentAppointment,
+    appointments,
+  } = useSelector((state: RootState) => state.appointment)
   const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
   const [isViewOpen, setIsViewOpen] = useState(false)
   console.log(appointments, 'appointments inside layout')
@@ -172,19 +177,20 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
       <div className="flex-1 h-full overflow-visible">{children}</div>
-      {isFormOpen && (formMode === 'create' || formMode === 'edit') && (
-        <NewAppoinment
-          open={isFormOpen}
-          onChange={() => dispatch(closeAppointmentForm())}
-        />
-      )}
-      {isFormOpen && formMode === 'view' && currentAppointment && (
+      {isFormOpen &&
+        (appoinmentFormMode === 'create' || appoinmentFormMode === 'edit') && (
+          <NewAppoinment
+            open={isFormOpen}
+            onChange={() => dispatch(closeAppointmentForm())}
+          />
+        )}
+      {isFormOpen && appoinmentFormMode === 'view' && currentAppointment && (
         <ViewAppointment
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
         />
       )}
-      {isFormOpen && formMode === 'delete' && currentAppointment && (
+      {isFormOpen && appoinmentFormMode === 'delete' && currentAppointment && (
         <DeleteModal
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}

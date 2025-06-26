@@ -101,7 +101,7 @@
 //   const { services, isLoading: isLoadingServices } = useSelector(
 //     (state: RootState) => state.service,
 //   )
-//   const { isFormOpen, formMode, currentAppointment } = useSelector(
+//   const { isFormOpen, appoinmentFormMode, currentAppointment } = useSelector(
 //     (state: RootState) => state.appointment,
 //   )
 
@@ -136,7 +136,7 @@
 //     if (services.length === 0) {
 //       dispatch(fetchServices())
 //     }
-//     if (isFormOpen && formMode === 'edit' && currentAppointment) {
+//     if (isFormOpen && appoinmentFormMode === 'edit' && currentAppointment) {
 //       // Split the customer name if it exists
 //       const [firstName = '', ...lastNameParts] =
 //         currentAppointment.customerName.split(' ')
@@ -158,7 +158,7 @@
 //       // Reset form when closing
 //       form.reset()
 //     }
-//   }, [isFormOpen, formMode, currentAppointment, form])
+//   }, [isFormOpen, appoinmentFormMode, currentAppointment, form])
 
 //   // Handle dialog close
 //   const handleOpenChange = (open: boolean) => {
@@ -202,7 +202,7 @@
 //       }
 //       console.log('Submitting appointment via store:', appointmentData)
 
-//       if (formMode === 'edit' && currentAppointment?.id) {
+//       if (appoinmentFormMode === 'edit' && currentAppointment?.id) {
 //         console.log('Updating appointment with ID:', currentAppointment.id)
 //         const result = await dispatch(
 //           updateAppointment({
@@ -222,7 +222,7 @@
 //       setIsSubmitted(true)
 //     } catch (error: any) {
 //       console.error(
-//         `Error ${formMode === 'edit' ? 'updating' : 'creating'} appointment in form:`,
+//         `Error ${appoinmentFormMode === 'edit' ? 'updating' : 'creating'} appointment in form:`,
 //         {
 //           error,
 //           name: error?.name,
@@ -234,7 +234,7 @@
 //       )
 //       // Optionally show error to user
 //       // toast.error(
-//       //   `Failed to ${formMode === 'edit' ? 'update' : 'create'} appointment: ${
+//       //   `Failed to ${appoinmentFormMode === 'edit' ? 'update' : 'create'} appointment: ${
 //       //     error?.response?.data?.message || error?.message || 'Unknown error'
 //       //   }`,
 //       // )
@@ -617,9 +617,8 @@ const NewAppointment = ({
   const { services, isLoading: isLoadingServices } = useSelector(
     (state: RootState) => state.service,
   )
-  const { isFormOpen, formMode, currentAppointment, success } = useSelector(
-    (state: RootState) => state.appointment,
-  )
+  const { isFormOpen, appoinmentFormMode, currentAppointment, success } =
+    useSelector((state: RootState) => state.appointment)
 
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -642,14 +641,19 @@ const NewAppointment = ({
   })
 
   useEffect(() => {
+<<<<<<< HEAD
     if (services.length === 0 && !isLoadingServices) {
       dispatch(fetchServices(true)).catch((error) => {
+=======
+    if (serviceOptions.length === 0 && !isLoadingServices) {
+      dispatch(fetchServices(false)).catch((error) => {
+>>>>>>> origin/nischal
         console.error('Failed to fetch services:', error)
         toast.error('Failed to load services. Please try again.')
       })
     }
 
-    if (isFormOpen && formMode === 'edit' && currentAppointment) {
+    if (isFormOpen && appoinmentFormMode === 'edit' && currentAppointment) {
       const [firstName = '', ...lastNameParts] =
         currentAppointment.customerName.split(' ')
       const lastName = lastNameParts.join(' ')
@@ -669,7 +673,7 @@ const NewAppointment = ({
     }
   }, [
     isFormOpen,
-    formMode,
+    appoinmentFormMode,
     currentAppointment,
     services,
     isLoadingServices,
@@ -727,7 +731,7 @@ const NewAppointment = ({
 
       console.log('Submitting appointment:', appointmentData)
 
-      if (formMode === 'edit' && currentAppointment?.id) {
+      if (appoinmentFormMode === 'edit' && currentAppointment?.id) {
         await dispatch(
           updateAppointment({
             id: currentAppointment.id,
@@ -740,7 +744,7 @@ const NewAppointment = ({
       setFilledData(formData)
     } catch (error: any) {
       console.error(
-        `Error ${formMode === 'edit' ? 'updating' : 'creating'} appointment:`,
+        `Error ${appoinmentFormMode === 'edit' ? 'updating' : 'creating'} appointment:`,
         error,
       )
       // Toast notifications are handled in the slice
@@ -769,8 +773,8 @@ const NewAppointment = ({
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground text-center">
                 Appointment successfully{' '}
-                {formMode === 'edit' ? 'updated' : 'scheduled'} on behalf of the
-                customer
+                {appoinmentFormMode === 'edit' ? 'updated' : 'scheduled'} on
+                behalf of the customer
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-5 px-4 py-6 bg-[#eff5ff] rounded-[8px]">
@@ -857,12 +861,12 @@ const NewAppointment = ({
       <DialogContent className="md:max-w-2xl overflow-y-scroll">
         <DialogHeader className="gap-0">
           <DialogTitle className="flex justify-center text-blue-700 text-xl">
-            {formMode === 'edit'
+            {appoinmentFormMode === 'edit'
               ? 'Edit Appointment'
               : 'Enter Appointment Details'}
           </DialogTitle>
           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
-            {formMode === 'edit'
+            {appoinmentFormMode === 'edit'
               ? 'Update existing appointment details'
               : 'Fill the details below to create an appointment on behalf of the customer'}
           </DialogDescription>
@@ -975,9 +979,13 @@ const NewAppointment = ({
                 >
                   {isSubmitting ? (
                     <LoadingSpinner
-                      text={formMode === 'edit' ? 'Updating...' : 'Creating...'}
+                      text={
+                        appoinmentFormMode === 'edit'
+                          ? 'Updating...'
+                          : 'Creating...'
+                      }
                     />
-                  ) : formMode === 'edit' ? (
+                  ) : appoinmentFormMode === 'edit' ? (
                     'Update'
                   ) : (
                     'Submit'
