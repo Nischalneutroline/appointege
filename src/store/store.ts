@@ -5,6 +5,7 @@ import navReducer from './slices/navSlice'
 import viewReducer from './slices/viewSlice'
 import appointmentReducer from './slices/appointmentSlice'
 import serviceReducer from './slices/serviceslice'
+import customerReducer from './slices/customerSlice'
 
 export const store = configureStore({
   reducer: {
@@ -13,6 +14,7 @@ export const store = configureStore({
     view: viewReducer,
     appointment: appointmentReducer,
     service: serviceReducer,
+    customer: customerReducer,
   },
 })
 

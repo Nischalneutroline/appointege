@@ -72,11 +72,12 @@ const NewServiceForm = ({
   open: boolean
   onChange: (open: boolean) => void
 }) => {
+  const businessAvailability = defaultBusinessAvailability
   // Dispatch
   const dispatch = useDispatch<AppDispatch>()
   // User state`
   const { user } = useSelector((state: RootState) => state.auth)
-  const { isFormOpen, formMode, currentAppointment } = useSelector(
+  const { isFormOpen, formMode } = useSelector(
     (state: RootState) => state.appointment,
   )
 
@@ -107,17 +108,10 @@ const NewServiceForm = ({
     },
   })
   // Loading Services
-  const { serviceOptions, isLoading: isLoadingServices } = useSelector(
-    (state: RootState) => state.service,
-  )
-  const onSubmit = async (data: {
-    title: string
-    description: string
-    image: File | null
-    estimatedDuration: number
-    businessDetailId: string
-    status: Status
-  }) => {
+  //   const { , isLoading: isLoadingServices } = useSelector(
+  //     (state: RootState) => state.service,
+  //   )
+  const onSubmit = async (data: FormData) => {
     // try {
     //   const serviceData = {
     //     title: data.serviceName,

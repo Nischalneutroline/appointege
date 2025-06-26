@@ -18,18 +18,8 @@
 // import { Button } from '@/components/ui/button'
 // import { useRouter, useParams } from 'next/navigation'
 // import DatePickerField from '@/components/custom-form-fields/date-field'
-// // import {
-// //   CalendarIcon,
-// //   Clock,
-// //   Mail,
-// //   PhoneCallIcon,
-// //   ScrollText,
-// //   SlidersHorizontal,
-// //   UserPen,
-// // } from 'lucide-react'
-// import { useEffect, useState, useMemo } from 'react'
+// import { useEffect, useState } from 'react'
 // import LoadingSpinner from '@/components/loading-spinner'
-// // import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 // import {
 //   FormControl,
 //   FormField,
@@ -39,7 +29,6 @@
 // } from '@/components/ui/form'
 // import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 // import {
-//   CalendarIcon,
 //   CircleCheckBig,
 //   Clock,
 //   HandHeart,
@@ -49,43 +38,25 @@
 // } from 'lucide-react'
 // import ViewItem from './view/view-item'
 // import { format } from 'date-fns'
-// import { useSelector } from 'react-redux'
-// import { RootState } from '@/store/store'
-// import { PostAppoinmentData } from '../_types/appointment'
+// import { useSelector, useDispatch } from 'react-redux'
+// import { RootState, AppDispatch } from '@/store/store'
+// import { AppointmentStatus, PostAppoinmentData } from '../_types/appointment'
 // import { normalDateToIso } from '@/utils/utils'
-// import { storeCreateAppointment } from '@/store/slices/appointmentSlice'
-// // import { isValidPhoneNumber } from 'libphonenumber-js'
+// import {
+//   storeCreateAppointment,
+//   fetchAppointments,
+//   updateAppointment,
+// } from '@/store/slices/appointmentSlice'
+// import { fetchServices } from '@/store/slices/serviceslice'
+// import {
+//   openAppointmentEditForm,
+//   closeAppointmentForm,
+// } from '@/store/slices/appointmentSlice'
 
 // interface ServiceOption {
 //   label: string
 //   value: string
 // }
-
-// // Define the form schema using Zod
-// // Updated appointment schema
-// // const appointmentSchema = z.object({
-// //   firstName: z.string().min(1, 'First name is required'),
-// //   lastName: z.string().min(1, 'Last name is required'),
-// //   email: z.string().email('Invalid email address').min(1, 'Email is required'),
-// //   phone: z
-// //     .string()
-// //     .min(1, 'Phone number is required')
-// //     .refine(
-// //       (value) => {
-// //         const parts = value.split(' ')
-// //         if (parts.length < 2 || !parts[1].trim()) {
-// //           return false // No number after country code
-// //         }
-// //         return isValidPhoneNumber(value.replace(' ', ''))
-// //       },
-// //       { message: 'Valid phone number is required' },
-// //     ),
-// //   service: z.string().min(1, 'Service is required'),
-// //   date: z.date({ required_error: 'Date is required' }),
-// //   time: z.string().min(1, 'Time is required'),
-// //   message: z.string().optional(),
-// //   appointmentType: z.string().min(1, 'Appointment type is required'),
-// // })
 
 // const appointmentSchema = z.object({
 //   firstName: z.string().min(1, 'First name is required'),
@@ -124,11 +95,18 @@
 //   open: boolean
 //   onChange: (open: boolean) => void
 // }) => {
+//   const dispatch = useDispatch<AppDispatch>()
 //   const { user } = useSelector((state: RootState) => state.auth)
 //   const { success } = useSelector((state: RootState) => state.appointment)
-//   const { serviceOptions } = useSelector((state: RootState) => state.servcie)
-//   console.log('NewAppoinment: serviceOptions =', serviceOptions)
-//   // console.log('NewAppoinment: user =', user)
+//   const { services, isLoading: isLoadingServices } = useSelector(
+//     (state: RootState) => state.service,
+//   )
+//   const { isFormOpen, formMode, currentAppointment } = useSelector(
+//     (state: RootState) => state.appointment,
+//   )
+
+//   console.log('NewAppoinment: services =', services)
+
 //   const router = useRouter()
 //   const params = useParams()
 //   const id = params?.id as string | undefined
@@ -139,56 +117,63 @@
 //   const [isSubmitted, setIsSubmitted] = useState(false)
 //   const [filledData, setFilledData] = useState<FormData>()
 
-//   // Initialize react-hook-form with Zod validation
 //   const form = useForm<FormData>({
 //     resolver: zodResolver(appointmentSchema),
 //     defaultValues: {
-//       firstName: 'John',
-//       lastName: 'Doe',
-//       email: 'john@example.com',
-//       phone: '+9779818275115', // US number
-//       service: 'service1',
-//       date: new Date(2025, 6, 20),
-//       time: '10:00 AM',
-//       message: 'Test appointment',
+//       firstName: '',
+//       lastName: '',
+//       email: '',
+//       phone: '',
+//       service: '',
+//       date: undefined,
+//       time: '',
+//       message: '',
 //       appointmentType: 'in-person',
 //     },
 //   })
 
-//   // Simulate fetching dummy data in edit mode
-//   // useEffect(() => {
-//   //   if (isEditMode && open) {
-//   //     // Dummy data for testing
-//   //     const dummyData: FormData = {
-//   //       firstName: 'John',
-//   //       lastName: 'Doe',
-//   //       email: 'john@example.com',
-//   //       phone: '+9779818275115', // US number
-//   //       service: 'service1',
-//   //       date: new Date(2025, 6, 20),
-//   //       time: '10:00 AM',
-//   //       message: 'Test appointment',
-//   //       appointmentType: 'in-person',
-//   //     }
-//   //     form.reset(dummyData)
-//   //     setIsLoadingAppointment(false)
-//   //   } else if (!open) {
-//   //     form.reset()
-//   //   }
-//   // }, [open, isEditMode, form])
+//   useEffect(() => {
+//     if (services.length === 0) {
+//       dispatch(fetchServices())
+//     }
+//     if (isFormOpen && formMode === 'edit' && currentAppointment) {
+//       // Split the customer name if it exists
+//       const [firstName = '', ...lastNameParts] =
+//         currentAppointment.customerName.split(' ')
+//       const lastName = lastNameParts.join(' ')
 
-//   // const serviceOptions: ServiceOption[] = [
-//   //   { label: 'Service 1', value: 'service1' },
-//   //   { label: 'Service 2', value: 'service2' },
-//   //   { label: 'Service 3', value: 'service3' },
-//   // ]
+//       // Pre-fill the form with existing appointment data
+//       form.reset({
+//         firstName,
+//         lastName,
+//         email: currentAppointment.email,
+//         phone: currentAppointment.phone,
+//         service: currentAppointment.serviceId,
+//         date: new Date(currentAppointment.selectedDate),
+//         time: currentAppointment.selectedTime,
+//         message: currentAppointment.message || '',
+//         appointmentType: 'in-person', // Set default or get from appointment
+//       })
+//     } else if (!isFormOpen) {
+//       // Reset form when closing
+//       form.reset()
+//     }
+//   }, [isFormOpen, formMode, currentAppointment, form])
+
+//   // Handle dialog close
+//   const handleOpenChange = (open: boolean) => {
+//     if (!open) {
+//       dispatch(closeAppointmentForm())
+//     }
+//   }
 
 //   const appointmentTypeOptions = [
 //     { label: 'In-Person', value: 'in-person' },
 //     { label: 'Virtual', value: 'virtual' },
 //   ]
 
-//   // Helper function to get label from value
+//   const hasFetchedServices = !isLoadingServices
+
 //   const getLabelFromValue = (
 //     value: string,
 //     options: { label: string; value: string }[],
@@ -197,10 +182,6 @@
 //     return option ? option.label : value
 //   }
 
-//   const hasFetchedServices = serviceOptions.length > 0
-//   const isLoadingServices = hasFetchedServices && !serviceOptions.length
-
-//   // onSubmit function (Keep this as is, uses Appointment Store actions)
 //   const onSubmit = async (formData: FormData) => {
 //     try {
 //       setIsSubmitting(true)
@@ -210,29 +191,53 @@
 //         phone: formData.phone,
 //         serviceId: formData.service,
 //         selectedDate: normalDateToIso(formData.date),
-//         // selectedTime: normalOrFormTimeToIso(formData.date, formData.time),
 //         selectedTime: formData.time,
+
 //         message: formData.message,
 //         userId: user?.id,
 //         isForSelf: false,
 //         bookedById: user?.id,
 //         createdById: user?.id,
-//         status: 'SCHEDULED',
+//         status: currentAppointment?.status || AppointmentStatus.SCHEDULED,
 //       }
 //       console.log('Submitting appointment via store:', appointmentData)
 
-//       if (isEditMode && id) {
-//         // await storeUpdateAppointment(id, appointmentData)
+//       if (formMode === 'edit' && currentAppointment?.id) {
+//         console.log('Updating appointment with ID:', currentAppointment.id)
+//         const result = await dispatch(
+//           updateAppointment({
+//             id: currentAppointment.id,
+//             data: appointmentData,
+//           }),
+//         ).unwrap()
+//         console.log('Update successful:', result)
 //       } else {
-//         await storeCreateAppointment(appointmentData)
+//         console.log('Creating new appointment')
+//         const result = await dispatch(
+//           storeCreateAppointment(appointmentData),
+//         ).unwrap()
+//         console.log('Creation successful:', result)
 //       }
-//       handleBack()
+//       setFilledData(formData)
+//       setIsSubmitted(true)
 //     } catch (error: any) {
 //       console.error(
-//         `Error ${isEditMode ? 'updating' : 'creating'} appointment in form:`,
-//         error,
+//         `Error ${formMode === 'edit' ? 'updating' : 'creating'} appointment in form:`,
+//         {
+//           error,
+//           name: error?.name,
+//           // data: error?.data,
+//           message: error?.message,
+//           response: error?.response?.data,
+//           stack: error?.stack,
+//         },
 //       )
-//       // Toast is handled by store method
+//       // Optionally show error to user
+//       // toast.error(
+//       //   `Failed to ${formMode === 'edit' ? 'update' : 'create'} appointment: ${
+//       //     error?.response?.data?.message || error?.message || 'Unknown error'
+//       //   }`,
+//       // )
 //     } finally {
 //       setIsSubmitting(false)
 //     }
@@ -281,13 +286,12 @@
 //                 bgColor="#dae8fe"
 //                 textColor="#3d73ed"
 //               />
-
 //               <div className="border-t-2 border-[#BEDAFE] w-full" />
 //               <ViewItem
 //                 title="Service"
 //                 value={
 //                   filledData?.service
-//                     ? getLabelFromValue(filledData.service, serviceOptions)
+//                     ? getLabelFromValue(filledData.service, services)
 //                     : ''
 //                 }
 //                 icon={<HandHeart className="w-4.5 h-4.5" strokeWidth={2} />}
@@ -320,15 +324,15 @@
 //                 textColor="#099668"
 //               />
 //             </div>
-//             <div className="flex flex-col gap-3 md:flex-row justify-between">
-//               <Button
+//             <div className="flex flex-col gap-3 md:flex-row justify-center ">
+//               {/* <Button
 //                 type="button"
 //                 variant="outline"
 //                 className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
 //                 onClick={handleBack}
 //               >
 //                 ← Back
-//               </Button>
+//               </Button> */}
 //               <Button
 //                 type="submit"
 //                 variant="default"
@@ -338,7 +342,7 @@
 //                 }}
 //                 className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
 //               >
-//                 Save
+//                 Done
 //               </Button>
 //             </div>
 //           </DialogContent>
@@ -361,11 +365,13 @@
 //           </DialogDescription>
 //         </DialogHeader>
 
-//         {isLoadingAppointment || (isLoadingServices && !hasFetchedServices) ? (
+//         {isLoadingServices ? (
 //           <div className="flex justify-center items-center py-20 text-muted-foreground">
-//             {isLoadingAppointment
-//               ? 'Loading appointment...'
-//               : 'Loading services...'}
+//             Loading services...
+//           </div>
+//         ) : !isLoadingServices && services.length === 0 ? (
+//           <div className="flex justify-center items-center py-20 text-muted-foreground">
+//             No service found to add appointment
 //           </div>
 //         ) : (
 //           <FormProvider {...form}>
@@ -403,23 +409,10 @@
 //               <SelectField
 //                 name="service"
 //                 label="Select a Service"
-//                 options={serviceOptions}
-//                 placeholder={
-//                   isLoadingServices ? 'Loading services...' : 'Select a service'
-//                 }
-//                 disabled={
-//                   isLoadingServices ||
-//                   (!isLoadingServices && serviceOptions.length === 0)
-//                 }
+//                 options={services}
+//                 placeholder="Select service"
+//                 disabled={isSubmitting}
 //               />
-
-//               {!isLoadingServices &&
-//                 serviceOptions.length === 0 &&
-//                 hasFetchedServices && (
-//                   <p className="text-sm text-muted-foreground text-center">
-//                     No services currently available.
-//                   </p>
-//                 )}
 
 //               <div className="grid grid-cols-2 items-center gap-4">
 //                 <DatePickerField
@@ -451,7 +444,7 @@
 //                         onValueChange={field.onChange}
 //                         value={field.value}
 //                         className="flex space-x-4"
-//                         disabled={isLoadingServices || isSubmitting}
+//                         disabled={isSubmitting}
 //                       >
 //                         {appointmentTypeOptions.map((option) => (
 //                           <div
@@ -477,8 +470,8 @@
 //                 )}
 //               />
 
-//               <div className="flex flex-col gap-3 md:flex-row justify-between mt-6">
-//                 <Button
+//               <div className="flex flex-col gap-3  md:flex-row justify-center items-center mt-6">
+//                 {/* <Button
 //                   type="button"
 //                   variant="outline"
 //                   className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
@@ -486,11 +479,11 @@
 //                   disabled={isSubmitting}
 //                 >
 //                   ← Back
-//                 </Button>
+//                 </Button> */}
 //                 <Button
 //                   type="submit"
 //                   variant="default"
-//                   className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
+//                   className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
 //                   disabled={
 //                     isLoadingServices || isLoadingAppointment || isSubmitting
 //                   }
@@ -499,12 +492,12 @@
 //                     isSubmitting ? (
 //                       <LoadingSpinner text="Updating..." />
 //                     ) : (
-//                       'Update Appointment'
+//                       'Submitting...'
 //                     )
 //                   ) : isSubmitting ? (
 //                     <LoadingSpinner text="Creating..." />
 //                   ) : (
-//                     'Book Appointment'
+//                     'Submit'
 //                   )}
 //                 </Button>
 //               </div>
@@ -536,7 +529,7 @@ import TextAreaField from '@/components/custom-form-fields/textarea-field'
 import PhoneInputField from '@/components/custom-form-fields/phone-field'
 import TimePickerField from '@/components/custom-form-fields/time-field'
 import { Button } from '@/components/ui/button'
-import { useRouter, useParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import DatePickerField from '@/components/custom-form-fields/date-field'
 import { useEffect, useState } from 'react'
 import LoadingSpinner from '@/components/loading-spinner'
@@ -560,18 +553,19 @@ import ViewItem from './view/view-item'
 import { format } from 'date-fns'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from '@/store/store'
-import { AppointmentStatus, PostAppoinmentData } from '../_types/appointment'
+import {
+  AppointmentStatus,
+  PostAppoinmentData,
+} from '@/app/(protected)/admin/appointment/_types/appointment'
 import { normalDateToIso } from '@/utils/utils'
 import {
   storeCreateAppointment,
-  fetchAppointments,
   updateAppointment,
-} from '@/store/slices/appointmentSlice'
-import { fetchServices } from '@/store/slices/serviceslice'
-import {
   openAppointmentEditForm,
   closeAppointmentForm,
 } from '@/store/slices/appointmentSlice'
+import { toast } from 'sonner'
+import { fetchServices } from '@/store/slices/serviceslice'
 
 interface ServiceOption {
   label: string
@@ -585,7 +579,10 @@ const appointmentSchema = z.object({
   phone: z
     .string()
     .min(1, 'Phone number is required')
-    .regex(/^\+\d{1,4}\s\d{7,}$/, 'Valid phone number is required'),
+    .regex(
+      /^\+\d{1,4}\s\d{7,}$/,
+      'Valid phone number is required (e.g., +977 9818275115)',
+    ),
   service: z.string().min(1, 'Service is required'),
   date: z.date({ required_error: 'Date is required' }),
   time: z.string().min(1, 'Time is required'),
@@ -608,7 +605,7 @@ const availableTimeSlots = [
   '05:00 PM',
 ]
 
-const NewAppoinment = ({
+const NewAppointment = ({
   open,
   onChange,
 }: {
@@ -617,25 +614,17 @@ const NewAppoinment = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const { user } = useSelector((state: RootState) => state.auth)
-  const { success } = useSelector((state: RootState) => state.appointment)
-  const { serviceOptions, isLoading: isLoadingServices } = useSelector(
+  const { services, isLoading: isLoadingServices } = useSelector(
     (state: RootState) => state.service,
   )
-  const { isFormOpen, formMode, currentAppointment } = useSelector(
+  const { isFormOpen, formMode, currentAppointment, success } = useSelector(
     (state: RootState) => state.appointment,
   )
 
-  console.log('NewAppoinment: serviceOptions =', serviceOptions)
-
   const router = useRouter()
-  const params = useParams()
-  const id = params?.id as string | undefined
-  const isEditMode = !!id
-
-  const [isLoadingAppointment, setIsLoadingAppointment] = useState(isEditMode)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [filledData, setFilledData] = useState<FormData>()
+  const [filledData, setFilledData] = useState<FormData | null>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(appointmentSchema),
@@ -653,56 +642,72 @@ const NewAppoinment = ({
   })
 
   useEffect(() => {
-    if (serviceOptions.length === 0) {
-      dispatch(fetchServices())
+    if (services.length === 0 && !isLoadingServices) {
+      dispatch(fetchServices(true)).catch((error) => {
+        console.error('Failed to fetch services:', error)
+        toast.error('Failed to load services. Please try again.')
+      })
     }
+
     if (isFormOpen && formMode === 'edit' && currentAppointment) {
-      // Split the customer name if it exists
       const [firstName = '', ...lastNameParts] =
         currentAppointment.customerName.split(' ')
       const lastName = lastNameParts.join(' ')
-
-      // Pre-fill the form with existing appointment data
       form.reset({
         firstName,
         lastName,
         email: currentAppointment.email,
         phone: currentAppointment.phone,
         service: currentAppointment.serviceId,
-        date: new Date(currentAppointment.selectedDate),
+        date: new Date(currentAppointment.selectedDate), // Convert string to Date for form
         time: currentAppointment.selectedTime,
         message: currentAppointment.message || '',
-        appointmentType: 'in-person', // Set default or get from appointment
+        appointmentType: 'in-person', // Adjust based on your data model
       })
     } else if (!isFormOpen) {
-      // Reset form when closing
       form.reset()
     }
-  }, [isFormOpen, formMode, currentAppointment, form])
+  }, [
+    isFormOpen,
+    formMode,
+    currentAppointment,
+    services,
+    isLoadingServices,
+    dispatch,
+    form,
+  ])
 
-  // Handle dialog close
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      dispatch(closeAppointmentForm())
+  useEffect(() => {
+    if (success && isSubmitting) {
+      setIsSubmitted(true)
+      setIsSubmitting(false)
     }
-  }
+  }, [success, isSubmitting])
 
   const appointmentTypeOptions = [
     { label: 'In-Person', value: 'in-person' },
     { label: 'Virtual', value: 'virtual' },
   ]
 
-  const hasFetchedServices = !isLoadingServices
-
-  const getLabelFromValue = (
-    value: string,
-    options: { label: string; value: string }[],
-  ) => {
+  const getLabelFromValue = (value: string, options: ServiceOption[]) => {
     const option = options.find((opt) => opt.value === value)
     return option ? option.label : value
   }
 
   const onSubmit = async (formData: FormData) => {
+    const errors = form.formState.errors
+    if (Object.keys(errors).length > 0) {
+      console.log('Validation errors:', errors)
+      toast.error('Please correct the form errors and try again.')
+      return
+    }
+
+    if (!user?.id) {
+      console.error('User is not authenticated')
+      toast.error('You must be logged in to create or update an appointment')
+      return
+    }
+
     try {
       setIsSubmitting(true)
       const appointmentData: PostAppoinmentData = {
@@ -710,59 +715,42 @@ const NewAppoinment = ({
         email: formData.email,
         phone: formData.phone,
         serviceId: formData.service,
-        selectedDate: normalDateToIso(formData.date),
+        selectedDate: normalDateToIso(formData.date), // Convert Date to ISO string
         selectedTime: formData.time,
+        status: currentAppointment?.status || AppointmentStatus.SCHEDULED,
         message: formData.message,
         userId: user?.id,
         isForSelf: false,
         bookedById: user?.id,
         createdById: user?.id,
-        status: currentAppointment?.status,
       }
-      console.log('Submitting appointment via store:', appointmentData)
+
+      console.log('Submitting appointment:', appointmentData)
 
       if (formMode === 'edit' && currentAppointment?.id) {
-        console.log('Updating appointment with ID:', currentAppointment.id)
-        const result = await dispatch(
+        await dispatch(
           updateAppointment({
             id: currentAppointment.id,
             data: appointmentData,
           }),
         ).unwrap()
-        console.log('Update successful:', result)
       } else {
-        console.log('Creating new appointment')
-        const result = await dispatch(
-          storeCreateAppointment(appointmentData),
-        ).unwrap()
-        console.log('Creation successful:', result)
+        await dispatch(storeCreateAppointment(appointmentData)).unwrap()
       }
       setFilledData(formData)
-      setIsSubmitted(true)
     } catch (error: any) {
       console.error(
-        `Error ${formMode === 'edit' ? 'updating' : 'creating'} appointment in form:`,
-        {
-          error,
-          name: error?.name,
-          // data: error?.data,
-          message: error?.message,
-          response: error?.response?.data,
-          stack: error?.stack,
-        },
+        `Error ${formMode === 'edit' ? 'updating' : 'creating'} appointment:`,
+        error,
       )
-      // Optionally show error to user
-      // toast.error(
-      //   `Failed to ${formMode === 'edit' ? 'update' : 'create'} appointment: ${
-      //     error?.response?.data?.message || error?.message || 'Unknown error'
-      //   }`,
-      // )
+      // Toast notifications are handled in the slice
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleBack = () => {
+    dispatch(closeAppointmentForm())
     onChange(false)
   }
 
@@ -780,28 +768,30 @@ const NewAppoinment = ({
                 Appointment Confirmed!
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground text-center">
-                Appointment successfully scheduled on behalf of the customer
+                Appointment successfully{' '}
+                {formMode === 'edit' ? 'updated' : 'scheduled'} on behalf of the
+                customer
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-5 px-4 py-6 bg-[#eff5ff] rounded-[8px]">
               <ViewItem
                 title="Name"
                 value={filledData?.firstName + ' ' + filledData?.lastName}
-                icon={<UserRound className="w-4 h-4 " strokeWidth={2.5} />}
+                icon={<UserRound className="w-4 h-4" strokeWidth={2.5} />}
                 bgColor="#dae8fe"
                 textColor="#3d73ed"
               />
               <ViewItem
                 title="Email"
                 value={filledData?.email || ''}
-                icon={<Mail className="w-4 h-4 " strokeWidth={2} />}
+                icon={<Mail className="w-4 h-4" strokeWidth={2} />}
                 bgColor="#dae8fe"
                 textColor="#3d73ed"
               />
               <ViewItem
                 title="Phone"
                 value={filledData?.phone || ''}
-                icon={<Phone className="w-4 h-4 " strokeWidth={2} />}
+                icon={<Phone className="w-4 h-4" strokeWidth={2} />}
                 bgColor="#dae8fe"
                 textColor="#3d73ed"
               />
@@ -810,7 +800,7 @@ const NewAppoinment = ({
                 title="Service"
                 value={
                   filledData?.service
-                    ? getLabelFromValue(filledData.service, serviceOptions)
+                    ? getLabelFromValue(filledData.service, services)
                     : ''
                 }
                 icon={<HandHeart className="w-4.5 h-4.5" strokeWidth={2} />}
@@ -843,21 +833,13 @@ const NewAppoinment = ({
                 textColor="#099668"
               />
             </div>
-            <div className="flex flex-col gap-3 md:flex-row justify-center ">
-              {/* <Button
-                type="button"
-                variant="outline"
-                className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
-                onClick={handleBack}
-              >
-                ← Back
-              </Button> */}
+            <div className="flex flex-col gap-3 md:flex-row justify-center">
               <Button
                 type="submit"
                 variant="default"
                 onClick={() => {
                   setIsSubmitted(false)
-                  onChange(false)
+                  handleBack()
                 }}
                 className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
               >
@@ -871,7 +853,7 @@ const NewAppoinment = ({
   }
 
   return (
-    <Dialog onOpenChange={onChange} open={open}>
+    <Dialog onOpenChange={handleBack} open={open}>
       <DialogContent className="md:max-w-2xl overflow-y-scroll">
         <DialogHeader className="gap-0">
           <DialogTitle className="flex justify-center text-blue-700 text-xl">
@@ -882,7 +864,7 @@ const NewAppoinment = ({
           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
             {formMode === 'edit'
               ? 'Update existing appointment details'
-              : 'Fill the detail below to create appointment on behalf of customer'}
+              : 'Fill the details below to create an appointment on behalf of the customer'}
           </DialogDescription>
         </DialogHeader>
 
@@ -890,9 +872,9 @@ const NewAppoinment = ({
           <div className="flex justify-center items-center py-20 text-muted-foreground">
             Loading services...
           </div>
-        ) : !isLoadingServices && serviceOptions.length === 0 ? (
+        ) : services.length === 0 ? (
           <div className="flex justify-center items-center py-20 text-muted-foreground">
-            No service found to add appointment
+            No services found to add appointment
           </div>
         ) : (
           <FormProvider {...form}>
@@ -913,28 +895,24 @@ const NewAppoinment = ({
                   placeholder="Doe"
                 />
               </div>
-
               <InputField
                 name="email"
                 label="Email"
                 type="email"
                 placeholder="john@example.com"
               />
-
               <PhoneInputField
                 name="phone"
                 label="Phone Number"
                 placeholder="Enter your number"
               />
-
               <SelectField
                 name="service"
                 label="Select a Service"
-                options={serviceOptions}
+                options={services}
                 placeholder="Select service"
                 disabled={isSubmitting}
               />
-
               <div className="grid grid-cols-2 items-center gap-4">
                 <DatePickerField
                   name="date"
@@ -947,13 +925,11 @@ const NewAppoinment = ({
                   availableTimeSlots={availableTimeSlots}
                 />
               </div>
-
               <TextAreaField
                 name="message"
                 label="Additional Notes"
                 placeholder="Any special requests?"
               />
-
               <FormField
                 control={form.control}
                 name="appointmentType"
@@ -990,33 +966,19 @@ const NewAppoinment = ({
                   </FormItem>
                 )}
               />
-
-              <div className="flex flex-col gap-3  md:flex-row justify-center items-center mt-6">
-                {/* <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
-                  onClick={handleBack}
-                  disabled={isSubmitting}
-                >
-                  ← Back
-                </Button> */}
+              <div className="flex flex-col gap-3 md:flex-row justify-center items-center mt-6">
                 <Button
                   type="submit"
                   variant="default"
                   className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
-                  disabled={
-                    isLoadingServices || isLoadingAppointment || isSubmitting
-                  }
+                  disabled={isLoadingServices || isSubmitting}
                 >
-                  {isEditMode ? (
-                    isSubmitting ? (
-                      <LoadingSpinner text="Updating..." />
-                    ) : (
-                      'Submitting...'
-                    )
-                  ) : isSubmitting ? (
-                    <LoadingSpinner text="Creating..." />
+                  {isSubmitting ? (
+                    <LoadingSpinner
+                      text={formMode === 'edit' ? 'Updating...' : 'Creating...'}
+                    />
+                  ) : formMode === 'edit' ? (
+                    'Update'
                   ) : (
                     'Submit'
                   )}
@@ -1030,4 +992,4 @@ const NewAppoinment = ({
   )
 }
 
-export default NewAppoinment
+export default NewAppointment

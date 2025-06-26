@@ -22,6 +22,8 @@ import DeleteAppointment from '../appointment/_component/delete-appointment'
 // import { useCustomerFilterOptions } from '../appointment/_data/data'
 import { createFilterOptions } from '../appointment/_data/data'
 import { customersData, filterCustomerOptions } from './_data/data'
+import DeleteModal from '../appointment/_component/delete-appointment'
+import NewCustomerForm from './_component/new-customer'
 
 const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch()
@@ -74,7 +76,7 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 h-full overflow-visible">{children}</div>
 
       {isFormOpen && (formMode === 'create' || formMode === 'edit') && (
-        <NewAppoinment
+        <NewCustomerForm
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
         />
@@ -86,10 +88,11 @@ const CustomerLayout = ({ children }: { children: React.ReactNode }) => {
         />
       )}
       {isFormOpen && formMode === 'delete' && currentAppointment && (
-        <DeleteAppointment
+        <DeleteModal
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
-          onDelete={() => console.log('clicked delete')}
+          isLoading={false}
+          // onDelete={() => console.log('clicked delete')}
         />
       )}
     </main>

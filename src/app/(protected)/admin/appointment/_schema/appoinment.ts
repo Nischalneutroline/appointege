@@ -12,8 +12,8 @@ export const appointmentSchema = z.object({
   }),
   selectedTime: z.string(),
   message: z.string().optional(),
-  isForSelf: z.boolean(),
-  createdById: z.string().min(1, 'Creator ID is required'),
+  isForSelf: z.boolean().optional(),
+  createdById: z.string().min(1, 'Creator ID is required').optional(),
   status: z.nativeEnum(AppointmentStatus), // Ensures status is from AppointmentStatus enum
   userId: z.string().optional(),
   bookedById: z.string().optional(),

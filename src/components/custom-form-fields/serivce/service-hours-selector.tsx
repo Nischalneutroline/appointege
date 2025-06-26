@@ -13,9 +13,10 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { CalendarDays, Hourglass, Plus, Trash2, Info } from "lucide-react"
 import { useMemo, useState } from "react"
+import { timeOptions, toMin } from "@/lib/lib"
 
 // Helper functions
-import { timeOptions, toMin } from "@/lib/lib"
+
 
 /* ────────────────────────────────────────────────────────────────── */
 /* 1. Business Availability (from props)                            */
@@ -118,7 +119,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
   /* -------- Filter options to exclude break times, but allow boundaries -------- */
   const workTimeOptions = useMemo(() => {
     const breaks = businessBreaks[activeDay] ?? []
-    return timeOptions().filter((t) => {
+    return timeOptions.filter((t:any) => {
       const min = toMin(t)
       // Exclude times strictly inside a break (allow start/end boundaries)
       return !breaks.some(([s, e]) => {
@@ -257,7 +258,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
                   <SelectValue placeholder="Start" />
                 </SelectTrigger>
                 <SelectContent>
-                  {timeOptions().map((t) => (
+                  {timeOptions.map((t) => (
                     <SelectItem
                       key={t}
                       value={t}
@@ -284,7 +285,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
                     <SelectValue placeholder="End" />
                   </SelectTrigger>
                   <SelectContent>
-                    {timeOptions().map((t) => (
+                    {timeOptions.map((t) => (
                       <SelectItem
                         key={t}
                         value={t}

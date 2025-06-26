@@ -11,7 +11,7 @@ export enum AppointmentStatus {
 // Interface for Appointment
 // Hello
 export interface Appointment {
-  id: string
+  id?: string
   customerName: string // Required field for the person being booked
   email: string // Required email of the person being booked
   phone: string // Required phone number of the person being booked
@@ -22,8 +22,8 @@ export interface Appointment {
   selectedDate: string // Required: ISO string for the appointment date
   selectedTime: string // Required: ISO string for the appointment time
   message?: string // Optional: Message from the user
-  isForSelf: boolean // Required: Indicates if the appointment is for the logged-in user or someone else
-  createdById: string // Required: ID of the user who created the appointment
+  isForSelf?: boolean // Required: Indicates if the appointment is for the logged-in user or someone else
+  createdById?: string // Required: ID of the user who created the appointment
   resourceId?: string // Optional: Resource ID for the appointment
   reminderOffsets?: AppointmentReminderOffset[]
   updatedAt?: string // Optional: Updated at timestamp
@@ -42,12 +42,12 @@ export interface PostAppoinmentData {
   isForSelf?: boolean
   bookedById?: string
   createdById?: string
-  status?: AppointmentStatus | string
+  status?: AppointmentStatus
   // service?: Service
 }
 
 export interface AxioxResponseType<T> {
-  data: { success: boolean; error?: string; message?: string; data: T }
+  data: { success: boolean; errorDetail?: any; message?: string; data: T }
 }
 
 // ----- Reminder
