@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 import { toggleMobileNav } from '@/store/slices/navSlice'
 import { useDispatch } from 'react-redux'
+import { LucideIcon } from 'lucide-react'
 
 interface NavLinksProps {
   name: string
@@ -15,60 +16,66 @@ interface NavLinksProps {
   onClick?: () => void
 }
 
-export const NavLinks = (props: NavLinksProps) => {
-  const { name, path, icon, className, onClick } = props
-  const pathname = usePathname()
-  const router = useRouter()
-  const handleNavClick = (path: string) => {
-    router.push(path)
-    onClick?.()
-  }
-  return (
-    <Link
-      href={path}
-      key={name}
-      onClick={() => handleNavClick(path)}
-      className={cn(
-        'flex items-center gap-3 text-lg font-medium transition-all cursor-pointer hover:scale-98',
-        pathname === path
-          ? 'text-[#3B5FCC]'
-          : 'text-[#6B7280] hover:text-[#3B5FCC]',
-        className,
-      )}
-    >
-      <div className="font-medium">{icon}</div>
-      <span className="font-medium text-sm">{name}</span>
-    </Link>
-  )
-}
+// export const NavLinks = ({
+//   name,
+//   path,
+//   icon: Icon,
+//   className,
+//   onClick,
+//   isCollaspsed,
+// }: NavLinksProps) => {
+//   const pathname = usePathname()
+//   const router = useRouter()
+//   const handleNavClick = (path: string) => {
+//     router.push(path)
+//     onClick?.()
+//   }
+//   return (
+//     <Link
+//       href={path}
+//       key={name}
+//       onClick={() => handleNavClick(path)}
+//       className={cn(
+//         'flex items-center gap-3 text-lg font-medium transition-all cursor-pointer hover:scale-98',
+//         pathname === path
+//           ? 'text-[#3B5FCC]'
+//           : 'text-[#6B7280] hover:text-[#3B5FCC]',
+//         className,
+//       )}
+//     >
+//       {Icon && <Icon className={`${isCollaspsed ? 'size-6' : 'size-5'}`} />}
 
-export const NavLinksMobile = (props: NavLinksProps) => {
-  const { name, path, icon } = props
+//       <span className="font-medium text-sm">{name}</span>
+//     </Link>
+//   )
+// }
 
-  const pathname = usePathname()
-  const router = useRouter()
-  const dispatch = useDispatch()
-  const handleNavClick = (path: string) => {
-    router.push(path)
-    dispatch(toggleMobileNav())
-  }
-  return (
-    <div
-      key={name}
-      onClick={() => handleNavClick(path)}
-      className={cn(
-        'flex items-center gap-5 text-lg font-medium transition-all cursor-pointer ',
-        pathname === path
-          ? 'text-[#3B5FCC]'
-          : 'text-[#6B7280] hover:text-[#3B5FCC]',
-      )}
-    >
-      <div className="font-medium">{icon}</div>
-    </div>
-  )
-}
-export const NavLinksMobileSidebar = (props: NavLinksProps) => {
-  const { name, path, icon } = props
+// export const NavLinksMobile = (props: NavLinksProps) => {
+//   const { name, path, icon } = props
+
+//   const pathname = usePathname()
+//   const router = useRouter()
+//   const dispatch = useDispatch()
+//   const handleNavClick = (path: string) => {
+//     router.push(path)
+//     dispatch(toggleMobileNav())
+//   }
+//   return (
+//     <div
+//       key={name}
+//       onClick={() => handleNavClick(path)}
+//       className={cn(
+//         'flex items-center gap-5 text-lg font-medium transition-all cursor-pointer ',
+//         pathname === path
+//           ? 'text-[#3B5FCC]'
+//           : 'text-[#6B7280] hover:text-[#3B5FCC]',
+//       )}
+//     >
+//       <div className="font-medium">{icon}</div>
+//     </div>
+//   )
+// }
+export const NavLinksMobileSidebar = ({ name, path, icon }: NavLinksProps) => {
   const dispatch = useDispatch()
   const pathname = usePathname()
   const router = useRouter()

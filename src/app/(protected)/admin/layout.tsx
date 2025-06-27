@@ -14,21 +14,6 @@ import { redirect } from 'next/navigation'
 // import { useDispatch } from 'react-redux'
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
-  // const session = await currentUser()
-  // console.log('Current User in Admin Layout:', session)
-  // if (!session) {
-  //   // Redirect to login if not authenticated
-  //   redirect('/login')
-  // }
-
-  // const dispatch = useDispatch<AppDispatch>()
-
-  // useEffect(() => {
-  //   console.log('Fetching appointments...')
-  //   dispatch(fetchAppointments())
-  //   dispatch(fetchServices())
-  // }, [dispatch]) // Only depend on dispatch to run once on mount
-
   return (
     // <AuthInitializer>
     <div className="relative min-h-screen bg-stone-100 overflow-hidden border-r-2">
