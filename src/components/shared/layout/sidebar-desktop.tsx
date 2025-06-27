@@ -458,7 +458,7 @@ const SidebarDesktop = () => {
   const router = useRouter()
 
   // Check the pathname and set is active in nav link item for highlighting
-  const pathname = usePathname()
+  const pathname = usePathname() || '/admin' // Default to '/admin' if pathname is undefined
 
   // Handle nav click
   const handleNavClick = (link: string) => {
@@ -480,7 +480,7 @@ const SidebarDesktop = () => {
         <div className="space-y-6">
           <div className="relative flex items-center justify-between">
             {/* Left side: Always show circle, show text only when expanded */}
-            <div className=" flex items-center gap-3">
+            <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center">
                 CN
               </div>
@@ -497,10 +497,10 @@ const SidebarDesktop = () => {
               </span>
               <ChevronRight
                 className={cn(
-                  'absolute  w-6 h-6 text-[#6B7280] cursor-pointer hover:text-blue-700 transition-all duration-200 ease-in-out',
+                  'absolute w-6 h-6 text-[#6B7280] cursor-pointer hover:text-blue-700 transition-all duration-200 ease-in-out',
                   isSidebarCollapsed
                     ? 'rotate-0'
-                    : 'rotate-180  bg-gray-100 rounded-sm',
+                    : 'rotate-180 bg-gray-100 rounded-sm',
                   isSidebarCollapsed ? '-right-4' : 'right-0',
                 )}
                 onClick={() => setCollapsed(!isSidebarCollapsed)}
@@ -515,14 +515,14 @@ const SidebarDesktop = () => {
                 key={index}
                 className={cn(
                   'active:scale-95 group flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
-                  pathname === link.path &&
+                  (pathname === link.path || (index === 0 && !pathname)) && // Default to Dashboard (index 0) if no pathname
                     'bg-gray-50 text-blue-700 font-medium',
                 )}
                 onClick={() => handleNavClick(link.path)}
               >
                 <span className="">{link.icon}</span>
                 <span
-                  className={`whitespace-nowrap text-sm  transition-all duration-300 ease-in-out ${
+                  className={`whitespace-nowrap text-sm transition-all duration-300 ease-in-out ${
                     isSidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'
                   }`}
                   style={{
@@ -600,8 +600,9 @@ const SidebarDesktop = () => {
           <div className="border-t py-4">
             <div
               className={cn(
-                'group flex border items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
+                'group flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
                 !isSidebarCollapsed && 'border-[#5BA4FF] bg-[#E9F1FD]',
+                pathname === 'admin/upgrade' && 'bg-gray-50 text-blue-700',
               )}
               onClick={() => handleNavClick('admin/upgrade')}
             >
