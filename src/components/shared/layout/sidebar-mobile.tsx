@@ -3,7 +3,7 @@
 import { cn } from '@/lib/utils'
 import { ArrowUpRight } from 'lucide-react'
 import CompanyProfile from '../company-profile'
-import { NavLinks, NavLinksMobileSidebar } from './nav-links'
+import { NavLinksMobileSidebar } from './nav-links'
 import { navLinks } from './sidebar-desktop'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
@@ -19,7 +19,7 @@ const SidebarMobile = () => {
     dispatch(toggleMobileNav())
   }
   return (
-    <>
+    <aside className="block lg:hidden fixed top-0 w-full z-50">
       {/* Overlay */}
       {mobileNavCollapse && (
         <div
@@ -80,7 +80,7 @@ const SidebarMobile = () => {
           </div>
         </div>
       </div>
-    </>
+    </aside>
   )
 }
 

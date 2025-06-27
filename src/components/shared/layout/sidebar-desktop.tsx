@@ -302,7 +302,7 @@
 //                 key={index}
 //                 className={cn(
 //                   'group flex items-center gap-3 py-3  rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
-//                   pathname === link.path && 'bg-gray-50 text-blue-700',
+//                   pathname === link.path && 'bg-gray-50 text-blue-700 font-medium',
 //                 )}
 //                 onClick={() => handleNavClick(link.path)}
 //               >
@@ -331,7 +331,7 @@
 //                   key={index}
 //                   className={cn(
 //                     'group flex items-center gap-3 py-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
-//                     pathname === link.path && 'bg-gray-50 text-blue-700',
+//                     pathname === link.path && 'bg-gray-50 text-blue-700 font-medium',
 //                   )}
 //                   onClick={() => handleNavClick(link.path)}
 //                 >
@@ -366,7 +366,7 @@
 //                 key={index}
 //                 className={cn(
 //                   'group flex items-center gap-3 py-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
-//                   pathname === link.path && 'bg-gray-50 text-blue-700',
+//                   pathname === link.path && 'bg-gray-50 text-blue-700 font-medium',
 //                 )}
 //                 onClick={() => handleNavClick(link.path)}
 //               >
@@ -468,9 +468,9 @@ const SidebarDesktop = () => {
   const [isSidebarCollapsed, setCollapsed] = useState(false)
 
   return (
-    <>
+    <aside className="hidden lg:block">
       {/* Sidebar */}
-      <aside
+      <div
         className={cn(
           `transition-all duration-300 ease-in-out flex flex-col justify-between shadow bg-white border-r border-[#E5E7EB] p-3 h-full overflow-hidden`,
           isSidebarCollapsed ? 'w-[80px]' : 'w-[250px]',
@@ -514,14 +514,15 @@ const SidebarDesktop = () => {
               <div
                 key={index}
                 className={cn(
-                  'group flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
-                  pathname === link.path && 'bg-gray-50 text-blue-700',
+                  'active:scale-95 group flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
+                  pathname === link.path &&
+                    'bg-gray-50 text-blue-700 font-medium',
                 )}
                 onClick={() => handleNavClick(link.path)}
               >
                 <span className="">{link.icon}</span>
                 <span
-                  className={`whitespace-nowrap text-sm transition-all duration-300 ease-in-out ${
+                  className={`whitespace-nowrap text-sm  transition-all duration-300 ease-in-out ${
                     isSidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'
                   }`}
                   style={{
@@ -544,8 +545,9 @@ const SidebarDesktop = () => {
               <div
                 key={index}
                 className={cn(
-                  'group flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
-                  pathname === link.path && 'bg-gray-50 text-blue-700',
+                  'active:scale-95 group flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
+                  pathname === link.path &&
+                    'bg-gray-50 text-blue-700 font-medium',
                 )}
                 onClick={() => handleNavClick(link.path)}
               >
@@ -573,8 +575,9 @@ const SidebarDesktop = () => {
               <div
                 key={index}
                 className={cn(
-                  'group flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
-                  pathname === link.path && 'bg-gray-50 text-blue-700',
+                  'active:scale-95 group flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
+                  pathname === link.path &&
+                    'bg-gray-50 text-blue-700 font-medium',
                 )}
                 onClick={() => handleNavClick(link.path)}
               >
@@ -595,44 +598,25 @@ const SidebarDesktop = () => {
           </div>
           {/* Bottom: Upgrade Button */}
           <div className="border-t py-4">
-            <button
+            <div
               className={cn(
-                'group flex items-center gap-3 p-3 rounded-lg text-gray-700 cursor-pointer transition-all duration-300 ease-in-out w-full',
-                isSidebarCollapsed
-                  ? 'justify-center bg-transparent border border-transparent'
-                  : 'bg-[#E9F1FD] border border-[#5BA4FF] hover:bg-gray-50',
-                {
-                  'shadow-[inset_0_2px_10px_rgba(37,99,235,0.15)]':
-                    !isSidebarCollapsed,
-                  'hover:text-blue-700': !isSidebarCollapsed,
-                  'bg-gray-50 text-blue-700':
-                    !isSidebarCollapsed && pathname === '/upgrade',
-                },
+                'group flex border items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-gray-700 hover:text-blue-700 cursor-pointer transition-all duration-200',
+                !isSidebarCollapsed && 'border-[#5BA4FF] bg-[#E9F1FD]',
               )}
-              style={{
-                transitionProperty:
-                  'background-color, border-color, box-shadow, opacity',
-              }}
-              onClick={() => handleNavClick('/upgrade')}
+              onClick={() => handleNavClick('admin/upgrade')}
             >
-              <span
-                className={cn(
-                  'flex items-center',
-                  isSidebarCollapsed && 'pl-3',
-                )}
-              >
+              <span>
                 <ArrowUpRight
                   className={cn(
-                    'bg-[#2672EF] text-white rounded-sm transition-all duration-300 ease-in-out',
+                    'bg-[#2672EF] text-white rounded-sm ',
                     'h-6 w-6',
                   )}
                 />
               </span>
               <span
-                className={cn(
-                  'whitespace-nowrap text-sm font-normal transition-all duration-300 ease-in-out',
-                  isSidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto',
-                )}
+                className={`whitespace-nowrap text-sm transition-all duration-300 ease-in-out ${
+                  isSidebarCollapsed ? 'opacity-0 w-0' : 'opacity-100 w-auto'
+                }`}
                 style={{
                   overflow: 'hidden',
                   transitionProperty: 'opacity, width',
@@ -640,11 +624,11 @@ const SidebarDesktop = () => {
               >
                 Upgrade Plan
               </span>
-            </button>
+            </div>
           </div>
         </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   )
 }
 

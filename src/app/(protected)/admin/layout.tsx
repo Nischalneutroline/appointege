@@ -4,12 +4,7 @@
 import Header from '@/components/shared/layout/header'
 import SidebarDesktop from '@/components/shared/layout/sidebar-desktop'
 import SidebarMobile from '@/components/shared/layout/sidebar-mobile'
-import { currentUser } from '@/lib/auth'
-import { AuthInitializer } from '@/store/authInitializer'
-import { fetchAppointments } from '@/store/slices/appointmentSlice'
-import { fetchServices } from '@/store/slices/serviceslice'
-import { AppDispatch, RootState } from '@/store/store'
-import { redirect } from 'next/navigation'
+
 // import { use, useEffect } from 'react'
 // import { useDispatch } from 'react-redux'
 
@@ -24,14 +19,9 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
       <div className="relative z-10 flex  h-screen">
         {/* Sidebar */}
         {/* Desktop Sidebar */}
-        <div className=" hidden lg:block ">
-          <SidebarDesktop />
-        </div>
-
+        <SidebarDesktop />
         {/* Mobile Navbar */}
-        <div className="block lg:hidden fixed top-0 w-full z-50">
-          <SidebarMobile />
-        </div>
+        <SidebarMobile />
 
         {/* Content Area */}
         <div className="flex-1 flex flex-col w-full h-full">
@@ -39,7 +29,21 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
           <Header />
           {/* Main Content */}
           {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1  shadow p-6 bg-[#fbfbfb] overflow-hidden">
+          <div className="flex-1 relative  shadow p-6 bg-[#fbfbfb] overflow-hidden">
+            {/* <div
+              className="absolute inset-0 opacity-5"
+              style={{
+                backgroundImage: `url("/assets/grain.jpg")`,
+              }}
+            /> */}
+            <div
+              className="absolute inset-0 opacity-10"
+              style={{
+                background:
+                  'linear-gradient(135deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
+                backgroundSize: '4px 4px', // Creates a subtle grid-like static effect
+              }}
+            />
             {children}
           </div>
         </div>
