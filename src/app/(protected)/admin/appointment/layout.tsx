@@ -115,9 +115,12 @@ import {
   openAppointmentCreateForm,
 } from '@/store/slices/appointmentSlice'
 import DeleteModal from './_component/delete-appointment'
+import { Button } from '@/components/ui/button'
+import { Plus } from 'lucide-react'
 
 const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch<AppDispatch>() // Use typed dispatch  const { isFormOpen, appoinmentFormMode, currentAppointment, appointments } =
+
   const {
     isFormOpen,
     isLoading,
@@ -125,29 +128,25 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
     currentAppointment,
     appointments,
   } = useSelector((state: RootState) => state.appointment)
-  const [viewMode, setViewMode] = useState<'card' | 'list' | 'grid'>('card')
-  const [isViewOpen, setIsViewOpen] = useState(false)
-  console.log(appointments, 'appointments inside layout')
-  // dispatch(fetchServices())
-  // Fetch appointments on component mount
-  // useEffect(() => {
-  //   console.log('Fetching appointments...')
-  //   dispatch(fetchAppointments())
-  // }, [dispatch]) // Only depend on dispatch to run once on mount
 
-  // const handleAppoinmentDelete = () => {
-  //   if (!currentAppointment) {
-  //     return
-  //   }
-  //   dispatch(deleteAppointment(currentAppointment?.id))
-  // }
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
 
-  // if there is no currentAppoinment then close the form
-  // useEffect(() => {
-  //   if (!currentAppointment) {
-  //     dispatch(closeAppointmentForm())
-  //   }
-  // }, [currentAppointment])
+  const [buttonName, setButtonName] = useState('New Appointment')
+
+  // Adjust button name based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 500) {
+        setButtonName('New')
+      } else {
+        setButtonName('New Appointment')
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   return (
     <main className="flex flex-col gap-4">
@@ -163,10 +162,15 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
               <ViewTabs viewMode={viewMode} setViewMode={setViewMode} />
             </div>
             <div>
-              <CreateButton
-                label="New Appointment"
+              <Button
+                className="active:scale-95"
                 onClick={() => dispatch(openAppointmentCreateForm())}
-              />
+              >
+                <span>
+                  <Plus />
+                </span>
+                <span>{buttonName}</span>
+              </Button>
             </div>
           </div>
         </div>

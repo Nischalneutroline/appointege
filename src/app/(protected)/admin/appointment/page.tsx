@@ -245,7 +245,7 @@ const Page = () => {
   return (
     <div className="flex flex-col gap-4 overflow-visible">
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
-        <div className="w-fit flex items-center gap-2 overflow-auto px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
+        <div className="w-full md:w-fit justify-between md:justify-start flex items-center gap-1 overflow-x-scroll px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
           {filterOptions.map((option, index) => (
             <FilterTabs
               key={index}
