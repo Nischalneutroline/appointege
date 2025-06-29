@@ -147,7 +147,6 @@
 // }
 
 // export default Page
-
 'use client'
 
 import React, { useEffect, useMemo, useCallback, useRef } from 'react'
@@ -243,9 +242,14 @@ const Page = () => {
   const memoizedColumns = useMemo(() => columns, [handleDelete])
 
   return (
-    <div className="flex flex-col gap-4 overflow-visible">
-      <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2">
-        <div className="w-full md:w-fit justify-between md:justify-start flex items-center gap-1 overflow-x-scroll px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border-[1px] border-[#E5E7EB]">
+    <div className="flex flex-col gap-4 h-full w-full overflow-hidden">
+      <div className="flex flex-col md:flex-row md:justify-between gap-2 w-full">
+        <div
+          className={cn(
+            'w-full md:w-fit flex items-center gap-1 overflow-x-auto px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border-[1px] border-[#E5E7EB]',
+            'scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-gray-500',
+          )}
+        >
           {filterOptions.map((option, index) => (
             <FilterTabs
               key={index}
@@ -258,15 +262,15 @@ const Page = () => {
             />
           ))}
         </div>
-        <div className="flex flex-row gap-2 md:gap-0 lg:gap-3 justify-between max-h-10">
+        <div className="flex gap-2 lg:gap-3 justify-between">
           <SearchBar
             className="bg-white rounded-[8px]"
             placeholder="Search appointment"
-            width="w-[330px]"
+            width="w-full max-w-[330px]"
             onSearch={(value) => console.log(value)}
           />
           <div className="flex gap-3 justify-end">
-            <div className="flex text-[#6B7280] items-center gap-1 justify-center border-[1px] bg-[#FFFFFF] border-[#E5E7EB] rounded-[8px] w-24.5 cursor-pointer hover:scale-110 transition duration-400">
+            <div className="flex text-[#6B7280] items-center gap-1 justify-center border-[1px] bg-[#FFFFFF] border-[#E5E7EB] rounded-[8px] w-24 cursor-pointer hover:scale-110 transition duration-400">
               <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
               <div className="text-sm font-normal">Filter</div>
               <ChevronDown strokeWidth={2.5} size={14} />
@@ -290,7 +294,8 @@ const Page = () => {
         </div>
       </div>
 
-      <div className="flex-1">
+      <div className="h-full flex-1 bg-red-600"></div>
+      {/* <div className="flex-1 w-full overflow-y-scroll pb-6">
         {isLoading && !hasFetched ? (
           <div className="text-center py-8 text-sm text-gray-500 italic">
             Loading appointments...
@@ -299,7 +304,7 @@ const Page = () => {
           <>
             {viewMode === 'list' ? (
               <div className="w-full overflow-x-auto">
-                <div className="min-w-max">
+                <div className="min-w-[800px]">
                   <DataTable
                     columns={memoizedColumns}
                     data={filteredAppointments}
@@ -308,14 +313,19 @@ const Page = () => {
                 </div>
               </div>
             ) : viewMode === 'card' ? (
-              <div className="flex flex-col max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)] overflow-y-auto gap-2">
+              <div className="flex flex-col h-full overflow-y-auto gap-2 pb-6">
                 {filteredAppointments.map((item) => (
                   <AppointmentCard item={item} key={item.id} />
                 ))}
               </div>
             ) : viewMode === 'grid' ? (
-              <div className="h-full overflow-y-visible">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 h-full overflow-y-auto max-h-[calc(100vh-350px)] lg:max-h-[calc(100vh-530px)] xl:max-h-[calc(100vh-360px)]">
+              <div className="h-full overflow-y-auto">
+                <div
+                  className={cn(
+                    'grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl grid-cols-4',
+                    'h-full pb-6',
+                  )}
+                >
                   {filteredAppointments.map((item) => (
                     <AppointmentGrid item={item} key={item.id} />
                   ))}
@@ -324,7 +334,7 @@ const Page = () => {
             ) : null}
           </>
         ) : (
-          <div className="py-18 h-full flex items-center justify-center text-gray-500">
+          <div className="h-full flex items-center justify-center text-gray-500">
             <div className="flex flex-col items-center gap-2">
               <Image
                 src="/assets/ecommerce.svg"
@@ -354,7 +364,7 @@ const Page = () => {
             </div>
           </div>
         )}
-      </div>
+      </div> */}
     </div>
   )
 }

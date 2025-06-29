@@ -26,7 +26,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <div
       className={cn(
-        'relative rounded-[8px] border-[#E5E7EB] border-[1px] text-[#A0AEC0]',
+        'relative rounded-[8px] h-10 sm:h-11 border-[#E5E7EB] border-[1px] text-[#A0AEC0]',
         width ? width : 'min-w-sm ',
         className,
       )}
@@ -40,7 +40,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className={cn(
-          'pl-10 border-0 text-sm leading-5 font-normal tracking-wide',
+          'pl-10 border-0 w-full h-full text-sm leading-5 font-normal tracking-wide',
           className,
         )}
       />

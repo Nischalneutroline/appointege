@@ -149,7 +149,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   return (
-    <main className="flex flex-col gap-4">
+    <main className="flex flex-col gap-4 border border-blue-500 h-full">
       <div className="flex flex-col justify-between gap-4">
         <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-0">
           <Heading
@@ -158,7 +158,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
           />
           <div className="flex flex-row gap-2 md:gap-0 justify-between items-center  lg:gap-3 h-10">
             {/* View Tabs for Card List Grid */}
-            <div className="flex items-center bg-[#E5E7EB] w-fit h-9 py-1  rounded-[8px]">
+            <div className="flex items-center bg-[#E5E7EB] w-fit h-9 py-1 rounded-[8px]">
               <ViewTabs viewMode={viewMode} setViewMode={setViewMode} />
             </div>
             <div>
@@ -180,7 +180,11 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
           ))}
         </div>
       </div>
-      <div className="flex-1 h-full overflow-visible">{children}</div>
+
+      {/* Children */}
+      <div className="flex-1 border border-#559200 ">{children}</div>
+
+      {/* Forms in different modals */}
       {isFormOpen &&
         (appoinmentFormMode === 'create' || appoinmentFormMode === 'edit') && (
           <NewAppoinment

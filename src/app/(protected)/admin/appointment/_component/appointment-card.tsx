@@ -57,7 +57,7 @@ const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
   )
 
   return (
-    <div className="relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white cursor-pointer">
+    <div className=" flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white cursor-pointer">
       <div
         className="h-16 w-16 text-lg font-semibold text-white flex items-center justify-center rounded-[8px] "
         style={{ backgroundColor: getRandomColor() }}

@@ -17,11 +17,11 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
         <SidebarMobile />
 
         {/* ------ Content Area ------- */}
-        <div className="flex-1 flex flex-col w-full h-full">
+        <div className="flex-1 flex flex-col w-full  h-full">
           <Header />
           {/* Main Content */}
           {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1 relative  shadow p-6  overflow-hidden">
+          <div className="flex-1 relative  shadow p-6 border border-red-500 overflow-y-auto md:overflow-hidden">
             {children}
           </div>
         </div>
