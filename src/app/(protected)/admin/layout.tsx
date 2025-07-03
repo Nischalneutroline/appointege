@@ -36,14 +36,14 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
                 backgroundImage: `url("/assets/grain.jpg")`,
               }}
             /> */}
-            <div
+            {/* <div
               className="absolute inset-0 opacity-10"
               style={{
                 background:
                   'linear-gradient(135deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
                 backgroundSize: '4px 4px', // Creates a subtle grid-like static effect
               }}
-            />
+            /> */}
             {children}
           </div>
         </div>
