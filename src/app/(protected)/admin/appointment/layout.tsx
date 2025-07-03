@@ -175,6 +175,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
             </div>
           </div>
         </div>
+
         <div className="hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
           {createFilterOptions(appointments).map((option) => (
             <LayoutCards key={option.value} option={option} />

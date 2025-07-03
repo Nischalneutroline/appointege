@@ -27,6 +27,11 @@ export interface Appointment {
   resourceId?: string // Optional: Resource ID for the appointment
   reminderOffsets?: AppointmentReminderOffset[]
   updatedAt?: string // Optional: Updated at timestamp
+  color?: string
+}
+
+export interface AppointmentWithColor extends Appointment {
+  color?: string
 }
 
 export interface PostAppoinmentData {

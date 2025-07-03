@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import axios, { AxiosError } from 'axios'
 import { getBaseUrl } from '@/lib/baseUrl'
 import {
-  Appointment as AppointmentType,
+  Appointment,
   AppointmentStatus,
   AxioxResponseType,
   PostAppoinmentData,
@@ -23,7 +23,8 @@ const isSameDay = (date1: Date, date2: Date): boolean => {
 }
 
 // Generate random avatar color
-function getRandomAvatarColor(): { bg: string; textIcon: string } {
+// function getRandomAvatarColor(): { bg: string; textIcon: string } {
+function getRandomAvatarColor(): string {
   // Random hue (0–360)
   const hue = Math.floor(Math.random() * 360)
   // Saturation between 40% and 80%
@@ -37,7 +38,8 @@ function getRandomAvatarColor(): { bg: string; textIcon: string } {
   // Simplified luminance: assuming HSL lightness is a rough proxy
   const textIcon = lightness > 55 ? '#333333' : '#ffffff' // Dark text for light bg, white for dark bg
 
-  return { bg, textIcon }
+  // return { bg, textIcon }
+  return bg
 }
 
 const api = axios.create({
@@ -73,9 +75,6 @@ interface AppointmentState {
 }
 
 // Appoinment with color
-interface Appointment extends AppointmentType {
-  color?: Color // Optional color property
-}
 
 const initialState: AppointmentState = {
   appointments: [],

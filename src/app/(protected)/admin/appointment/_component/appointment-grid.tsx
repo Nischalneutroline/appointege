@@ -41,8 +41,6 @@ const AppointmentGrid = ({ item }: { item: AppointmentWithService }) => {
     item.selectedDate,
   )
 
-
-
   return (
     <div className="flex flex-col items-stretch bg-white rounded-[10px] border-[1px] border-[#DCE9F9] gap-4 ">
       <div className="flex flex-col px-6 pt-6 gap-5">
@@ -50,7 +48,7 @@ const AppointmentGrid = ({ item }: { item: AppointmentWithService }) => {
           <div className="flex gap-2.5 items-center">
             <div
               className="h-10 w-10 p-1.5 font-semibold text-white flex items-center justify-center rounded-[8px] "
-              style={{ backgroundColor: getRandomColor() }}
+              style={{ backgroundColor: item.color || getRandomColor() }}
             >
               <div className="text-lg leading-[71.694%]">
                 {getInitials(item.customerName)}

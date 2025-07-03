@@ -263,10 +263,11 @@ const Page = () => {
   const hasAttemptedEmptyFetch = useRef(false)
 
   // Memoized filter options based on appointments
-  const filterOptions = useMemo(
-    () => createFilterOptions(appointments),
-    [appointments],
-  )
+  const filterOptions = useMemo(() => {
+    const result = createFilterOptions(appointments)
+    console.log('Filter options:', result)
+    return result
+  }, [appointments])
 
   // Manual refresh handler with debouncing
   const handleRefresh = useCallback(() => {
@@ -336,9 +337,10 @@ const Page = () => {
   }, [])
 
   return (
-    <div className="flex flex-col gap-4 h-full w-full overflow-hidden mb-3 ">
+    <div className="flex flex-col gap-4 h-full w-full overflow-hidden py-0.5 ">
       {/* Filter and Search Controls */}
       <div className="flex flex-col md:flex-row md:justify-between gap-2 w-full">
+        {/* Filter Tabs */}
         <div
           className={cn(
             'w-full md:w-fit flex items-center gap-1 overflow-x-auto px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border border-[#E5E7EB]',
@@ -357,6 +359,7 @@ const Page = () => {
             />
           ))}
         </div>
+        {/* Search Bar */}
         <div className="flex gap-2 lg:gap-3 justify-between">
           <SearchBar
             className="bg-white rounded-[8px]"
@@ -390,7 +393,7 @@ const Page = () => {
       </div>
 
       {/* Appointment Display */}
-      <div className="flex-1 h-full border-y  min-h-0 rounded-lg overflow-y-auto">
+      <div className="flex-1 h-full   min-h-0 rounded-lg overflow-y-auto">
         {isLoading && !hasFetched ? (
           <div className="text-center py-8 text-sm text-gray-500 italic">
             Loading appointments...
@@ -410,15 +413,6 @@ const Page = () => {
             )}
             {viewMode === 'card' && (
               <div className="flex-1 h-full min-h-0  rounded-lg overflow-y-auto">
-                <div className="flex flex-col gap-2   ">
-                  {filteredAppointments.map((item) => (
-                    <AppointmentCard item={item} key={item.id} />
-                  ))}
-                </div>
-              </div>
-            )}
-            {viewMode === 'grid' && (
-              <div className="h-full overflow-y-auto">
                 <div
                   className={cn(
                     'grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
@@ -431,6 +425,20 @@ const Page = () => {
                 </div>
               </div>
             )}
+            {/* {viewMode === 'grid' && (
+              <div className="h-full overflow-y-auto">
+                <div
+                  className={cn(
+                    'grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+                    'h-full pb-6',
+                  )}
+                >
+                  {filteredAppointments.map((item) => (
+                    <AppointmentGrid item={item} key={item.id} />
+                  ))}
+                </div>
+              </div>
+            )} */}
           </>
         ) : (
           <div className="h-full flex items-center justify-center text-gray-500">
