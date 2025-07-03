@@ -12,7 +12,6 @@ import { toast } from 'sonner'
 
 // Utility function for date comparison
 const isSameDay = (date1: Date, date2: Date): boolean => {
-  // Normalize to UTC midnight to ignore time components
   const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate())
   const d2 = new Date(date2.getFullYear(), date2.getMonth(), date2.getDate())
   return (
@@ -23,23 +22,11 @@ const isSameDay = (date1: Date, date2: Date): boolean => {
 }
 
 // Generate random avatar color
-// function getRandomAvatarColor(): { bg: string; textIcon: string } {
 function getRandomAvatarColor(): string {
-  // Random hue (0–360)
   const hue = Math.floor(Math.random() * 360)
-  // Saturation between 40% and 80%
   const saturation = Math.floor(Math.random() * (80 - 40 + 1)) + 40
-  // Lightness between 40% and 70%
   const lightness = Math.floor(Math.random() * (70 - 40 + 1)) + 40
-
-  const bg = `hsl(${hue}, ${saturation}%, ${lightness}%)`
-
-  // Calculate luminance to determine contrasting text/icon color
-  // Simplified luminance: assuming HSL lightness is a rough proxy
-  const textIcon = lightness > 55 ? '#333333' : '#ffffff' // Dark text for light bg, white for dark bg
-
-  // return { bg, textIcon }
-  return bg
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`
 }
 
 const api = axios.create({
@@ -52,11 +39,6 @@ const api = axios.create({
 interface RejectError {
   error: any | null
   message: string | null
-}
-
-interface Color {
-  bg: string
-  textIcon: string
 }
 
 interface AppointmentState {
@@ -72,9 +54,8 @@ interface AppointmentState {
   message: string | null
   success: boolean
   activeFilter: AppointmentFilterValue
+  activeFilters: AppointmentFilterValue[]
 }
-
-// Appoinment with color
 
 const initialState: AppointmentState = {
   appointments: [],
@@ -88,10 +69,10 @@ const initialState: AppointmentState = {
   error: null,
   message: null,
   success: false,
-  activeFilter: 'upcoming',
+  activeFilter: 'today',
+  activeFilters: ['today', 'upcoming', 'completed', 'all'],
 }
 
-// Helper function to filter appointments based on activeFilter
 export const filterAppointments = (
   appointments: Appointment[],
   activeFilter: AppointmentFilterValue,
@@ -167,9 +148,9 @@ const fetchAppointments = createAsyncThunk<
       if (success && Array.isArray(data)) {
         const normalizedData = data.map((appt) => ({
           ...appt,
-          selectedDate: appt.selectedDate, // Keep as string
+          selectedDate: appt.selectedDate,
           status: appt.status,
-          color: appt.color || getRandomAvatarColor(), // Assign color if not present
+          color: appt.color || getRandomAvatarColor(),
         }))
         if (isManualRefresh) {
           const toastMessage = normalizedData.length
@@ -219,7 +200,6 @@ const storeCreateAppointment = createAsyncThunk<
   async (appointmentData, { rejectWithValue }) => {
     try {
       const response = await api.post('/api/appointment', appointmentData)
-      console.log('storeCreateAppointment: Response =', response)
       const { data, success, errorDetail, message } = response.data
       if (success && data) {
         toast.success(message || 'Appointment created successfully', {
@@ -227,9 +207,9 @@ const storeCreateAppointment = createAsyncThunk<
         })
         return {
           ...data,
-          selectedDate: data.selectedDate, // Keep as string
+          selectedDate: data.selectedDate,
           status: data.status as AppointmentStatus,
-          color: getRandomAvatarColor(), // Assign color on creation
+          color: getRandomAvatarColor(),
         }
       }
       toast.error(message || 'Failed to create appointment', {
@@ -274,9 +254,9 @@ const updateAppointment = createAsyncThunk<
         })
         return {
           ...responseData,
-          selectedDate: responseData.selectedDate, // Keep as string
+          selectedDate: responseData.selectedDate,
           status: responseData.status as AppointmentStatus,
-          color: responseData.color || getRandomAvatarColor(), // Fallback to random color if not provided
+          color: responseData.color || getRandomAvatarColor(),
         }
       }
       toast.error(message || 'Failed to update appointment', {
@@ -318,8 +298,8 @@ const deleteAppointment = createAsyncThunk<
       id: 'delete-appointment',
     })
     return rejectWithValue({
-      error: errorDetail || 'Failed to delete appointment',
-      message: message || null,
+      error: errorDetail || 'Failed to delete appointment | null',
+      message: message,
     })
   } catch (error: any) {
     const errorMsg =
@@ -377,6 +357,19 @@ const appointmentSlice = createSlice({
         action.payload,
       )
     },
+    setActiveFilters: (
+      state,
+      action: PayloadAction<AppointmentFilterValue[]>,
+    ) => {
+      state.activeFilters = action.payload
+      // Set activeFilter to the first filter or 'today' if empty
+      state.activeFilter =
+        action.payload.length > 0 ? action.payload[0] : 'today'
+      state.filteredAppointments = filterAppointments(
+        state.appointments,
+        state.activeFilter,
+      )
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(fetchAppointments.pending, (state, action) => {
@@ -415,7 +408,7 @@ const appointmentSlice = createSlice({
       state.isLoading = false
       state.appointments.push(action.payload)
       state.filteredAppointments = filterAppointments(
-        state.appointments,
+        [...state.appointments],
         state.activeFilter,
       )
       state.error = null
@@ -443,12 +436,9 @@ const appointmentSlice = createSlice({
         state.appointments,
         state.activeFilter,
       )
-      console.log('Updated appointment:', action.payload)
       state.error = null
       state.message = null
       state.success = true
-      console.log('Updated appointments:', state.appointments)
-      console.log('Updated filteredAppointments:', state.filteredAppointments)
     })
     builder.addCase(updateAppointment.rejected, (state, action) => {
       state.isLoading = false
@@ -492,6 +482,7 @@ export const {
   closeAppointmentForm,
   openAppointmentDeleteForm,
   setCurrentAppointment,
+  setActiveFilters,
   setActiveFilter,
 } = appointmentSlice.actions
 

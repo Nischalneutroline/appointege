@@ -127,6 +127,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
     appoinmentFormMode,
     currentAppointment,
     appointments,
+    activeFilters,
   } = useSelector((state: RootState) => state.appointment)
   console.log('Appointments', appointments)
 
@@ -176,10 +177,13 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
 
-        <div className="hidden mt-9 md:mt-0 lg:grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-          {createFilterOptions(appointments).map((option) => (
-            <LayoutCards key={option.value} option={option} />
-          ))}
+        <div className="hidden md:flex gap-4 min-w-[340px]">
+          {createFilterOptions(appointments).map(
+            (option) =>
+              activeFilters.includes(option.value) && (
+                <LayoutCards key={option.value} option={option} />
+              ),
+          )}
         </div>
       </div>
 

@@ -1,27 +1,25 @@
+'use client'
+
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { cn } from '@/lib/utils'
 import {
   AppointmentFilterValue,
   FilterAppoinmentState,
 } from '@/app/(protected)/admin/appointment/_data/data'
-
-import { Appointment } from '@/app/(protected)/admin/appointment/_types/appointment'
-import { cn } from '@/lib/utils'
-
-import React, { useState } from 'react'
+import { setActiveFilter } from '@/store/slices/appointmentSlice'
+import { RootState } from '@/store/store'
 
 interface FilterTabsProps {
   option: FilterAppoinmentState
-  activeFilter: string
-  setSelectedData: (data: Appointment[]) => void
-  setActiveFilter: (filter: AppointmentFilterValue) => void
 }
 
-const FilterTabs = ({
-  option,
-  activeFilter,
-  setSelectedData,
-  setActiveFilter,
-}: FilterTabsProps) => {
+const FilterTabs = ({ option }: FilterTabsProps) => {
   const [isHovered, setIsHovered] = useState(false)
+  const dispatch = useDispatch()
+  const { activeFilter, activeFilters } = useSelector(
+    (state: RootState) => state.appointment,
+  )
 
   const isActive = activeFilter === option.value
   const backgroundColor = isActive
@@ -29,7 +27,6 @@ const FilterTabs = ({
     : isHovered
       ? 'oklch(96.7% 0.003 264.542)'
       : '#F8F9FA'
-
   const border = isActive ? `1px solid ${option.border}` : 'none'
 
   return (
@@ -37,7 +34,7 @@ const FilterTabs = ({
       key={option.value}
       className={cn(
         `w-fit text-sm font-normal px-2 py-2 flex justify-center items-center 
-         transition-transform duration-300 cursor-pointer rounded-[8px] active:scale-95  hover:bg-slate-50/80 dark:hover:bg-slate-800/50
+         transition-transform duration-300 cursor-pointer rounded-[8px] active:scale-95 hover:bg-slate-50/80 dark:hover:bg-slate-800/50
         `,
       )}
       style={{
@@ -47,8 +44,7 @@ const FilterTabs = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {
-        setSelectedData(option.data)
-        setActiveFilter(option.value)
+        dispatch(setActiveFilter(option.value))
       }}
     >
       <div className="flex gap-1">
@@ -57,7 +53,7 @@ const FilterTabs = ({
           {option.count && (
             <div
               className={cn(
-                'text-sm ',
+                'text-sm',
                 option.value === activeFilter && 'font-bold',
               )}
             >

@@ -81,7 +81,14 @@
 //     icon: <Users className="text-[#2D155B]" size={24} />,
 //   },
 // ]
-import { CalendarDays, CircleCheckBig, Clock, Users } from 'lucide-react'
+import {
+  CalendarDays,
+  CircleCheckBig,
+  Clock,
+  Delete,
+  PhoneMissed,
+  Users,
+} from 'lucide-react'
 import {
   Appointment,
   AppointmentStatus,
@@ -212,7 +219,7 @@ export const createFilterOptions = (
       ),
       border: '#FEE2E2',
       background: '#FEF2F2',
-      icon: <CircleCheckBig className="text-[#7F1D1D]" size={24} />,
+      icon: <Delete className="text-[#7F1D1D]" size={24} />,
     },
     {
       label: 'Missed',
@@ -230,7 +237,7 @@ export const createFilterOptions = (
       ),
       border: '#E5E7EB',
       background: '#F3F4F6',
-      icon: <CircleCheckBig className="text-[#6B7280]" size={24} />,
+      icon: <PhoneMissed className="text-[#6B7280]" size={24} />,
     },
     {
       label: 'All',

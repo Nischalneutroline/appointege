@@ -341,12 +341,289 @@
 // }
 
 // export default Page
+
+// --------- recent
+// 'use client'
+
+// import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
+// import { AppointmentFilterValue, createFilterOptions } from './_data/data'
+// import SearchBar from '@/components/shared/layout/search-bar'
+// import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
+// import DataTable from '@/components/table/data-table'
+// import { columns } from './_data/column'
+// import FilterTabs from '@/components/shared/layout/filter-tabs'
+// import AppointmentGrid from './_component/appointment-grid'
+// import Image from 'next/image'
+// import { useDispatch, useSelector } from 'react-redux'
+// import { AppDispatch, RootState } from '@/store/store'
+// import {
+//   fetchAppointments,
+//   setActiveFilter,
+//   deleteAppointment,
+// } from '@/store/slices/appointmentSlice'
+// import { cn } from '@/utils/utils'
+// import { Appointment } from '@/app/(protected)/admin/appointment/_types/appointment'
+
+// const Page = () => {
+//   const {
+//     isLoading,
+//     isRefreshing,
+//     appointments,
+//     hasFetched,
+//     activeFilter,
+//     filteredAppointments,
+//     success,
+//   } = useSelector((state: RootState) => state.appointment)
+//   const { viewMode } = useSelector((state: RootState) => state.view)
+//   const dispatch = useDispatch<AppDispatch>()
+
+//   // State for search query
+//   const [searchQuery, setSearchQuery] = useState<string>('')
+
+//   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
+//   const hasFetchedOnce = useRef(false)
+//   const hasAttemptedEmptyFetch = useRef(false)
+
+//   const filterOptions = useMemo(() => {
+//     const result = createFilterOptions(appointments)
+//     console.log('Filter options:', result)
+//     return result
+//   }, [appointments])
+
+//   // Search logic: filter appointments based on search query
+//   const searchedAppointments = useMemo(() => {
+//     if (!searchQuery.trim()) {
+//       return filteredAppointments
+//     }
+
+//     const query = searchQuery.toLowerCase().trim()
+//     return filteredAppointments.filter((appointment: Appointment) => {
+//       // Adjust these fields based on your Appointment type definition
+//       const searchableFields = [
+//         appointment.customerName, // customer name
+//         appointment.status, // status
+//         appointment.selectedDate, // date
+//         appointment.selectedTime, // time
+//       ].filter(Boolean) // Remove undefined/null values
+
+//       return searchableFields.some((field) =>
+//         field.toLowerCase().includes(query),
+//       )
+//     })
+//   }, [filteredAppointments, searchQuery])
+
+//   const handleRefresh = useCallback(() => {
+//     if (debounceTimeout.current) return
+//     console.log('Manual refresh triggered')
+//     debounceTimeout.current = setTimeout(() => {
+//       dispatch(fetchAppointments(true)).then((action) => {
+//         if (action.type === fetchAppointments.fulfilled.type) {
+//           hasAttemptedEmptyFetch.current =
+//             Array.isArray(action.payload) && action.payload.length === 0
+//         }
+//         debounceTimeout.current = null
+//       })
+//     }, 300)
+//   }, [dispatch])
+
+//   const handleDelete = useCallback(
+//     async (id: string) => {
+//       await dispatch(deleteAppointment(id))
+//     },
+//     [dispatch],
+//   )
+
+//   const memoizedColumns = useMemo(() => columns, [])
+
+//   useEffect(() => {
+//     if (
+//       hasFetchedOnce.current ||
+//       isLoading ||
+//       isRefreshing ||
+//       (hasFetched && hasAttemptedEmptyFetch.current)
+//     ) {
+//       return
+//     }
+
+//     if (!hasFetched || appointments.length === 0) {
+//       console.log(
+//         `Triggering fetch: hasFetched=${hasFetched}, appointments.length=${appointments.length}`,
+//       )
+//       hasFetchedOnce.current = true
+//       dispatch(fetchAppointments(false)).then((action) => {
+//         if (action.type === fetchAppointments.fulfilled.type) {
+//           hasAttemptedEmptyFetch.current =
+//             Array.isArray(action.payload) && action.payload.length === 0
+//         }
+//       })
+//     }
+//   }, [isLoading, isRefreshing, hasFetched, appointments, dispatch])
+
+//   // Reset activeFilter to 'all' after a successful update to ensure updated appointment is visible
+//   useEffect(() => {
+//     if (success && filteredAppointments.length === 0 && !searchQuery) {
+//       console.log('Success detected, resetting activeFilter to "all"')
+//       dispatch(setActiveFilter('all'))
+//     }
+//   }, [success, filteredAppointments, dispatch, searchQuery])
+
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       console.log('Silent auto-refresh triggered')
+//       dispatch(fetchAppointments(false))
+//     }, 300000) // 5 minutes
+//     return () => clearInterval(interval)
+//   }, [dispatch])
+
+//   useEffect(() => {
+//     return () => {
+//       if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
+//     }
+//   }, [])
+
+//   return (
+//     <div className="flex flex-col gap-4 h-full w-full overflow-hidden py-0.5">
+//       <div className="flex flex-col md:flex-row md:justify-between gap-2 w-full">
+//         <div
+//           className={cn(
+//             'w-full md:w-fit flex items-center gap-1 overflow-x-auto px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border border-[#E5E7EB]',
+//             'scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-gray-500',
+//           )}
+//         >
+//           {filterOptions.map((option, index) => (
+//             <FilterTabs
+//               key={index}
+//               option={option}
+//               activeFilter={activeFilter}
+//               setSelectedData={() => {}}
+//               setActiveFilter={(filter: AppointmentFilterValue) =>
+//                 dispatch(setActiveFilter(filter))
+//               }
+//             />
+//           ))}
+//         </div>
+//         <div className="flex gap-2 lg:gap-3 justify-between">
+//           <SearchBar
+//             className="bg-white rounded-[8px]"
+//             placeholder="Search appointments by title, description, or name"
+//             width="w-full max-w-[330px]"
+//             onSearch={(value) => {
+//               console.log('Search:', value)
+//               setSearchQuery(value)
+//             }}
+//           />
+//           <div className="flex gap-3 justify-end">
+//             <div className="flex text-[#6B7280] items-center gap-1 justify-center border border-[#E5E7EB] bg-white rounded-[8px] w-24 cursor-pointer hover:scale-110 transition duration-400">
+//               <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
+//               <div className="text-sm font-normal">Filter</div>
+//               <ChevronDown strokeWidth={2.5} size={14} />
+//             </div>
+//             <div
+//               className={cn(
+//                 'flex items-center justify-center text-[#7285BD] cursor-pointer hover:rotate-90 transition duration-700 hover:scale-110',
+//                 isRefreshing && 'animate-spin',
+//               )}
+//               onClick={handleRefresh}
+//               aria-label={
+//                 isRefreshing
+//                   ? 'Refreshing appointments'
+//                   : 'Refresh appointments'
+//               }
+//               aria-busy={isRefreshing}
+//             >
+//               <RefreshCcw strokeWidth={2.5} size={18} />
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       <div className="flex-1 h-full min-h-0 rounded-lg overflow-y-auto">
+//         {isLoading && !hasFetched ? (
+//           <div className="text-center py-8 text-sm text-gray-500 italic">
+//             Loading appointments...
+//           </div>
+//         ) : searchedAppointments.length > 0 ? (
+//           <>
+//             {viewMode === 'list' && (
+//               <div className="w-full overflow-x-auto">
+//                 <div className="min-w-[800px]">
+//                   <DataTable
+//                     columns={memoizedColumns}
+//                     data={searchedAppointments}
+//                     rowKey="id"
+//                   />
+//                 </div>
+//               </div>
+//             )}
+//             {viewMode === 'card' && (
+//               <div
+//                 className={cn(
+//                   'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
+//                   'pb-6',
+//                 )}
+//               >
+//                 {searchedAppointments.map((item) => (
+//                   <AppointmentGrid item={item} key={item.id} />
+//                 ))}
+//               </div>
+//             )}
+//           </>
+//         ) : (
+//           <div className="h-full flex items-center justify-center text-gray-500">
+//             <div className="flex flex-col items-center gap-2">
+//               <Image
+//                 src="/assets/ecommerce.svg"
+//                 alt="No appointments"
+//                 width={140}
+//                 height={140}
+//               />
+//               <div className="text-2xl text-[#4F7CFF] font-semibold">
+//                 No Appointments Found
+//               </div>
+//               <div className="text-[#9F9C9C] text-sm font-medium">
+//                 {searchQuery ? (
+//                   <>
+//                     No appointments match your search query &quot;{searchQuery}
+//                     &quot; for{' '}
+//                     {activeFilter !== 'all'
+//                       ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
+//                       : 'the current filter'}
+//                     .
+//                   </>
+//                 ) : (
+//                   <>
+//                     No appointments found for{' '}
+//                     {activeFilter !== 'all'
+//                       ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
+//                       : 'the current filter'}
+//                     .
+//                   </>
+//                 )}
+//                 <button
+//                   className="p-1 ml-1 text-blue-600 hover:underline disabled:opacity-50"
+//                   onClick={handleRefresh}
+//                   disabled={isRefreshing || isLoading}
+//                   aria-label="Retry fetching appointments"
+//                 >
+//                   Try refreshing
+//                 </button>{' '}
+//                 or creating a new appointment.
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default Page
 'use client'
 
 import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import { AppointmentFilterValue, createFilterOptions } from './_data/data'
 import SearchBar from '@/components/shared/layout/search-bar'
-import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
+import { RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
 import { columns } from './_data/column'
 import FilterTabs from '@/components/shared/layout/filter-tabs'
@@ -356,21 +633,23 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
 import {
   fetchAppointments,
-  setActiveFilter,
   deleteAppointment,
+  setActiveFilters,
+  setActiveFilter,
 } from '@/store/slices/appointmentSlice'
 import { cn } from '@/utils/utils'
 import { Appointment } from '@/app/(protected)/admin/appointment/_types/appointment'
+import FilterDropdown from '@/components/shared/layout/filter-dropdown'
 
 const Page = () => {
   const {
     isLoading,
     isRefreshing,
-    appointments,
-    hasFetched,
-    activeFilter,
     filteredAppointments,
+    hasFetched,
     success,
+    activeFilter,
+    activeFilters,
   } = useSelector((state: RootState) => state.appointment)
   const { viewMode } = useSelector((state: RootState) => state.view)
   const dispatch = useDispatch<AppDispatch>()
@@ -383,31 +662,36 @@ const Page = () => {
   const hasAttemptedEmptyFetch = useRef(false)
 
   const filterOptions = useMemo(() => {
-    const result = createFilterOptions(appointments)
+    const result = createFilterOptions(filteredAppointments)
     console.log('Filter options:', result)
     return result
-  }, [appointments])
+  }, [filteredAppointments])
 
-  // Search logic: filter appointments based on search query
+  // Search logic: filter filteredAppointments based on search query
   const searchedAppointments = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return filteredAppointments
+    let result = filteredAppointments
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim()
+      console.log('Searching with query:', query)
+      result = filteredAppointments.filter((appointment: Appointment) => {
+        const searchableFields = [
+          appointment.customerName,
+          appointment.status,
+          appointment.selectedDate,
+          appointment.selectedTime,
+        ]
+          .filter(Boolean)
+          .map((field) => String(field).toLowerCase())
+        const matches = searchableFields.some((field) => field.includes(query))
+        console.log(`Appointment ID ${appointment.id}:`, {
+          searchableFields,
+          matches,
+        })
+        return matches
+      })
     }
-
-    const query = searchQuery.toLowerCase().trim()
-    return filteredAppointments.filter((appointment: Appointment) => {
-      // Adjust these fields based on your Appointment type definition
-      const searchableFields = [
-        appointment.customerName, // customer name
-        appointment.status, // status
-        appointment.selectedDate, // date
-        appointment.selectedTime, // time
-      ].filter(Boolean) // Remove undefined/null values
-
-      return searchableFields.some((field) =>
-        field.toLowerCase().includes(query),
-      )
-    })
+    console.log('Searched appointments:', result)
+    return result
   }, [filteredAppointments, searchQuery])
 
   const handleRefresh = useCallback(() => {
@@ -443,9 +727,9 @@ const Page = () => {
       return
     }
 
-    if (!hasFetched || appointments.length === 0) {
+    if (!hasFetched || filteredAppointments.length === 0) {
       console.log(
-        `Triggering fetch: hasFetched=${hasFetched}, appointments.length=${appointments.length}`,
+        `Triggering fetch: hasFetched=${hasFetched}, filteredAppointments.length=${filteredAppointments.length}`,
       )
       hasFetchedOnce.current = true
       dispatch(fetchAppointments(false)).then((action) => {
@@ -455,15 +739,17 @@ const Page = () => {
         }
       })
     }
-  }, [isLoading, isRefreshing, hasFetched, appointments, dispatch])
+  }, [isLoading, isRefreshing, hasFetched, filteredAppointments, dispatch])
 
-  // Reset activeFilter to 'all' after a successful update to ensure updated appointment is visible
+  // Reset activeFilter and activeFilters to default after a successful update if no appointments are found
   useEffect(() => {
-    if (success && filteredAppointments.length === 0 && !searchQuery) {
-      console.log('Success detected, resetting activeFilter to "all"')
-      dispatch(setActiveFilter('all'))
+    if (success && searchedAppointments.length === 0 && !searchQuery) {
+      console.log(
+        'Success detected, resetting activeFilter and activeFilters to default',
+      )
+      dispatch(setActiveFilter('today'))
     }
-  }, [success, filteredAppointments, dispatch, searchQuery])
+  }, [success, searchedAppointments, searchQuery, dispatch])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -488,34 +774,29 @@ const Page = () => {
             'scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-gray-500',
           )}
         >
-          {filterOptions.map((option, index) => (
-            <FilterTabs
-              key={index}
-              option={option}
-              activeFilter={activeFilter}
-              setSelectedData={() => {}}
-              setActiveFilter={(filter: AppointmentFilterValue) =>
-                dispatch(setActiveFilter(filter))
-              }
-            />
-          ))}
+          {filterOptions.map(
+            (option, index) =>
+              activeFilters.includes(option.value) && (
+                <FilterTabs key={index} option={option} />
+              ),
+          )}
         </div>
-        <div className="flex gap-2 lg:gap-3 justify-between">
+        <div className="flex gap-2 min-w-1/2 lg:gap-3 justify-between">
           <SearchBar
             className="bg-white rounded-[8px]"
-            placeholder="Search appointments by title, description, or name"
-            width="w-full max-w-[330px]"
+            placeholder="Search by customer name, status, date, or time"
+            width="w-full max-w-[530px]"
             onSearch={(value) => {
               console.log('Search:', value)
               setSearchQuery(value)
             }}
           />
           <div className="flex gap-3 justify-end">
-            <div className="flex text-[#6B7280] items-center gap-1 justify-center border border-[#E5E7EB] bg-white rounded-[8px] w-24 cursor-pointer hover:scale-110 transition duration-400">
-              <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
-              <div className="text-sm font-normal">Filter</div>
-              <ChevronDown strokeWidth={2.5} size={14} />
-            </div>
+            <FilterDropdown
+              filterOptions={filterOptions}
+              activeFilters={activeFilters}
+              onFilterChange={(filters) => dispatch(setActiveFilters(filters))}
+            />
             <div
               className={cn(
                 'flex items-center justify-center text-[#7285BD] cursor-pointer hover:rotate-90 transition duration-700 hover:scale-110',
@@ -581,19 +862,18 @@ const Page = () => {
               <div className="text-[#9F9C9C] text-sm font-medium">
                 {searchQuery ? (
                   <>
-                    No appointments match your search query &quot;{searchQuery}
-                    &quot; for{' '}
-                    {activeFilter !== 'all'
-                      ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
-                      : 'the current filter'}
+                    No appointments match your search query "{searchQuery}" for{' '}
+                    {activeFilter === 'all'
+                      ? 'all appointments'
+                      : `${activeFilter} appointments`}
                     .
                   </>
                 ) : (
                   <>
                     No appointments found for{' '}
-                    {activeFilter !== 'all'
-                      ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
-                      : 'the current filter'}
+                    {activeFilter === 'all'
+                      ? 'all appointments'
+                      : `${activeFilter} appointments`}
                     .
                   </>
                 )}
