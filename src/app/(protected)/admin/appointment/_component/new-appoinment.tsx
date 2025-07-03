@@ -476,8 +476,6 @@
 
 // export default NewAppointment
 
-'use client'
-
 import {
   Dialog,
   DialogContent,
@@ -540,8 +538,6 @@ interface ServiceOption {
 
 const appointmentSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
-  // firstName: z.string().min(1, 'First name is required'),
-  // lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address').min(1, 'Email is required'),
   phone: z
     .string()
@@ -618,10 +614,10 @@ const NewAppointment = ({
         email: currentAppointment.email,
         phone: currentAppointment.phone,
         service: currentAppointment.serviceId,
-        date: new Date(currentAppointment.selectedDate), // Convert string to Date for form
+        date: new Date(currentAppointment.selectedDate),
         time: currentAppointment.selectedTime,
         message: currentAppointment.message || '',
-        appointmentType: 'in-person', // Adjust based on your data model
+        appointmentType: 'in-person',
       })
     } else if (!isFormOpen) {
       form.reset()
@@ -674,7 +670,7 @@ const NewAppointment = ({
         email: formData.email,
         phone: formData.phone,
         serviceId: formData.service,
-        selectedDate: normalDateToIso(formData.date), // Convert Date to ISO string
+        selectedDate: normalDateToIso(formData.date),
         selectedTime: formData.time,
         status: currentAppointment?.status || AppointmentStatus.SCHEDULED,
         message: formData.message,
@@ -716,7 +712,7 @@ const NewAppointment = ({
     return (
       <div className="max-w-md md:max-w-2xl">
         <Dialog onOpenChange={setIsSubmitted} open={isSubmitted}>
-          <DialogContent className="md:max-w-lg overflow-y-scroll space-y-1 pb-3">
+          <DialogContent className="max-w-md md:max-w-lg max-h-[80dvh] overflow-y-auto space-y-1 pb-3">
             <DialogHeader className="gap-1">
               <DialogTitle className="text-blue-700 text-xl flex flex-col gap-1 items-center">
                 <CircleCheckBig
@@ -812,10 +808,9 @@ const NewAppointment = ({
 
   return (
     <Dialog onOpenChange={handleBack} open={open}>
-      {/* <DialogContent className="md:max-w-2xl overflow-y-scroll"> */}
-      <DialogContent className="md:max-w-[600px] overflow-y-scroll space-y-3">
+      <DialogContent className="max-w-md md:max-w-2xl max-h-[90dvh] overflow-y-auto space-y-3 px-4 sm:px-6">
         <DialogHeader className="gap-1">
-          <DialogTitle className="flex justify-center text-blue-700 text-xl md:text-2x">
+          <DialogTitle className="flex justify-center text-blue-700 text-xl md:text-2xl">
             {appoinmentFormMode === 'edit'
               ? 'Edit Appointment'
               : 'Create New Appointment'}
@@ -846,20 +841,20 @@ const NewAppointment = ({
                 name="fullName"
                 label="Full Name"
                 placeholder="Doe"
-                className="!h-10 border border-blue-200  rounded-[4px]"
+                className="!h-10 border border-blue-200 rounded-[4px]"
               />
               <InputField
                 name="email"
                 label="Email"
                 type="email"
                 placeholder="john@example.com"
-                className="!h-10 border border-blue-200  rounded-[4px]"
+                className="!h-10 border border-blue-200 rounded-[4px]"
               />
               <PhoneInputField
                 name="phone"
                 label="Phone"
                 placeholder="Enter your number"
-                className="!h-10 border border-blue-200  rounded-[4px]"
+                className="!h-10 border border-blue-200 rounded-[4px]"
               />
               <SelectField
                 name="service"
@@ -867,21 +862,21 @@ const NewAppointment = ({
                 options={serviceOptions}
                 placeholder="Select service"
                 disabled={isSubmitting}
-                className="!h-10 border border-blue-200  rounded-[4px] "
+                className="!h-10 border border-blue-200 rounded-[4px]"
               />
               <div className="grid grid-cols-2 items-center gap-4">
                 <DatePickerField
                   name="date"
                   label="Date"
                   placeholder="Pick a date"
-                  buttonClassName="h-10 border border-blue-200  rounded-[4px]"
+                  buttonClassName="h-10 border border-blue-200 rounded-[4px]"
                   icon={Calendar}
                 />
                 <TimePickerField
                   name="time"
                   label="Time"
                   placeholder="Select Time"
-                  className="!h-10 w-full border border-blue-200  rounded-[4px]"
+                  className="!h-10 w-full border border-blue-200 rounded-[4px]"
                   availableTimeSlots={availableTimeSlots}
                 />
               </div>
@@ -889,7 +884,7 @@ const NewAppointment = ({
                 name="message"
                 label="Message"
                 placeholder="Any special requests?"
-                className=" w-full border border-blue-200  rounded-[4px]"
+                className="w-full border border-blue-200 rounded-[4px]"
               />
               <FormField
                 control={form.control}
