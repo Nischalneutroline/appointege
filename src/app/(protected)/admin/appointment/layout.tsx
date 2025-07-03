@@ -128,6 +128,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
     currentAppointment,
     appointments,
   } = useSelector((state: RootState) => state.appointment)
+  console.log('Appointments', appointments)
 
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
 
@@ -149,8 +150,8 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   return (
-    <main className="flex flex-col gap-4 border border-blue-500 h-full">
-      <div className="flex flex-col justify-between gap-4">
+    <main className="flex flex-col gap-4  h-full">
+      <div className="flex flex-col justify-between gap-4 ">
         <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-0">
           <Heading
             title="Appointments"
@@ -182,7 +183,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
       </div>
 
       {/* Children */}
-      <div className="flex-1 border border-#559200 ">{children}</div>
+      <div className="flex-1 overflow-hidden ">{children}</div>
 
       {/* Forms in different modals */}
       {isFormOpen &&

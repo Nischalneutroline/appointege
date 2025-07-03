@@ -21,7 +21,7 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
           <Header />
           {/* Main Content */}
           {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1 relative  shadow p-6 border border-red-500 overflow-y-auto md:overflow-hidden">
+          <div className="flex-1 relative  shadow p-6 pb-0.5  overflow-y-auto md:overflow-hidden">
             {children}
           </div>
         </div>
