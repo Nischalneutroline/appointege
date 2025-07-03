@@ -42,7 +42,7 @@ const AppointmentGrid = ({ item }: { item: AppointmentWithService }) => {
   )
 
   return (
-    <div className="min-w-[340px] flex flex-col items-stretch bg-white rounded-[10px] border-[1px] border-[#DCE9F9] gap-4 ">
+    <div className="w-full flex flex-col items-stretch bg-white rounded-[10px] border-[1px] border-[#DCE9F9] gap-4 ">
       <div className="flex flex-col px-6 pt-6 gap-5">
         {/* Header: Name */}
         <div className="flex flex-col gap-3 ">

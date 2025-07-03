@@ -781,10 +781,10 @@ const Page = () => {
               ),
           )}
         </div>
-        <div className="flex gap-2 min-w-1/2 lg:gap-3 justify-between">
+        <div className="flex gap-2 min-w-1/4 lg:gap-3 justify-between">
           <SearchBar
             className="bg-white rounded-[8px]"
-            placeholder="Search by customer name, status, date, or time"
+            placeholder="Search by details"
             width="w-full max-w-[530px]"
             onSearch={(value) => {
               console.log('Search:', value)
@@ -837,7 +837,7 @@ const Page = () => {
             {viewMode === 'card' && (
               <div
                 className={cn(
-                  'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
+                  'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
                   'pb-6',
                 )}
               >
