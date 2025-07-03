@@ -10,6 +10,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { useFormContext } from 'react-hook-form'
 import { LucideIcon, ScrollText } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface TextAreaFieldProps {
   name: string
@@ -17,6 +18,7 @@ interface TextAreaFieldProps {
   placeholder?: string
   disabled?: boolean
   icon?: LucideIcon
+  className?: string
 }
 
 const TextAreaField = ({
@@ -24,7 +26,9 @@ const TextAreaField = ({
   label,
   placeholder,
   disabled,
+  // icon: Icon = ScrollText,
   icon: Icon,
+  className,
 }: TextAreaFieldProps) => {
   const { control } = useFormContext()
 
@@ -43,7 +47,10 @@ const TextAreaField = ({
               {...field}
               placeholder={placeholder}
               disabled={disabled}
-              className="resize-none h-20"
+              className={cn(
+                'resize-y min-h-[80px] w-full', // Set min-height and ensure full width
+                className,
+              )}
             />
           </FormControl>
           <FormMessage />

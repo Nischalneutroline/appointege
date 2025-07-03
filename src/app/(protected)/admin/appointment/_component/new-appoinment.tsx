@@ -16,7 +16,7 @@
 // import PhoneInputField from '@/components/custom-form-fields/phone-field'
 // import TimePickerField from '@/components/custom-form-fields/time-field'
 // import { Button } from '@/components/ui/button'
-// import { useRouter, useParams } from 'next/navigation'
+// import { useRouter } from 'next/navigation'
 // import DatePickerField from '@/components/custom-form-fields/date-field'
 // import { useEffect, useState } from 'react'
 // import LoadingSpinner from '@/components/loading-spinner'
@@ -40,18 +40,19 @@
 // import { format } from 'date-fns'
 // import { useSelector, useDispatch } from 'react-redux'
 // import { RootState, AppDispatch } from '@/store/store'
-// import { AppointmentStatus, PostAppoinmentData } from '../_types/appointment'
+// import {
+//   AppointmentStatus,
+//   PostAppoinmentData,
+// } from '@/app/(protected)/admin/appointment/_types/appointment'
 // import { normalDateToIso } from '@/utils/utils'
 // import {
 //   storeCreateAppointment,
-//   fetchAppointments,
 //   updateAppointment,
-// } from '@/store/slices/appointmentSlice'
-// import { fetchServices } from '@/store/slices/serviceslice'
-// import {
 //   openAppointmentEditForm,
 //   closeAppointmentForm,
 // } from '@/store/slices/appointmentSlice'
+// import { toast } from 'sonner'
+// import { fetchServices } from '@/store/slices/serviceslice'
 
 // interface ServiceOption {
 //   label: string
@@ -59,13 +60,17 @@
 // }
 
 // const appointmentSchema = z.object({
-//   firstName: z.string().min(1, 'First name is required'),
-//   lastName: z.string().min(1, 'Last name is required'),
+//   fullName: z.string().min(1, 'Full name is required'),
+//   // firstName: z.string().min(1, 'First name is required'),
+//   // lastName: z.string().min(1, 'Last name is required'),
 //   email: z.string().email('Invalid email address').min(1, 'Email is required'),
 //   phone: z
 //     .string()
 //     .min(1, 'Phone number is required')
-//     .regex(/^\+\d{1,4}\s\d{7,}$/, 'Valid phone number is required'),
+//     .regex(
+//       /^\+\d{1,4}\s\d{7,}$/,
+//       'Valid phone number is required (e.g., +977 9818275115)',
+//     ),
 //   service: z.string().min(1, 'Service is required'),
 //   date: z.date({ required_error: 'Date is required' }),
 //   time: z.string().min(1, 'Time is required'),
@@ -88,7 +93,7 @@
 //   '05:00 PM',
 // ]
 
-// const NewAppoinment = ({
+// const NewAppointment = ({
 //   open,
 //   onChange,
 // }: {
@@ -97,31 +102,22 @@
 // }) => {
 //   const dispatch = useDispatch<AppDispatch>()
 //   const { user } = useSelector((state: RootState) => state.auth)
-//   const { success } = useSelector((state: RootState) => state.appointment)
-//   const { services, isLoading: isLoadingServices } = useSelector(
-//     (state: RootState) => state.service,
-//   )
-//   const { isFormOpen, appoinmentFormMode, currentAppointment } = useSelector(
-//     (state: RootState) => state.appointment,
-//   )
+//   const {
+//     services,
+//     isLoading: isLoadingServices,
+//     serviceOptions,
+//   } = useSelector((state: RootState) => state.service)
+//   const { isFormOpen, appoinmentFormMode, currentAppointment, success } =
+//     useSelector((state: RootState) => state.appointment)
 
-//   console.log('NewAppoinment: services =', services)
-
-//   const router = useRouter()
-//   const params = useParams()
-//   const id = params?.id as string | undefined
-//   const isEditMode = !!id
-
-//   const [isLoadingAppointment, setIsLoadingAppointment] = useState(isEditMode)
 //   const [isSubmitting, setIsSubmitting] = useState(false)
 //   const [isSubmitted, setIsSubmitted] = useState(false)
-//   const [filledData, setFilledData] = useState<FormData>()
+//   const [filledData, setFilledData] = useState<FormData | null>(null)
 
 //   const form = useForm<FormData>({
 //     resolver: zodResolver(appointmentSchema),
 //     defaultValues: {
-//       firstName: '',
-//       lastName: '',
+//       fullName: '',
 //       email: '',
 //       phone: '',
 //       service: '',
@@ -133,117 +129,111 @@
 //   })
 
 //   useEffect(() => {
-//     if (services.length === 0) {
-//       dispatch(fetchServices())
+//     if (services.length === 0 && !isLoadingServices) {
+//       dispatch(fetchServices(false)).catch((error) => {
+//         console.error('Failed to fetch services:', error)
+//         toast.error('Failed to load services. Please try again.')
+//       })
 //     }
-//     if (isFormOpen && appoinmentFormMode === 'edit' && currentAppointment) {
-//       // Split the customer name if it exists
-//       const [firstName = '', ...lastNameParts] =
-//         currentAppointment.customerName.split(' ')
-//       const lastName = lastNameParts.join(' ')
 
-//       // Pre-fill the form with existing appointment data
+//     if (isFormOpen && appoinmentFormMode === 'edit' && currentAppointment) {
 //       form.reset({
-//         firstName,
-//         lastName,
+//         fullName: currentAppointment.customerName,
 //         email: currentAppointment.email,
 //         phone: currentAppointment.phone,
 //         service: currentAppointment.serviceId,
-//         date: new Date(currentAppointment.selectedDate),
+//         date: new Date(currentAppointment.selectedDate), // Convert string to Date for form
 //         time: currentAppointment.selectedTime,
 //         message: currentAppointment.message || '',
-//         appointmentType: 'in-person', // Set default or get from appointment
+//         appointmentType: 'in-person', // Adjust based on your data model
 //       })
 //     } else if (!isFormOpen) {
-//       // Reset form when closing
 //       form.reset()
 //     }
-//   }, [isFormOpen, appoinmentFormMode, currentAppointment, form])
+//   }, [
+//     isFormOpen,
+//     appoinmentFormMode,
+//     currentAppointment,
+//     services,
+//     isLoadingServices,
+//     dispatch,
+//     form,
+//   ])
 
-//   // Handle dialog close
-//   const handleOpenChange = (open: boolean) => {
-//     if (!open) {
-//       dispatch(closeAppointmentForm())
+//   useEffect(() => {
+//     if (success && isSubmitting) {
+//       setIsSubmitted(true)
+//       setIsSubmitting(false)
 //     }
-//   }
+//   }, [success, isSubmitting])
 
 //   const appointmentTypeOptions = [
-//     { label: 'In-Person', value: 'in-person' },
+//     { label: 'Physical', value: 'physical' },
 //     { label: 'Virtual', value: 'virtual' },
 //   ]
 
-//   const hasFetchedServices = !isLoadingServices
-
-//   const getLabelFromValue = (
-//     value: string,
-//     options: { label: string; value: string }[],
-//   ) => {
+//   const getLabelFromValue = (value: string, options: ServiceOption[]) => {
 //     const option = options.find((opt) => opt.value === value)
 //     return option ? option.label : value
 //   }
 
 //   const onSubmit = async (formData: FormData) => {
+//     const errors = form.formState.errors
+//     if (Object.keys(errors).length > 0) {
+//       console.log('Validation errors:', errors)
+//       toast.error('Please correct the form errors and try again.')
+//       return
+//     }
+
+//     if (!user?.id) {
+//       console.error('User is not authenticated')
+//       toast.error('You must be logged in to create or update an appointment')
+//       return
+//     }
+
 //     try {
 //       setIsSubmitting(true)
 //       const appointmentData: PostAppoinmentData = {
-//         customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+//         customerName: formData.fullName,
 //         email: formData.email,
 //         phone: formData.phone,
 //         serviceId: formData.service,
-//         selectedDate: normalDateToIso(formData.date),
+//         selectedDate: normalDateToIso(formData.date), // Convert Date to ISO string
 //         selectedTime: formData.time,
-
+//         status: currentAppointment?.status || AppointmentStatus.SCHEDULED,
 //         message: formData.message,
 //         userId: user?.id,
 //         isForSelf: false,
 //         bookedById: user?.id,
 //         createdById: user?.id,
-//         status: currentAppointment?.status || AppointmentStatus.SCHEDULED,
 //       }
-//       console.log('Submitting appointment via store:', appointmentData)
+
+//       console.log('Submitting appointment:', appointmentData)
 
 //       if (appoinmentFormMode === 'edit' && currentAppointment?.id) {
-//         console.log('Updating appointment with ID:', currentAppointment.id)
-//         const result = await dispatch(
+//         await dispatch(
 //           updateAppointment({
 //             id: currentAppointment.id,
 //             data: appointmentData,
 //           }),
 //         ).unwrap()
-//         console.log('Update successful:', result)
 //       } else {
-//         console.log('Creating new appointment')
-//         const result = await dispatch(
-//           storeCreateAppointment(appointmentData),
-//         ).unwrap()
-//         console.log('Creation successful:', result)
+//         await dispatch(storeCreateAppointment(appointmentData)).unwrap()
 //       }
 //       setFilledData(formData)
-//       setIsSubmitted(true)
 //     } catch (error: any) {
 //       console.error(
-//         `Error ${appoinmentFormMode === 'edit' ? 'updating' : 'creating'} appointment in form:`,
-//         {
-//           error,
-//           name: error?.name,
-//           // data: error?.data,
-//           message: error?.message,
-//           response: error?.response?.data,
-//           stack: error?.stack,
-//         },
+//         `Error ${appoinmentFormMode === 'edit' ? 'updating' : 'creating'} appointment:`,
+//         error,
 //       )
-//       // Optionally show error to user
-//       // toast.error(
-//       //   `Failed to ${appoinmentFormMode === 'edit' ? 'update' : 'create'} appointment: ${
-//       //     error?.response?.data?.message || error?.message || 'Unknown error'
-//       //   }`,
-//       // )
+//       // Toast notifications are handled in the slice
 //     } finally {
 //       setIsSubmitting(false)
 //     }
 //   }
 
 //   const handleBack = () => {
+//     dispatch(closeAppointmentForm())
 //     onChange(false)
 //   }
 
@@ -261,28 +251,30 @@
 //                 Appointment Confirmed!
 //               </DialogTitle>
 //               <DialogDescription className="text-sm text-muted-foreground text-center">
-//                 Appointment successfully scheduled on behalf of the customer
+//                 Appointment successfully{' '}
+//                 {appoinmentFormMode === 'edit' ? 'updated' : 'scheduled'} on
+//                 behalf of the customer
 //               </DialogDescription>
 //             </DialogHeader>
 //             <div className="flex flex-col gap-5 px-4 py-6 bg-[#eff5ff] rounded-[8px]">
 //               <ViewItem
 //                 title="Name"
-//                 value={filledData?.firstName + ' ' + filledData?.lastName}
-//                 icon={<UserRound className="w-4 h-4 " strokeWidth={2.5} />}
+//                 value={filledData?.fullName || ''}
+//                 icon={<UserRound className="w-4 h-4" strokeWidth={2.5} />}
 //                 bgColor="#dae8fe"
 //                 textColor="#3d73ed"
 //               />
 //               <ViewItem
 //                 title="Email"
 //                 value={filledData?.email || ''}
-//                 icon={<Mail className="w-4 h-4 " strokeWidth={2} />}
+//                 icon={<Mail className="w-4 h-4" strokeWidth={2} />}
 //                 bgColor="#dae8fe"
 //                 textColor="#3d73ed"
 //               />
 //               <ViewItem
 //                 title="Phone"
 //                 value={filledData?.phone || ''}
-//                 icon={<Phone className="w-4 h-4 " strokeWidth={2} />}
+//                 icon={<Phone className="w-4 h-4" strokeWidth={2} />}
 //                 bgColor="#dae8fe"
 //                 textColor="#3d73ed"
 //               />
@@ -291,7 +283,7 @@
 //                 title="Service"
 //                 value={
 //                   filledData?.service
-//                     ? getLabelFromValue(filledData.service, services)
+//                     ? getLabelFromValue(filledData.service, serviceOptions)
 //                     : ''
 //                 }
 //                 icon={<HandHeart className="w-4.5 h-4.5" strokeWidth={2} />}
@@ -324,21 +316,13 @@
 //                 textColor="#099668"
 //               />
 //             </div>
-//             <div className="flex flex-col gap-3 md:flex-row justify-center ">
-//               {/* <Button
-//                 type="button"
-//                 variant="outline"
-//                 className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
-//                 onClick={handleBack}
-//               >
-//                 ← Back
-//               </Button> */}
+//             <div className="flex flex-col gap-3 md:flex-row justify-center">
 //               <Button
 //                 type="submit"
 //                 variant="default"
 //                 onClick={() => {
 //                   setIsSubmitted(false)
-//                   onChange(false)
+//                   handleBack()
 //                 }}
 //                 className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
 //               >
@@ -352,16 +336,19 @@
 //   }
 
 //   return (
-//     <Dialog onOpenChange={onChange} open={open}>
-//       <DialogContent className="md:max-w-2xl overflow-y-scroll">
-//         <DialogHeader className="gap-0">
-//           <DialogTitle className="flex justify-center text-blue-700 text-xl">
-//             {isEditMode ? 'Edit Appointment' : 'Enter Appointment Details'}
+//     <Dialog onOpenChange={handleBack} open={open}>
+//       {/* <DialogContent className="md:max-w-2xl overflow-y-scroll"> */}
+//       <DialogContent className="md:max-w-[600px] overflow-y-scroll space-y-4">
+//         <DialogHeader className="gap-2">
+//           <DialogTitle className="flex justify-center text-blue-700 text-xl md:text-2x">
+//             {appoinmentFormMode === 'edit'
+//               ? 'Edit Appointment'
+//               : 'Create New Appointment'}
 //           </DialogTitle>
 //           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
-//             {isEditMode
+//             {appoinmentFormMode === 'edit'
 //               ? 'Update existing appointment details'
-//               : 'Fill the detail below to create appointment on behalf of customer'}
+//               : 'Fill the details below to create an appointment on behalf of the customer'}
 //           </DialogDescription>
 //         </DialogHeader>
 
@@ -369,77 +356,65 @@
 //           <div className="flex justify-center items-center py-20 text-muted-foreground">
 //             Loading services...
 //           </div>
-//         ) : !isLoadingServices && services.length === 0 ? (
+//         ) : services.length === 0 ? (
 //           <div className="flex justify-center items-center py-20 text-muted-foreground">
-//             No service found to add appointment
+//             No services found to add appointment
 //           </div>
 //         ) : (
 //           <FormProvider {...form}>
 //             <form
 //               onSubmit={form.handleSubmit(onSubmit)}
-//               className="space-y-5"
+//               className="flex flex-col gap-2"
 //               aria-busy={isSubmitting}
 //             >
-//               <div className="grid grid-cols-2 gap-4">
-//                 <InputField
-//                   name="firstName"
-//                   label="First Name"
-//                   placeholder="John"
-//                 />
-//                 <InputField
-//                   name="lastName"
-//                   label="Last Name"
-//                   placeholder="Doe"
-//                 />
-//               </div>
-
+//               <InputField name="fullName" label="Full Name" placeholder="Doe" />
 //               <InputField
 //                 name="email"
 //                 label="Email"
 //                 type="email"
 //                 placeholder="john@example.com"
 //               />
-
 //               <PhoneInputField
 //                 name="phone"
-//                 label="Phone Number"
+//                 label="Phone"
 //                 placeholder="Enter your number"
+//                 className="h-10 border border-blue-200  rounded-[4px]"
 //               />
-
 //               <SelectField
 //                 name="service"
-//                 label="Select a Service"
-//                 options={services}
+//                 label="Service"
+//                 options={serviceOptions}
 //                 placeholder="Select service"
 //                 disabled={isSubmitting}
+//                 className="!h-10 border border-blue-200  rounded-[4px]"
 //               />
-
 //               <div className="grid grid-cols-2 items-center gap-4">
 //                 <DatePickerField
 //                   name="date"
-//                   label="Appointment Date"
+//                   label="Date"
 //                   placeholder="Pick a date"
+//                   buttonClassName="h-10 border border-blue-200  rounded-[4px]"
 //                 />
 //                 <TimePickerField
 //                   name="time"
-//                   label="Appointment Time"
+//                   label="Time"
+//                   className="!h-10 w-full border border-blue-200  rounded-[4px]"
 //                   availableTimeSlots={availableTimeSlots}
 //                 />
 //               </div>
-
 //               <TextAreaField
 //                 name="message"
-//                 label="Additional Notes"
+//                 label="Message"
 //                 placeholder="Any special requests?"
+//                 className="!h-10 w-full border border-blue-200  rounded-[4px]"
 //               />
-
 //               <FormField
 //                 control={form.control}
 //                 name="appointmentType"
 //                 render={({ field }) => (
-//                   <FormItem>
+//                   <FormItem className="">
 //                     <FormLabel>Appointment Type</FormLabel>
-//                     <FormControl>
+//                     <FormControl className="">
 //                       <RadioGroup
 //                         onValueChange={field.onChange}
 //                         value={field.value}
@@ -469,33 +444,23 @@
 //                   </FormItem>
 //                 )}
 //               />
-
-//               <div className="flex flex-col gap-3  md:flex-row justify-center items-center mt-6">
-//                 {/* <Button
-//                   type="button"
-//                   variant="outline"
-//                   className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
-//                   onClick={handleBack}
-//                   disabled={isSubmitting}
-//                 >
-//                   ← Back
-//                 </Button> */}
+//               <div className="flex flex-col gap-3 md:flex-row justify-center items-center mt-6">
 //                 <Button
 //                   type="submit"
 //                   variant="default"
 //                   className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
-//                   disabled={
-//                     isLoadingServices || isLoadingAppointment || isSubmitting
-//                   }
+//                   disabled={isLoadingServices || isSubmitting}
 //                 >
-//                   {isEditMode ? (
-//                     isSubmitting ? (
-//                       <LoadingSpinner text="Updating..." />
-//                     ) : (
-//                       'Submitting...'
-//                     )
-//                   ) : isSubmitting ? (
-//                     <LoadingSpinner text="Creating..." />
+//                   {isSubmitting ? (
+//                     <LoadingSpinner
+//                       text={
+//                         appoinmentFormMode === 'edit'
+//                           ? 'Updating...'
+//                           : 'Creating...'
+//                       }
+//                     />
+//                   ) : appoinmentFormMode === 'edit' ? (
+//                     'Update'
 //                   ) : (
 //                     'Submit'
 //                   )}
@@ -509,7 +474,7 @@
 //   )
 // }
 
-// export default NewAppoinment
+// export default NewAppointment
 
 'use client'
 
@@ -573,8 +538,9 @@ interface ServiceOption {
 }
 
 const appointmentSchema = z.object({
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
+  fullName: z.string().min(1, 'Full name is required'),
+  // firstName: z.string().min(1, 'First name is required'),
+  // lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email address').min(1, 'Email is required'),
   phone: z
     .string()
@@ -629,8 +595,7 @@ const NewAppointment = ({
   const form = useForm<FormData>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      fullName: '',
       email: '',
       phone: '',
       service: '',
@@ -650,12 +615,8 @@ const NewAppointment = ({
     }
 
     if (isFormOpen && appoinmentFormMode === 'edit' && currentAppointment) {
-      const [firstName = '', ...lastNameParts] =
-        currentAppointment.customerName.split(' ')
-      const lastName = lastNameParts.join(' ')
       form.reset({
-        firstName,
-        lastName,
+        fullName: currentAppointment.customerName,
         email: currentAppointment.email,
         phone: currentAppointment.phone,
         service: currentAppointment.serviceId,
@@ -685,7 +646,7 @@ const NewAppointment = ({
   }, [success, isSubmitting])
 
   const appointmentTypeOptions = [
-    { label: 'In-Person', value: 'in-person' },
+    { label: 'Physical', value: 'physical' },
     { label: 'Virtual', value: 'virtual' },
   ]
 
@@ -711,7 +672,7 @@ const NewAppointment = ({
     try {
       setIsSubmitting(true)
       const appointmentData: PostAppoinmentData = {
-        customerName: `${formData.firstName} ${formData.lastName}`.trim(),
+        customerName: formData.fullName,
         email: formData.email,
         phone: formData.phone,
         serviceId: formData.service,
@@ -776,7 +737,7 @@ const NewAppointment = ({
             <div className="flex flex-col gap-5 px-4 py-6 bg-[#eff5ff] rounded-[8px]">
               <ViewItem
                 title="Name"
-                value={filledData?.firstName + ' ' + filledData?.lastName}
+                value={filledData?.fullName || ''}
                 icon={<UserRound className="w-4 h-4" strokeWidth={2.5} />}
                 bgColor="#dae8fe"
                 textColor="#3d73ed"
@@ -854,12 +815,13 @@ const NewAppointment = ({
 
   return (
     <Dialog onOpenChange={handleBack} open={open}>
-      <DialogContent className="md:max-w-2xl overflow-y-scroll">
-        <DialogHeader className="gap-0">
-          <DialogTitle className="flex justify-center text-blue-700 text-xl">
+      {/* <DialogContent className="md:max-w-2xl overflow-y-scroll"> */}
+      <DialogContent className="md:max-w-[600px] overflow-y-scroll space-y-3">
+        <DialogHeader className="gap-1">
+          <DialogTitle className="flex justify-center text-blue-700 text-xl md:text-2x">
             {appoinmentFormMode === 'edit'
               ? 'Edit Appointment'
-              : 'Enter Appointment Details'}
+              : 'Create New Appointment'}
           </DialogTitle>
           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
             {appoinmentFormMode === 'edit'
@@ -880,63 +842,64 @@ const NewAppointment = ({
           <FormProvider {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-5"
+              className="flex flex-col gap-4"
               aria-busy={isSubmitting}
             >
-              <div className="grid grid-cols-2 gap-4">
-                <InputField
-                  name="firstName"
-                  label="First Name"
-                  placeholder="John"
-                />
-                <InputField
-                  name="lastName"
-                  label="Last Name"
-                  placeholder="Doe"
-                />
-              </div>
+              <InputField
+                name="fullName"
+                label="Full Name"
+                placeholder="Doe"
+                className="!h-10 border border-blue-200  rounded-[4px]"
+              />
               <InputField
                 name="email"
                 label="Email"
                 type="email"
                 placeholder="john@example.com"
+                className="!h-10 border border-blue-200  rounded-[4px]"
               />
               <PhoneInputField
                 name="phone"
-                label="Phone Number"
+                label="Phone"
                 placeholder="Enter your number"
+                className="!h-10 border border-blue-200  rounded-[4px]"
               />
               <SelectField
                 name="service"
-                label="Select a Service"
+                label="Service"
                 options={serviceOptions}
                 placeholder="Select service"
                 disabled={isSubmitting}
+                className="!h-10 border border-blue-200  rounded-[4px]"
               />
               <div className="grid grid-cols-2 items-center gap-4">
                 <DatePickerField
                   name="date"
-                  label="Appointment Date"
+                  label="Date"
                   placeholder="Pick a date"
+                  buttonClassName="h-10 border border-blue-200  rounded-[4px]"
                 />
                 <TimePickerField
                   name="time"
-                  label="Appointment Time"
+                  label="Time"
+                  placeholder="Select Time"
+                  className="!h-10 w-full border border-blue-200  rounded-[4px]"
                   availableTimeSlots={availableTimeSlots}
                 />
               </div>
               <TextAreaField
                 name="message"
-                label="Additional Notes"
+                label="Message"
                 placeholder="Any special requests?"
+                className=" w-full border border-blue-200  rounded-[4px]"
               />
               <FormField
                 control={form.control}
                 name="appointmentType"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="">
                     <FormLabel>Appointment Type</FormLabel>
-                    <FormControl>
+                    <FormControl className="">
                       <RadioGroup
                         onValueChange={field.onChange}
                         value={field.value}
@@ -970,7 +933,7 @@ const NewAppointment = ({
                 <Button
                   type="submit"
                   variant="default"
-                  className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
+                  className="rounded-md w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
                   disabled={isLoadingServices || isSubmitting}
                 >
                   {isSubmitting ? (
