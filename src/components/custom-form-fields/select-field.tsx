@@ -44,47 +44,52 @@ const SelectField = ({
     <FormField
       control={control}
       name={name}
-      render={({ field }) => {
-        // console.log(`${name} options:`, options)
-        return (
-          <FormItem className="flex flex-col gap-1">
-            <div className="flex gap-2 items-center">
-              {Icon && <Icon className="size-4 text-gray-500" />}
-              <FormLabel>{label}</FormLabel>
-            </div>
-            <FormControl className={className}>
-              <Select
-                value={field.value ? String(field.value) : ''}
-                onValueChange={(value) => {
-                  console.log(`${name} onValueChange:`, value)
-                  // Only update if the value is non-empty and exists in options
-                  if (value && options.some((opt) => opt.value === value)) {
-                    field.onChange(value)
-                  } else {
-                    console.log(
-                      `${name} onValueChange ignored: Invalid or empty value`,
-                      value,
-                    )
-                  }
-                }}
-                disabled={disabled}
+      render={({ field }) => (
+        <FormItem className="flex flex-col gap-1">
+          <div className="flex gap-2 items-center">
+            {Icon && <Icon className="size-4 text-gray-500" />}
+            <FormLabel>{label}</FormLabel>
+          </div>
+          <FormControl>
+            <Select
+              value={field.value ? String(field.value) : ''}
+              onValueChange={(value) => {
+                console.log(`${name} onValueChange:`, value)
+                if (value && options.some((opt) => opt.value === value)) {
+                  field.onChange(value)
+                } else {
+                  console.log(
+                    `${name} onValueChange ignored: Invalid or empty value`,
+                    value,
+                  )
+                }
+              }}
+              disabled={disabled}
+            >
+              <SelectTrigger
+                className={cn(
+                  'w-full h-10',
+                  !field.value && 'text-muted-foreground', // Apply placeholder text color
+                  className,
+                )}
               >
-                <SelectTrigger className={cn('w-full h-10', className)}>
-                  <SelectValue placeholder={placeholder} />
-                </SelectTrigger>
-                <SelectContent>
-                  {options.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )
-      }}
+                <SelectValue
+                  placeholder={placeholder}
+                  className="text-black" // Ensure placeholder text has specific styling
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
     />
   )
 }

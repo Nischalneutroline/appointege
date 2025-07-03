@@ -507,6 +507,7 @@ import {
 } from '@/components/ui/form'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
+  Calendar,
   CircleCheckBig,
   Clock,
   HandHeart,
@@ -870,7 +871,7 @@ const NewAppointment = ({
                 options={serviceOptions}
                 placeholder="Select service"
                 disabled={isSubmitting}
-                className="!h-10 border border-blue-200  rounded-[4px]"
+                className="!h-10 border border-blue-200  rounded-[4px] "
               />
               <div className="grid grid-cols-2 items-center gap-4">
                 <DatePickerField
@@ -878,6 +879,7 @@ const NewAppointment = ({
                   label="Date"
                   placeholder="Pick a date"
                   buttonClassName="h-10 border border-blue-200  rounded-[4px]"
+                  icon={Calendar}
                 />
                 <TimePickerField
                   name="time"
