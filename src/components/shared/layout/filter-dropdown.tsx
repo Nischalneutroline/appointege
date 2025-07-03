@@ -147,9 +147,12 @@ const FilterDropdown = ({
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className={cn('h-10 w-[160px] justify-between text-sm font-normal ', {
-            'text-muted-foreground': activeFilters.length === 0,
-          })}
+          className={cn(
+            'h-10 w-[160px] justify-between text-sm font-normal text-gray-500',
+            {
+              'text-muted-foreground': activeFilters.length === 0,
+            },
+          )}
         >
           <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
           <div className="text-sm font-normal"> Select Filters</div>
