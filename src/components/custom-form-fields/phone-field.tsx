@@ -723,7 +723,7 @@ const PhoneField = ({
     // Main container for phone field
     <div className={cn('space-y-1')}>
       {/* Label and icon */}
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center">
         {Icon && <Icon className="size-4 text-gray-500" />}
         {label && (
           <Label htmlFor={name} className="text-sm font-medium">
@@ -739,7 +739,8 @@ const PhoneField = ({
           disabled={disabled}
           error={!!error}
           countryOptions={countryOptions}
-          className={cn(className, ' rounded-e-none')}
+          // className={cn(className, ' rounded-e-none  border-r-[#474747]')}
+          className={cn(className, ' rounded-e-none  border-r-gray-400')}
         />
         <PhoneInput
           value={phoneNumber}
@@ -748,7 +749,7 @@ const PhoneField = ({
           error={!!error}
           selectedCountry={selectedCountry}
           disabled={disabled}
-          className={cn(className, ' rounded-s-none')}
+          className={cn(className, ' rounded-s-none border-l-0')}
         />
       </div>
       {/* Error message */}

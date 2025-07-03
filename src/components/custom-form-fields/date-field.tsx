@@ -149,7 +149,7 @@ const DatePickerField = ({
       render={({ field }) => (
         <FormItem className={cn('flex flex-col', className)}>
           <div className="flex items-center gap-2">
-            {Icon && <Icon className="size-4 text-gray-500" />}
+            {/* {Icon && <Icon className="size-4 text-gray-500" />} */}
             <FormLabel>{label}</FormLabel>
           </div>
           <Popover>

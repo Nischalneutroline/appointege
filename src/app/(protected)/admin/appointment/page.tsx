@@ -393,7 +393,7 @@ const Page = () => {
       </div>
 
       {/* Appointment Display */}
-      <div className="flex-1 h-full   min-h-0 md:border-t rounded-lg overflow-y-auto">
+      <div className="flex-1 h-full   min-h-0  rounded-lg overflow-y-auto">
         {isLoading && !hasFetched ? (
           <div className="text-center py-8 text-sm text-gray-500 italic">
             Loading appointments...
