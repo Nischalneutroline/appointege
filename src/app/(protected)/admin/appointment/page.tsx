@@ -341,10 +341,9 @@
 // }
 
 // export default Page
-
 'use client'
 
-import React, { useEffect, useMemo, useCallback, useRef } from 'react'
+import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
 import { AppointmentFilterValue, createFilterOptions } from './_data/data'
 import SearchBar from '@/components/shared/layout/search-bar'
 import { ChevronDown, Funnel, RefreshCcw } from 'lucide-react'
@@ -361,6 +360,7 @@ import {
   deleteAppointment,
 } from '@/store/slices/appointmentSlice'
 import { cn } from '@/utils/utils'
+import { Appointment } from '@/app/(protected)/admin/appointment/_types/appointment'
 
 const Page = () => {
   const {
@@ -375,6 +375,9 @@ const Page = () => {
   const { viewMode } = useSelector((state: RootState) => state.view)
   const dispatch = useDispatch<AppDispatch>()
 
+  // State for search query
+  const [searchQuery, setSearchQuery] = useState<string>('')
+
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
   const hasFetchedOnce = useRef(false)
   const hasAttemptedEmptyFetch = useRef(false)
@@ -384,6 +387,28 @@ const Page = () => {
     console.log('Filter options:', result)
     return result
   }, [appointments])
+
+  // Search logic: filter appointments based on search query
+  const searchedAppointments = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return filteredAppointments
+    }
+
+    const query = searchQuery.toLowerCase().trim()
+    return filteredAppointments.filter((appointment: Appointment) => {
+      // Adjust these fields based on your Appointment type definition
+      const searchableFields = [
+        appointment.customerName, // customer name
+        appointment.status, // status
+        appointment.selectedDate, // date
+        appointment.selectedTime, // time
+      ].filter(Boolean) // Remove undefined/null values
+
+      return searchableFields.some((field) =>
+        field.toLowerCase().includes(query),
+      )
+    })
+  }, [filteredAppointments, searchQuery])
 
   const handleRefresh = useCallback(() => {
     if (debounceTimeout.current) return
@@ -434,11 +459,11 @@ const Page = () => {
 
   // Reset activeFilter to 'all' after a successful update to ensure updated appointment is visible
   useEffect(() => {
-    if (success && filteredAppointments.length === 0) {
+    if (success && filteredAppointments.length === 0 && !searchQuery) {
       console.log('Success detected, resetting activeFilter to "all"')
       dispatch(setActiveFilter('all'))
     }
-  }, [success, filteredAppointments, dispatch])
+  }, [success, filteredAppointments, dispatch, searchQuery])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -478,9 +503,12 @@ const Page = () => {
         <div className="flex gap-2 lg:gap-3 justify-between">
           <SearchBar
             className="bg-white rounded-[8px]"
-            placeholder="Search appointment"
+            placeholder="Search appointments by title, description, or name"
             width="w-full max-w-[330px]"
-            onSearch={(value) => console.log('Search:', value)}
+            onSearch={(value) => {
+              console.log('Search:', value)
+              setSearchQuery(value)
+            }}
           />
           <div className="flex gap-3 justify-end">
             <div className="flex text-[#6B7280] items-center gap-1 justify-center border border-[#E5E7EB] bg-white rounded-[8px] w-24 cursor-pointer hover:scale-110 transition duration-400">
@@ -490,7 +518,7 @@ const Page = () => {
             </div>
             <div
               className={cn(
-                'flex items-center justify-center text-[#7285BD] cursor-pointer hover:rotate-90 transition duration-400 hover:scale-110',
+                'flex items-center justify-center text-[#7285BD] cursor-pointer hover:rotate-90 transition duration-700 hover:scale-110',
                 isRefreshing && 'animate-spin',
               )}
               onClick={handleRefresh}
@@ -512,14 +540,14 @@ const Page = () => {
           <div className="text-center py-8 text-sm text-gray-500 italic">
             Loading appointments...
           </div>
-        ) : filteredAppointments.length > 0 ? (
+        ) : searchedAppointments.length > 0 ? (
           <>
             {viewMode === 'list' && (
               <div className="w-full overflow-x-auto">
                 <div className="min-w-[800px]">
                   <DataTable
                     columns={memoizedColumns}
-                    data={filteredAppointments}
+                    data={searchedAppointments}
                     rowKey="id"
                   />
                 </div>
@@ -532,7 +560,7 @@ const Page = () => {
                   'pb-6',
                 )}
               >
-                {filteredAppointments.map((item) => (
+                {searchedAppointments.map((item) => (
                   <AppointmentGrid item={item} key={item.id} />
                 ))}
               </div>
@@ -551,11 +579,24 @@ const Page = () => {
                 No Appointments Found
               </div>
               <div className="text-[#9F9C9C] text-sm font-medium">
-                No appointments found for{' '}
-                {activeFilter !== 'all'
-                  ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
-                  : 'the current filter'}
-                .
+                {searchQuery ? (
+                  <>
+                    No appointments match your search query &quot;{searchQuery}
+                    &quot; for{' '}
+                    {activeFilter !== 'all'
+                      ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
+                      : 'the current filter'}
+                    .
+                  </>
+                ) : (
+                  <>
+                    No appointments found for{' '}
+                    {activeFilter !== 'all'
+                      ? `'${filterOptions.find((opt) => opt.value === activeFilter)?.label}'`
+                      : 'the current filter'}
+                    .
+                  </>
+                )}
                 <button
                   className="p-1 ml-1 text-blue-600 hover:underline disabled:opacity-50"
                   onClick={handleRefresh}

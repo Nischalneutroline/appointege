@@ -95,7 +95,10 @@ const AppointmentGrid = ({ item }: { item: AppointmentWithService }) => {
               />
             </div>
             <div>
-              {formattedTime} {item?.service?.estimatedDuration} min
+              {item.selectedTime}{' '}
+              <span className=" font-light">
+                ({item?.service?.estimatedDuration} min)
+              </span>
             </div>
           </div>
         </div>

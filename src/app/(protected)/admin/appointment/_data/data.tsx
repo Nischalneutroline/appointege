@@ -81,7 +81,6 @@
 //     icon: <Users className="text-[#2D155B]" size={24} />,
 //   },
 // ]
-
 import { CalendarDays, CircleCheckBig, Clock, Users } from 'lucide-react'
 import {
   Appointment,
@@ -197,42 +196,42 @@ export const createFilterOptions = (
       background: '#E9F9EF',
       icon: <CircleCheckBig className="text-[#0F5327]" size={24} />,
     },
-    // {
-    //   label: 'Cancelled',
-    //   value: 'cancelled',
-    //   textColor: '#7F1D1D',
-    //   count: appointments.filter(
-    //     (apt) =>
-    //       validStatuses.includes(apt.status as AppointmentStatus) &&
-    //       apt.status === AppointmentStatus.CANCELLED,
-    //   ).length,
-    //   data: appointments.filter(
-    //     (apt) =>
-    //       validStatuses.includes(apt.status as AppointmentStatus) &&
-    //       apt.status === AppointmentStatus.CANCELLED,
-    //   ),
-    //   border: '#FEE2E2',
-    //   background: '#FEF2F2',
-    //   icon: <CircleCheckBig className="text-[#7F1D1D]" size={24} />,
-    // },
-    // {
-    //   label: 'Missed',
-    //   value: 'missed',
-    //   textColor: '#6B7280',
-    //   count: appointments.filter(
-    //     (apt) =>
-    //       validStatuses.includes(apt.status as AppointmentStatus) &&
-    //       apt.status === AppointmentStatus.MISSED,
-    //   ).length,
-    //   data: appointments.filter(
-    //     (apt) =>
-    //       validStatuses.includes(apt.status as AppointmentStatus) &&
-    //       apt.status === AppointmentStatus.MISSED,
-    //   ),
-    //   border: '#E5E7EB',
-    //   background: '#F3F4F6',
-    //   icon: <CircleCheckBig className="text-[#6B7280]" size={24} />,
-    // },
+    {
+      label: 'Cancelled',
+      value: 'cancelled',
+      textColor: '#7F1D1D',
+      count: appointments.filter(
+        (apt) =>
+          validStatuses.includes(apt.status as AppointmentStatus) &&
+          apt.status === AppointmentStatus.CANCELLED,
+      ).length,
+      data: appointments.filter(
+        (apt) =>
+          validStatuses.includes(apt.status as AppointmentStatus) &&
+          apt.status === AppointmentStatus.CANCELLED,
+      ),
+      border: '#FEE2E2',
+      background: '#FEF2F2',
+      icon: <CircleCheckBig className="text-[#7F1D1D]" size={24} />,
+    },
+    {
+      label: 'Missed',
+      value: 'missed',
+      textColor: '#6B7280',
+      count: appointments.filter(
+        (apt) =>
+          validStatuses.includes(apt.status as AppointmentStatus) &&
+          apt.status === AppointmentStatus.MISSED,
+      ).length,
+      data: appointments.filter(
+        (apt) =>
+          validStatuses.includes(apt.status as AppointmentStatus) &&
+          apt.status === AppointmentStatus.MISSED,
+      ),
+      border: '#E5E7EB',
+      background: '#F3F4F6',
+      icon: <CircleCheckBig className="text-[#6B7280]" size={24} />,
+    },
     {
       label: 'All',
       value: 'all',
@@ -245,37 +244,3 @@ export const createFilterOptions = (
     },
   ]
 }
-
-// Customer filter options
-// export const filterCustomerOptions = [
-//   {
-//     label: 'All',
-//     value: 'all',
-//     textColor: '#103064',
-//     count: 0,
-//     data: [],
-//     border: '#DCE9F9',
-//     background: '#E9F1FD',
-//     icon: <CalendarDays className="text-[#1C55B2]" size={24} />,
-//   },
-//   {
-//     label: 'Active',
-//     value: 'active',
-//     textColor: '#166534',
-//     count: 0,
-//     data: [],
-//     border: '#D1FAE5',
-//     background: '#ECFDF5',
-//     icon: <CircleCheckBig className="text-[#059669]" size={24} />,
-//   },
-//   {
-//     label: 'Inactive',
-//     value: 'inactive',
-//     textColor: '#991B1B',
-//     count: 0,
-//     data: [],
-//     border: '#FEE2E2',
-//     background: '#FEF2F2',
-//     icon: <Clock className="text-[#DC2626]" size={24} />,
-//   },
-// ]
