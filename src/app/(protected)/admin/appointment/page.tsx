@@ -393,7 +393,7 @@ const Page = () => {
       </div>
 
       {/* Appointment Display */}
-      <div className="flex-1 h-full   min-h-0 rounded-lg overflow-y-auto">
+      <div className="flex-1 h-full   min-h-0 md:border-t rounded-lg overflow-y-auto">
         {isLoading && !hasFetched ? (
           <div className="text-center py-8 text-sm text-gray-500 italic">
             Loading appointments...
@@ -401,8 +401,8 @@ const Page = () => {
         ) : filteredAppointments.length > 0 ? (
           <>
             {viewMode === 'list' && (
-              <div className="w-full  overflow-x-auto ">
-                <div className=" border min-w-[800px]">
+              <div className="w-full overflow-x-auto ">
+                <div className="  min-w-[800px]">
                   <DataTable
                     columns={memoizedColumns}
                     data={filteredAppointments}
@@ -412,17 +412,15 @@ const Page = () => {
               </div>
             )}
             {viewMode === 'card' && (
-              <div className="flex-1 h-full min-h-0  rounded-lg overflow-y-auto">
-                <div
-                  className={cn(
-                    'grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
-                    'h-full pb-6',
-                  )}
-                >
-                  {filteredAppointments.map((item) => (
-                    <AppointmentGrid item={item} key={item.id} />
-                  ))}
-                </div>
+              <div
+                className={cn(
+                  'grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3  ',
+                  'pb-6',
+                )}
+              >
+                {filteredAppointments.map((item) => (
+                  <AppointmentGrid item={item} key={item.id} />
+                ))}
               </div>
             )}
             {/* {viewMode === 'grid' && (
