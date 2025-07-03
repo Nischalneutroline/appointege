@@ -276,7 +276,7 @@ const updateAppointment = createAsyncThunk<
           ...responseData,
           selectedDate: responseData.selectedDate, // Keep as string
           status: responseData.status as AppointmentStatus,
-          color: responseData.color, // Preserve existing color
+          color: responseData.color || getRandomAvatarColor(), // Fallback to random color if not provided
         }
       }
       toast.error(message || 'Failed to update appointment', {
@@ -443,9 +443,12 @@ const appointmentSlice = createSlice({
         state.appointments,
         state.activeFilter,
       )
+      console.log('Updated appointment:', action.payload)
       state.error = null
       state.message = null
       state.success = true
+      console.log('Updated appointments:', state.appointments)
+      console.log('Updated filteredAppointments:', state.filteredAppointments)
     })
     builder.addCase(updateAppointment.rejected, (state, action) => {
       state.isLoading = false

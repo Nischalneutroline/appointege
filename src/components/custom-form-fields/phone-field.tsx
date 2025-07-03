@@ -482,7 +482,6 @@ const CountrySelect = ({
         type="button"
         className={cn(
           'flex items-center gap-1 px-3 py-2 border rounded-md min-w-max text-sm',
-          error && 'border-red-400',
           disabled && 'bg-gray-50 opacity-50 cursor-not-allowed',
           isOpen && 'ring-2 ring-blue-500',
           className,
@@ -582,7 +581,7 @@ const PhoneInput = ({
   return (
     // Phone number input field
     <Input
-      type="text"
+      type="tel"
       value={value}
       onChange={(e) => {
         let input = e.target.value
@@ -601,7 +600,6 @@ const PhoneInput = ({
       disabled={disabled}
       className={cn(
         'w-full',
-        error && 'border-red-400',
         disabled && 'bg-gray-50 opacity-50 cursor-not-allowed',
         className,
       )}
@@ -732,7 +730,7 @@ const PhoneField = ({
         )}
       </div>
       {/* Country select and phone input */}
-      <div className="flex items-center ">
+      <div className={cn('flex items-center rounded-sm')}>
         <CountrySelect
           selectedCountryCode={selectedCountry?.code}
           onChange={handleCountrySelect}
@@ -740,7 +738,11 @@ const PhoneField = ({
           error={!!error}
           countryOptions={countryOptions}
           // className={cn(className, ' rounded-e-none  border-r-[#474747]')}
-          className={cn(className, ' rounded-e-none  border-r-gray-400')}
+          className={cn(
+            className,
+            error && 'border-red-400 border',
+            ' rounded-e-none  border-r-gray-400',
+          )}
         />
         <PhoneInput
           value={phoneNumber}
@@ -749,7 +751,11 @@ const PhoneField = ({
           error={!!error}
           selectedCountry={selectedCountry}
           disabled={disabled}
-          className={cn(className, ' rounded-s-none border-l-0')}
+          className={cn(
+            className,
+            error && 'border-red-400 border',
+            ' rounded-s-none border-l-0',
+          )}
         />
       </div>
       {/* Error message */}

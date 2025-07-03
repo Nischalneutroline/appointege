@@ -546,10 +546,7 @@ const appointmentSchema = z.object({
   phone: z
     .string()
     .min(1, 'Phone number is required')
-    .regex(
-      /^\+\d{1,4}\s\d{7,}$/,
-      'Valid phone number is required (e.g., +977 9818275115)',
-    ),
+    .regex(/^\+\d{1,4}\s\d{7,}$/, 'Valid phone number is required!'),
   service: z.string().min(1, 'Service is required'),
   date: z.date({ required_error: 'Date is required' }),
   time: z.string().min(1, 'Time is required'),
@@ -705,7 +702,6 @@ const NewAppointment = ({
         `Error ${appoinmentFormMode === 'edit' ? 'updating' : 'creating'} appointment:`,
         error,
       )
-      // Toast notifications are handled in the slice
     } finally {
       setIsSubmitting(false)
     }

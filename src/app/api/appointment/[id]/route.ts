@@ -112,6 +112,11 @@ export async function PUT(
         createdById: parsedData.createdById,
         resourceId: parsedData.resourceId,
       },
+      include: {
+        user: true,
+        service: true,
+        Resource: true,
+      },
     })
 
     if (!updatedService) {
