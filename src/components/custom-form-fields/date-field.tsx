@@ -28,6 +28,7 @@ interface DatePickerFieldProps {
   maxDate?: Date
   icon?: LucideIcon
   className?: string // Fixed: Changed from LucideIcon to string
+  buttonClassName?: string
 }
 
 const DatePickerField = ({
@@ -39,6 +40,7 @@ const DatePickerField = ({
   maxDate = addDays(new Date(), 30),
   icon: Icon,
   className,
+  buttonClassName,
 }: DatePickerFieldProps) => {
   const { control } = useFormContext()
 
@@ -48,18 +50,19 @@ const DatePickerField = ({
       name={name}
       render={({ field }) => (
         <FormItem className={cn('flex flex-col', className)}>
-          <div className="flex gap-2 items-center">
+          <div className="flex items-center">
             {Icon && <Icon className="size-4 text-gray-500" />}
             <FormLabel>{label}</FormLabel>
           </div>
           <Popover>
             <PopoverTrigger asChild>
-              <FormControl>
+              <FormControl className="p-[12px]">
                 <Button
                   variant="outline"
                   className={cn(
-                    'w-full justify-start text-left font-normal',
+                    'w-full justify-start text-left font-normal ',
                     !field.value && 'text-muted-foreground',
+                    buttonClassName,
                   )}
                   disabled={disabled}
                 >

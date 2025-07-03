@@ -96,6 +96,7 @@ export type AppointmentFilterLabel =
   | 'Cancelled'
   | 'Missed'
   | 'All'
+
 export type AppointmentFilterValue =
   | 'today'
   | 'upcoming'

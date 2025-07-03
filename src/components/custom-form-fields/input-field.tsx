@@ -1,16 +1,16 @@
-"use client"
+'use client'
 
-import { Input } from "@/components/ui/input"
+import { Input } from '@/components/ui/input'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { useFormContext } from "react-hook-form"
-import { cn } from "@/lib/utils"
-import { LucideIcon } from "lucide-react"
+} from '@/components/ui/form'
+import { useFormContext } from 'react-hook-form'
+import { cn } from '@/lib/utils'
+import { LucideIcon } from 'lucide-react'
 
 interface InputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   name: string
@@ -26,7 +26,7 @@ const InputField = ({
   name,
   label,
   placeholder,
-  type = "text",
+  type = 'text',
   className,
   icon: Icon,
   value,
@@ -40,17 +40,20 @@ const InputField = ({
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className="flex flex-col ">
-          <div className="flex gap-2 items-center">
+        <FormItem className="flex flex-col gap-1 ">
+          <div className="flex gap-1 items-center">
             {Icon && <Icon className="size-4 text-gray-500" />}
-            <FormLabel>{label}</FormLabel>
+            <FormLabel className="text-sm">{label}</FormLabel>
           </div>
           <FormControl>
             <Input
               {...field}
               type={type}
               placeholder={placeholder}
-              className={cn("w-full placeholder:text-sm text-sm", className)}
+              className={cn(
+                'w-full placeholder:text-sm text-sm rounded-sm ',
+                className,
+              )}
               value={value !== undefined ? value : field.value}
               onChange={onChange || field.onChange}
               {...rest}

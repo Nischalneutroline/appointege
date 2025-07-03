@@ -29,7 +29,6 @@ import { getRandomColor } from '@/lib/color'
 
 const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
   const dispatch = useDispatch()
-  // Dynmaic Status Variants
   const statusVariants = {
     COMPLETED: 'success',
     MISSED: 'destructive',
@@ -38,28 +37,14 @@ const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
   } as const
   const variant =
     statusVariants[item.status as keyof typeof statusVariants] || 'default'
-  // OnClick Function for View Action
-  const handleViewClick = () => {
-    dispatch(openAppointmentViewForm({ ...item }))
-  }
-  // OnClick Function for Edit Action
-  const handleEditClick = () => {
-    dispatch(openAppointmentEditForm({ ...item }))
-  }
-  // OnClick Function for Delete Action
-  const handleDeleteClick = () => {
-    dispatch(openAppointmentDeleteForm({ ...item }))
-  }
-
-  // Date formatting
   const { formattedDate, formattedTime } = formatAppointmentDateTime(
     item.selectedDate,
   )
 
   return (
-    <div className="relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px]  bg-white cursor-pointer">
+    <div className="  relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px] bg-white cursor-pointer">
       <div
-        className="h-16 w-16 text-lg font-semibold text-white flex items-center justify-center rounded-[8px] "
+        className="h-16 w-16 text-lg font-semibold text-white flex items-center justify-center rounded-[8px]"
         style={{ backgroundColor: getRandomColor() }}
       >
         {getInitials(item.customerName)}
@@ -78,7 +63,6 @@ const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
             <div className="text-[#6B7280]">{item?.service?.title}</div>
             <div className="flex gap-2">
               <MapPin size={14} strokeWidth={2.5} color="#92AAF3" />
-
               <div className="font-medium text-[#78818C]">Physical</div>
             </div>
           </div>
@@ -106,20 +90,20 @@ const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
           <DropdownMenuContent align="end" className="">
             <DropdownMenuItem
               className="group/view text-gray-500 hover:bg-gray-50 gap-0"
-              onClick={handleViewClick}
+              onClick={() => dispatch(openAppointmentViewForm({ ...item }))}
             >
               <Eye className="mr-4 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
-              <div className=" group-hover/view:text-[#2563EB]">View</div>
+              <div className="group-hover/view:text-[#2563EB]">View</div>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={handleEditClick}
+              onClick={() => dispatch(openAppointmentEditForm({ ...item }))}
               className="group/edit text-gray-500 hover:bg-gray-50 gap-0"
             >
               <SquarePen className="mr-4 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
               <div className="group-hover/edit:text-[#10B981]">Edit</div>
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={handleDeleteClick}
+              onClick={() => dispatch(openAppointmentDeleteForm({ ...item }))}
               className="group/delete text-gray-500 hover:bg-gray-50 gap-0"
             >
               <Trash2 className="mr-4 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />

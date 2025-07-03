@@ -6,7 +6,7 @@ import { AppDispatch, RootState } from '../../../store/store'
 import { useDispatch, useSelector } from 'react-redux'
 import { setViewMode } from '@/store/slices/viewSlice'
 
-export type ViewType = 'card' | 'list' | 'grid'
+export type ViewType = 'card' | 'list'
 
 interface ViewOption {
   value: ViewType
@@ -28,11 +28,11 @@ const defaultOptions: ViewOption[] = [
     icon: <Grid2x2 size={16} strokeWidth={2} />,
   },
   { value: 'list', label: 'List', icon: <List size={16} strokeWidth={2} /> },
-  {
-    value: 'grid',
-    label: 'Grid',
-    icon: <LayoutGrid size={16} strokeWidth={2} />,
-  },
+  // {
+  //   value: 'grid',
+  //   label: 'Grid',
+  //   icon: <LayoutGrid size={16} strokeWidth={2} />,
+  // },
 ]
 
 const ViewTabs = ({ options = defaultOptions, className }: ViewTabsProps) => {

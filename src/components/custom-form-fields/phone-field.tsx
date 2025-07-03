@@ -415,12 +415,14 @@ const CountrySelect = ({
   disabled,
   error,
   countryOptions,
+  className,
 }: {
   selectedCountryCode?: string
   onChange: (code: string) => void
   disabled?: boolean
   error?: boolean
   countryOptions: CountryOption[]
+  className?: string
 }) => {
   // State for search input and dropdown visibility
   const [search, setSearch] = useState('')
@@ -483,6 +485,7 @@ const CountrySelect = ({
           error && 'border-red-400',
           disabled && 'bg-gray-50 opacity-50 cursor-not-allowed',
           isOpen && 'ring-2 ring-blue-500',
+          className,
         )}
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
@@ -566,6 +569,7 @@ const PhoneInput = ({
   error,
   selectedCountry,
   disabled,
+  className,
 }: {
   value: string
   onChange: (value: string) => void
@@ -573,6 +577,7 @@ const PhoneInput = ({
   error?: boolean
   selectedCountry?: CountryOption | null
   disabled?: boolean
+  className?: string
 }) => {
   return (
     // Phone number input field
@@ -598,6 +603,7 @@ const PhoneInput = ({
         'w-full',
         error && 'border-red-400',
         disabled && 'bg-gray-50 opacity-50 cursor-not-allowed',
+        className,
       )}
     />
   )
@@ -715,7 +721,7 @@ const PhoneField = ({
 
   return (
     // Main container for phone field
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-1')}>
       {/* Label and icon */}
       <div className="flex gap-2 items-center">
         {Icon && <Icon className="size-4 text-gray-500" />}
@@ -726,13 +732,14 @@ const PhoneField = ({
         )}
       </div>
       {/* Country select and phone input */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center ">
         <CountrySelect
           selectedCountryCode={selectedCountry?.code}
           onChange={handleCountrySelect}
           disabled={disabled}
           error={!!error}
           countryOptions={countryOptions}
+          className={cn(className, ' rounded-e-none')}
         />
         <PhoneInput
           value={phoneNumber}
@@ -741,6 +748,7 @@ const PhoneField = ({
           error={!!error}
           selectedCountry={selectedCountry}
           disabled={disabled}
+          className={cn(className, ' rounded-s-none')}
         />
       </div>
       {/* Error message */}

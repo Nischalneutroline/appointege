@@ -16,7 +16,7 @@ const AdminDashboard = () => {
     dispatch(fetchCustomers(false))
   }, [dispatch]) // Only depend on dispatch to run once on mount
 
-  return <div>hello</div>
+  return <div>Dashboard</div>
 }
 
 export default AdminDashboard

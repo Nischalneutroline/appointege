@@ -10,46 +10,23 @@ import SidebarMobile from '@/components/shared/layout/sidebar-mobile'
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
-    // <AuthInitializer>
-    <div className="relative min-h-screen bg-stone-100 overflow-hidden border-r-2">
-      {/* Top Background Gradient */}
-      {/* <div className="absolute inset-0 h-[30vh] rounded-b-lg z-0 pointer-events-none bg-gradient" /> */}
-
-      {/* Layout */}
-      <div className="relative z-10 flex  h-screen">
-        {/* Sidebar */}
-        {/* Desktop Sidebar */}
+    <div className=" min-h-screen bg-[#f4f8fe] overflow-hidden">
+      <div className=" flex h-screen">
+        {/* ------ Sidebar ------- */}
         <SidebarDesktop />
-        {/* Mobile Navbar */}
         <SidebarMobile />
 
-        {/* Content Area */}
-        <div className="flex-1 flex flex-col w-full h-full">
-          {/* Header */}
+        {/* ------ Content Area ------- */}
+        <div className="flex-1 flex flex-col w-full  h-full">
           <Header />
           {/* Main Content */}
           {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1 relative  shadow p-6 bg-[#fbfbfb] overflow-hidden">
-            {/* <div
-              className="absolute inset-0 opacity-5"
-              style={{
-                backgroundImage: `url("/assets/grain.jpg")`,
-              }}
-            /> */}
-            {/* <div
-              className="absolute inset-0 opacity-10"
-              style={{
-                background:
-                  'linear-gradient(135deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%)',
-                backgroundSize: '4px 4px', // Creates a subtle grid-like static effect
-              }}
-            /> */}
+          <div className="flex-1 relative  shadow p-6 pb-0.5  overflow-y-auto md:overflow-hidden">
             {children}
           </div>
         </div>
       </div>
     </div>
-    // </AuthInitializer>
   )
 }
 

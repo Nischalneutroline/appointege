@@ -1,23 +1,23 @@
-"use client"
+'use client'
 
-import { useFormContext } from "react-hook-form"
+import { useFormContext } from 'react-hook-form'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from '@/components/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { cn } from "@/lib/utils"
-import { LucideIcon } from "lucide-react"
-import React from "react"
+} from '@/components/ui/select'
+import { cn } from '@/lib/utils'
+import { LucideIcon } from 'lucide-react'
+import React from 'react'
 
 interface SelectFieldProps {
   name: string
@@ -47,14 +47,14 @@ const SelectField = ({
       render={({ field }) => {
         // console.log(`${name} options:`, options)
         return (
-          <FormItem className="flex flex-col">
+          <FormItem className="flex flex-col gap-1">
             <div className="flex gap-2 items-center">
               {Icon && <Icon className="size-4 text-gray-500" />}
               <FormLabel>{label}</FormLabel>
             </div>
-            <FormControl>
+            <FormControl className={className}>
               <Select
-                value={field.value ? String(field.value) : ""}
+                value={field.value ? String(field.value) : ''}
                 onValueChange={(value) => {
                   console.log(`${name} onValueChange:`, value)
                   // Only update if the value is non-empty and exists in options
@@ -63,13 +63,13 @@ const SelectField = ({
                   } else {
                     console.log(
                       `${name} onValueChange ignored: Invalid or empty value`,
-                      value
+                      value,
                     )
                   }
                 }}
                 disabled={disabled}
               >
-                <SelectTrigger className={cn("w-full", className)}>
+                <SelectTrigger className={cn('w-full h-10', className)}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
                 <SelectContent>
