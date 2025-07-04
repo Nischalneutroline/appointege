@@ -70,7 +70,9 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
           <div className="w-full flex border border-[#E6E6EA] rounded-[8px] p-3 gap-3">
             <div
               className="h-12 w-12 text-lg font-semibold text-white flex items-center justify-center rounded-[8px]"
-              style={{ backgroundColor: getRandomColor() }}
+              style={{
+                backgroundColor: currentAppointment.color || getRandomColor(),
+              }}
             >
               {getInitials(currentAppointment.customerName)}
             </div>

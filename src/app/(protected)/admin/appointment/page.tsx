@@ -676,14 +676,16 @@ const Page = () => {
       result = filteredAppointments.filter((appointment: Appointment) => {
         const searchableFields = [
           appointment.customerName.toLowerCase(),
-          appointment.status,
-          appointment.service?.title,
-          appointment.selectedDate,
-          appointment.selectedTime,
+          appointment.status.toLowerCase(),
+          appointment.service?.title.toLowerCase(),
+          appointment.selectedDate.toLowerCase(),
+          appointment.selectedTime.toLowerCase(),
         ]
           .filter(Boolean)
           .map((field) => String(field).toLowerCase())
-        const matches = searchableFields.some((field) => field.includes(query))
+        const matches = searchableFields.some((field) =>
+          field.includes(query.toLowerCase()),
+        )
         console.log(`Appointment ID ${appointment.id}:`, {
           searchableFields,
           matches,

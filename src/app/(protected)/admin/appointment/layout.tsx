@@ -178,12 +178,9 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         <div className="hidden md:flex gap-4 min-w-[340px]">
-          {createFilterOptions(appointments).map(
-            (option) =>
-              activeFilters.includes(option.value) && (
-                <LayoutCards key={option.value} option={option} />
-              ),
-          )}
+          {createFilterOptions(appointments).map((option) => (
+            <LayoutCards key={option.value} option={option} />
+          ))}
         </div>
       </div>
 

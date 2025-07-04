@@ -20,11 +20,12 @@ import {
 } from 'lucide-react'
 import React from 'react'
 import { useDispatch } from 'react-redux'
-import { AppointmentWithService } from '../_data/column'
+// import { AppointmentWithService } from '../_data/column'
 import { formatAppointmentDateTime } from '@/lib/date-time-format'
 import { getRandomColor } from '@/lib/color'
+import { Appointment } from '../_types/appointment'
 
-const AppointmentGrid = ({ item }: { item: AppointmentWithService }) => {
+const AppointmentGrid = ({ item }: { item: Appointment }) => {
   const dispatch = useDispatch()
   const statusVariants = {
     COMPLETED: 'success',
