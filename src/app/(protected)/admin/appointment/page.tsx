@@ -675,8 +675,9 @@ const Page = () => {
       console.log('Searching with query:', query)
       result = filteredAppointments.filter((appointment: Appointment) => {
         const searchableFields = [
-          appointment.customerName,
+          appointment.customerName.toLowerCase(),
           appointment.status,
+          appointment.service?.title,
           appointment.selectedDate,
           appointment.selectedTime,
         ]

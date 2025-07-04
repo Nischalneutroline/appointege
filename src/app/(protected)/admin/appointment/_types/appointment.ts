@@ -28,6 +28,7 @@ export interface Appointment {
   reminderOffsets?: AppointmentReminderOffset[]
   updatedAt?: string // Optional: Updated at timestamp
   color?: string
+  service?: Service
 }
 
 export interface AppointmentWithColor extends Appointment {
