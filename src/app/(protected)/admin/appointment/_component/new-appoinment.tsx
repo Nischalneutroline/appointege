@@ -475,6 +475,7 @@
 // }
 
 // export default NewAppointment
+'use client'
 
 import {
   Dialog,
@@ -525,7 +526,6 @@ import { normalDateToIso } from '@/utils/utils'
 import {
   storeCreateAppointment,
   updateAppointment,
-  openAppointmentEditForm,
   closeAppointmentForm,
 } from '@/store/slices/appointmentSlice'
 import { toast } from 'sonner'
@@ -548,6 +548,15 @@ const appointmentSchema = z.object({
   time: z.string().min(1, 'Time is required'),
   message: z.string().optional(),
   appointmentType: z.string().min(1, 'Appointment type is required'),
+  status: z
+    .enum([
+      AppointmentStatus.SCHEDULED,
+      AppointmentStatus.COMPLETED,
+      AppointmentStatus.MISSED,
+      AppointmentStatus.CANCELLED,
+      AppointmentStatus.FOLLOW_UP,
+    ])
+    .optional(),
 })
 
 type FormData = z.infer<typeof appointmentSchema>
@@ -597,6 +606,7 @@ const NewAppointment = ({
       time: '',
       message: '',
       appointmentType: 'in-person',
+      status: AppointmentStatus.SCHEDULED,
     },
   })
 
@@ -618,6 +628,7 @@ const NewAppointment = ({
         time: currentAppointment.selectedTime,
         message: currentAppointment.message || '',
         appointmentType: 'in-person',
+        status: currentAppointment.status,
       })
     } else if (!isFormOpen) {
       form.reset()
@@ -643,6 +654,11 @@ const NewAppointment = ({
     { label: 'Physical', value: 'physical' },
     { label: 'Virtual', value: 'virtual' },
   ]
+
+  const statusOptions = Object.values(AppointmentStatus).map((status) => ({
+    label: status.charAt(0) + status.slice(1).toLowerCase().replace('_', ' '),
+    value: status,
+  }))
 
   const getLabelFromValue = (value: string, options: ServiceOption[]) => {
     const option = options.find((opt) => opt.value === value)
@@ -672,7 +688,10 @@ const NewAppointment = ({
         serviceId: formData.service,
         selectedDate: normalDateToIso(formData.date),
         selectedTime: formData.time,
-        status: currentAppointment?.status || AppointmentStatus.SCHEDULED,
+        status:
+          appoinmentFormMode === 'edit' && formData.status
+            ? formData.status
+            : AppointmentStatus.SCHEDULED,
         message: formData.message,
         userId: user?.id,
         isForSelf: false,
@@ -749,7 +768,6 @@ const NewAppointment = ({
                 bgColor="#dae8fe"
                 textColor="#3d73ed"
               />
-              <div className="border-t-2 border-[#BEDAFE] w-full" />
               <ViewItem
                 title="Service"
                 value={
@@ -786,6 +804,18 @@ const NewAppointment = ({
                 bgColor="#d2fae5"
                 textColor="#099668"
               />
+              {appoinmentFormMode === 'edit' && filledData?.status && (
+                <ViewItem
+                  title="Status"
+                  value={
+                    filledData.status.charAt(0) +
+                    filledData.status.slice(1).toLowerCase().replace('_', ' ')
+                  }
+                  icon={<CircleCheckBig className="w-4 h-4" strokeWidth={2} />}
+                  bgColor="#d2fae5"
+                  textColor="#099668"
+                />
+              )}
             </div>
             <div className="flex flex-col gap-3 md:flex-row justify-center">
               <Button
@@ -922,6 +952,16 @@ const NewAppointment = ({
                   </FormItem>
                 )}
               />
+              {appoinmentFormMode === 'edit' && (
+                <SelectField
+                  name="status"
+                  label="Status"
+                  options={statusOptions}
+                  placeholder="Select status"
+                  disabled={isSubmitting}
+                  className="!h-10 border border-blue-200 rounded-[4px]"
+                />
+              )}
               <div className="flex flex-col gap-3 md:flex-row justify-center items-center mt-6">
                 <Button
                   type="submit"
