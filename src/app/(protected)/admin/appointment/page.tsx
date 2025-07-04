@@ -620,8 +620,7 @@
 // export default Page
 'use client'
 
-import React, { useEffect, useMemo, useCallback, useRef, useState } from 'react'
-import { AppointmentFilterValue, createFilterOptions } from './_data/data'
+import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import SearchBar from '@/components/shared/layout/search-bar'
 import { RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
@@ -646,6 +645,8 @@ const Page = () => {
     isLoading,
     isRefreshing,
     filteredAppointments,
+    filterOptions,
+    counts,
     hasFetched,
     success,
     activeFilter,
@@ -661,11 +662,13 @@ const Page = () => {
   const hasFetchedOnce = useRef(false)
   const hasAttemptedEmptyFetch = useRef(false)
 
-  const filterOptions = useMemo(() => {
-    const result = createFilterOptions(filteredAppointments)
-    console.log('Filter options:', result)
-    return result
-  }, [filteredAppointments])
+  // Combine filterOptions with counts for FilterDropdown and FilterTabs
+  const enrichedFilterOptions = useMemo(() => {
+    return filterOptions.map((option) => ({
+      ...option,
+      count: counts[option.value],
+    }))
+  }, [filterOptions, counts])
 
   // Search logic: filter filteredAppointments based on search query
   const searchedAppointments = useMemo(() => {
@@ -777,12 +780,11 @@ const Page = () => {
             'scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-gray-500',
           )}
         >
-          {filterOptions.map(
-            (option, index) =>
-              activeFilters.includes(option.value) && (
-                <FilterTabs key={index} option={option} />
-              ),
-          )}
+          {enrichedFilterOptions
+            .filter((option) => activeFilters.includes(option.value))
+            .map((option, index) => (
+              <FilterTabs key={index} {...option} />
+            ))}
         </div>
         <div className="flex gap-2 min-w-1/4 lg:gap-3 justify-between">
           <SearchBar
@@ -796,7 +798,7 @@ const Page = () => {
           />
           <div className="flex gap-3 justify-end">
             <FilterDropdown
-              filterOptions={filterOptions}
+              filterOptions={enrichedFilterOptions}
               activeFilters={activeFilters}
               onFilterChange={(filters) => dispatch(setActiveFilters(filters))}
             />
@@ -840,7 +842,7 @@ const Page = () => {
             {viewMode === 'card' && (
               <div
                 className={cn(
-                  'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3',
+                  'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 xxl:grid-cols-4 ',
                   'pb-6',
                 )}
               >

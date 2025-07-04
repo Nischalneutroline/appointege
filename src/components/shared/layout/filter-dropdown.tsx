@@ -89,6 +89,105 @@
 
 // export default FilterDropdown
 
+// 'use client'
+
+// import React from 'react'
+// import { useDispatch } from 'react-redux'
+// import { cn } from '@/lib/utils'
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+//   DropdownMenuCheckboxItem,
+// } from '@/components/ui/dropdown-menu'
+// import { Button } from '@/components/ui/button'
+// import {
+//   FilterAppoinmentState,
+//   AppointmentFilterValue,
+// } from '@/app/(protected)/admin/appointment/_data/data'
+// import {
+//   setActiveFilter,
+//   setActiveFilters,
+// } from '@/store/slices/appointmentSlice'
+// import { ChevronDown, Funnel } from 'lucide-react'
+// import { DEFAULT_FILTERS_VALUES } from '@/app/(protected)/admin/appointment/_types/appointment'
+
+// interface FilterDropdownProps {
+//   filterOptions: FilterAppoinmentState[]
+//   activeFilters: AppointmentFilterValue[]
+//   onFilterChange: (filters: AppointmentFilterValue[]) => void
+// }
+
+// const FilterDropdown = ({
+//   filterOptions,
+//   activeFilters,
+//   onFilterChange,
+// }: FilterDropdownProps) => {
+//   const dispatch = useDispatch()
+
+//   const handleFilterChange = (
+//     value: AppointmentFilterValue,
+//     checked: boolean,
+//   ) => {
+//     const newFilters = checked
+//       ? [...activeFilters, value]
+//       : activeFilters.filter(
+//           (filter) =>
+//             !DEFAULT_FILTERS_VALUES.includes(filter) && filter !== value,
+//         )
+
+//     // Dispatch setActiveFilters with the new filters
+//     onFilterChange(newFilters)
+//     dispatch(setActiveFilters(newFilters))
+
+//     // Update activeFilter to the first selected filter or 'today' if none
+//     const newActiveFilter = newFilters.length > 0 ? newFilters[0] : 'today'
+//     dispatch(setActiveFilter(newActiveFilter))
+//   }
+
+//   return (
+//     <DropdownMenu>
+//       <DropdownMenuTrigger asChild>
+//         <Button
+//           variant="outline"
+//           className={cn(
+//             'h-10 w-[160px] justify-between text-sm font-normal text-gray-500',
+//             {
+//               'text-muted-foreground': activeFilters.length === 0,
+//             },
+//           )}
+//         >
+//           <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
+//           <div className="text-sm font-normal"> Select Filters</div>
+//           <ChevronDown strokeWidth={2.5} size={14} />
+//           {/* <ChevronDown className="ml-2 h-4 w-4" /> */}
+//         </Button>
+//       </DropdownMenuTrigger>
+//       <DropdownMenuContent className="w-[160px]">
+//         {filterOptions.map((option) => (
+//           <DropdownMenuCheckboxItem
+//             key={option.value}
+//             checked={activeFilters.includes(option.value)}
+//             onCheckedChange={(checked) =>
+//               handleFilterChange(option.value, checked)
+//             }
+//             className="text-sm"
+//           >
+//             <div className="flex gap-2 items-center">
+//               <span>{option.label === 'All' ? 'All' : option.label}</span>
+//               <span className="text-xs text-muted-foreground">
+//                 ({option.count && option.count})
+//               </span>
+//             </div>
+//           </DropdownMenuCheckboxItem>
+//         ))}
+//       </DropdownMenuContent>
+//     </DropdownMenu>
+//   )
+// }
+
+// export default FilterDropdown
 'use client'
 
 import React from 'react'
@@ -102,18 +201,17 @@ import {
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { AppointmentFilterValue } from '@/app/(protected)/admin/appointment/_data/data'
 import {
-  FilterAppoinmentState,
-  AppointmentFilterValue,
-} from '@/app/(protected)/admin/appointment/_data/data'
-import {
+  FilterOptionState,
   setActiveFilter,
   setActiveFilters,
 } from '@/store/slices/appointmentSlice'
-import { ChevronDown, Funnel } from 'lucide-react'
+import { ChevronDown, Funnel, Lock } from 'lucide-react'
+import { DEFAULT_FILTERS_VALUES } from '@/app/(protected)/admin/appointment/_types/appointment'
 
 interface FilterDropdownProps {
-  filterOptions: FilterAppoinmentState[]
+  filterOptions: (FilterOptionState & { count: number })[]
   activeFilters: AppointmentFilterValue[]
   onFilterChange: (filters: AppointmentFilterValue[]) => void
 }
@@ -127,17 +225,20 @@ const FilterDropdown = ({
 
   const handleFilterChange = (
     value: AppointmentFilterValue,
-    checked: boolean,
+    checked?: boolean,
   ) => {
+    if (DEFAULT_FILTERS_VALUES.includes(value)) {
+      dispatch(setActiveFilter(value))
+      return
+    }
+
     const newFilters = checked
       ? [...activeFilters, value]
       : activeFilters.filter((filter) => filter !== value)
 
-    // Dispatch setActiveFilters with the new filters
     onFilterChange(newFilters)
     dispatch(setActiveFilters(newFilters))
 
-    // Update activeFilter to the first selected filter or 'today' if none
     const newActiveFilter = newFilters.length > 0 ? newFilters[0] : 'today'
     dispatch(setActiveFilter(newActiveFilter))
   }
@@ -157,27 +258,44 @@ const FilterDropdown = ({
           <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
           <div className="text-sm font-normal"> Select Filters</div>
           <ChevronDown strokeWidth={2.5} size={14} />
-          {/* <ChevronDown className="ml-2 h-4 w-4" /> */}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[160px]">
-        {filterOptions.map((option) => (
-          <DropdownMenuCheckboxItem
-            key={option.value}
-            checked={activeFilters.includes(option.value)}
-            onCheckedChange={(checked) =>
-              handleFilterChange(option.value, checked)
-            }
-            className="text-sm"
-          >
-            <div className="flex gap-2 items-center">
-              <span>{option.label === 'All' ? 'All' : option.label}</span>
-              <span className="text-xs text-muted-foreground">
-                ({option.count && option.count})
-              </span>
-            </div>
-          </DropdownMenuCheckboxItem>
-        ))}
+        {filterOptions.map((option: FilterOptionState & { count: number }) => {
+          const isDefaultFilter = DEFAULT_FILTERS_VALUES.includes(option.value)
+
+          return isDefaultFilter ? (
+            <DropdownMenuItem
+              key={option.value}
+              onSelect={() => handleFilterChange(option.value)}
+              className="text-sm"
+            >
+              <div className="flex gap-2 items-center">
+                <Lock size={14} className="text-gray-400" />
+                <span>{option.label === 'All' ? 'All' : option.label}</span>
+                <span className="text-xs text-muted-foreground">
+                  ({option.count})
+                </span>
+              </div>
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuCheckboxItem
+              key={option.value}
+              checked={activeFilters.includes(option.value)}
+              onCheckedChange={(checked) =>
+                handleFilterChange(option.value, checked)
+              }
+              className="text-sm"
+            >
+              <div className="flex gap-2 items-center">
+                <span>{option.label}</span>
+                <span className="text-xs text-muted-foreground">
+                  ({option.count})
+                </span>
+              </div>
+            </DropdownMenuCheckboxItem>
+          )
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   )
