@@ -29,7 +29,7 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { Service } from '../../service/_types/service'
 import { formatAppointmentDateTime } from '@/lib/date-time-format'
-import { User } from '../../customer/_types/customer'
+import { CustomerStatus, User } from '../../customer/_types/customer'
 
 // Color for the Customer Name
 const getRandomColor = () => {
@@ -121,7 +121,7 @@ export const columns: TableColumn<User>[] = [
           <div
             className={`h-8 w-8 flex items-center justify-center rounded-[4px] `}
             style={{
-              backgroundColor: getRandomColor(),
+              backgroundColor: row.color || getRandomColor(),
               color: 'white',
             }}
           >
@@ -143,18 +143,25 @@ export const columns: TableColumn<User>[] = [
     header: 'Phone',
     accessor: 'phone',
     render: (value, row, index) => {
-      return <span>{row.phone}</span>
+      return <span>{row.phone || 'N/A'}</span>
     },
   },
   {
     header: 'Role',
     accessor: 'role',
     render: (value, row, index) => {
-      const role = row.role || 'USER'
-      if (role === 'USER') {
+      const isMember = row.status?.includes(CustomerStatus.MEMBER)
+
+      if (isMember) {
         return (
           <Pill variant="success" withDot>
-            {role}
+            {'Member'}
+          </Pill>
+        )
+      } else {
+        return (
+          <Pill variant="default" withDot>
+            {'Guest'}
           </Pill>
         )
       }
@@ -172,56 +179,31 @@ export const columns: TableColumn<User>[] = [
       //       </Pill>
       //     )
       //   }
-      if (role === 'GUEST') {
-        return (
-          <Pill variant="destructive" withDot>
-            {role}
-          </Pill>
-        )
-      }
     },
   },
   {
     header: 'Is Active',
     accessor: 'isActive',
     render: (value, row, index) => {
-      const active = row.isActive
-      if (active === true) {
+      const isActive = row.status?.includes(CustomerStatus.ACTIVE)
+      const isInactive = row.status?.includes(CustomerStatus.INACTIVE)
+      if (isActive) {
         return (
           <Pill variant="success" withDot>
-            Active
+            {'Active'}
           </Pill>
         )
       }
-      if (active === false) {
+      if (isInactive) {
         return (
           <Pill variant="destructive" withDot>
-            In-Active
+            {'InActive'}
           </Pill>
         )
       }
     },
   },
-  {
-    header: 'Created At',
-    accessor: 'createdAt',
-    render: (value, row, index) => {
-      const { formattedDate, formattedTime } = formatAppointmentDateTime(
-        row.createdAt,
-      )
-      return <span>{formattedDate}</span>
-    },
-  },
-  {
-    header: 'Updated At',
-    accessor: 'updatedAt',
-    render: (value, row, index) => {
-      const { formattedDate, formattedTime } = formatAppointmentDateTime(
-        row.updatedAt,
-      )
-      return <span>{formattedDate}</span>
-    },
-  },
+
   {
     header: 'Action',
     accessor: 'id',

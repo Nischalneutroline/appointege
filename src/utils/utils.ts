@@ -165,3 +165,19 @@ export function normalDateToIso(date: Date): string {
     return ''
   }
 }
+
+/**
+ * Check if two dates are the same day.
+ * @param date1 - First date
+ * @param date2 - Second date
+ * @returns True if the two dates are the same day, false otherwise
+ */
+const isSameDay = (date1: Date, date2: Date): boolean => {
+  const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate())
+  const d2 = new Date(date2.getFullYear(), date2.getMonth(), date2.getDate())
+  return (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  )
+}

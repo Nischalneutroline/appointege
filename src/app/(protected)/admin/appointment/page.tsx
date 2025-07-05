@@ -637,8 +637,12 @@ import {
   setActiveFilter,
 } from '@/store/slices/appointmentSlice'
 import { cn } from '@/utils/utils'
-import { Appointment } from '@/app/(protected)/admin/appointment/_types/appointment'
+import {
+  Appointment,
+  DEFAULT_APPOINTMENT_FILTERS_VALUES,
+} from '@/app/(protected)/admin/appointment/_types/appointment'
 import FilterDropdown from '@/components/shared/layout/filter-dropdown'
+import { AppointmentFilterValue } from './_data/data'
 
 const Page = () => {
   const {
@@ -783,7 +787,14 @@ const Page = () => {
           {enrichedFilterOptions
             .filter((option) => activeFilters.includes(option.value))
             .map((option, index) => (
-              <FilterTabs key={index} {...option} />
+              <FilterTabs
+                key={index}
+                {...option}
+                sliceName="appointment"
+                onDispatch={(filter: string) =>
+                  dispatch(setActiveFilter(option.value))
+                }
+              />
             ))}
         </div>
         <div className="flex gap-2 min-w-1/4 lg:gap-3 justify-between">
@@ -797,10 +808,20 @@ const Page = () => {
             }}
           />
           <div className="flex gap-3 justify-end">
-            <FilterDropdown
+            {/* <FilterDropdown
               filterOptions={enrichedFilterOptions}
               activeFilters={activeFilters}
               onFilterChange={(filters) => dispatch(setActiveFilters(filters))}
+            /> */}
+            <FilterDropdown<AppointmentFilterValue>
+              filterOptions={enrichedFilterOptions}
+              activeFilters={activeFilters}
+              defaultFilters={DEFAULT_APPOINTMENT_FILTERS_VALUES}
+              sliceName="appointment"
+              onDispatch={{
+                setActiveFilter,
+                setActiveFilters,
+              }}
             />
             <div
               className={cn(

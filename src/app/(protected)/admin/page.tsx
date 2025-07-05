@@ -10,10 +10,14 @@ import { useDispatch } from 'react-redux'
 const AdminDashboard = () => {
   const dispatch = useDispatch<AppDispatch>()
   useEffect(() => {
-    console.log('Fetching appointments.. fro dashboard')
-    dispatch(fetchAppointments(false))
-    dispatch(fetchServices(false))
-    dispatch(fetchCustomers(false))
+    const fetchData = async () => {
+      console.log('Fetching appointments.. fro dashboard')
+      dispatch(fetchAppointments(false))
+      dispatch(fetchServices(false))
+      dispatch(fetchCustomers(false))
+    }
+
+    fetchData()
   }, [dispatch]) // Only depend on dispatch to run once on mount
 
   return <div>Dashboard</div>

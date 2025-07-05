@@ -113,7 +113,7 @@ import {
   closeAppointmentForm,
   openAppointmentCreateForm,
 } from '@/store/slices/appointmentSlice'
-import { DEFAULT_FILTERS_VALUES } from './_types/appointment'
+import { DEFAULT_APPOINTMENT_FILTERS_VALUES } from './_types/appointment'
 import {
   CalendarDays,
   Clock,
@@ -154,7 +154,9 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   // --- Combine filterOptions with counts and map icon strings to components
   const enrichedFilterOptions = useMemo(() => {
     return filterOptions
-      .filter((option) => DEFAULT_FILTERS_VALUES.includes(option.value))
+      .filter((option) =>
+        DEFAULT_APPOINTMENT_FILTERS_VALUES.includes(option.value),
+      )
       .map((option) => {
         const IconComponent = iconMap[option.icon] || CalendarDays
         return {

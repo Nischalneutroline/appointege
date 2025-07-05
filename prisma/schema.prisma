@@ -72,6 +72,7 @@ enum Role {
   USER
   ADMIN
   SUPER_ADMIN
+  GUEST
   // Add more roles as needed
 }
 

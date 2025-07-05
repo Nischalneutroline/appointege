@@ -1,6 +1,12 @@
 import { Service } from '../../service/_types/service'
+import { AppointmentFilterValue } from '../_data/data'
 
-export const DEFAULT_FILTERS_VALUES = ['today', 'upcoming', 'completed', 'all']
+export const DEFAULT_APPOINTMENT_FILTERS_VALUES: AppointmentFilterValue[] = [
+  'today',
+  'upcoming',
+  'completed',
+  'all',
+]
 
 export enum AppointmentStatus {
   SCHEDULED = 'SCHEDULED',

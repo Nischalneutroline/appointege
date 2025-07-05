@@ -188,10 +188,125 @@
 // }
 
 // export default FilterDropdown
+// 'use client'
+
+// import React from 'react'
+// import { useDispatch } from 'react-redux'
+// import { cn } from '@/lib/utils'
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+//   DropdownMenuCheckboxItem,
+// } from '@/components/ui/dropdown-menu'
+// import { Button } from '@/components/ui/button'
+// import { AppointmentFilterValue } from '@/app/(protected)/admin/appointment/_data/data'
+// import {
+//   FilterOptionState,
+//   setActiveFilter,
+//   setActiveFilters,
+// } from '@/store/slices/appointmentSlice'
+// import { ChevronDown, Funnel, Lock } from 'lucide-react'
+// import { DEFAULT_FILTERS_VALUES } from '@/app/(protected)/admin/appointment/_types/appointment'
+
+// interface FilterDropdownProps {
+//   filterOptions: (FilterOptionState & { count: number })[]
+//   activeFilters: AppointmentFilterValue[]
+//   onFilterChange: (filters: AppointmentFilterValue[]) => void
+// }
+
+// const FilterDropdown = ({
+//   filterOptions,
+//   activeFilters,
+//   onFilterChange,
+// }: FilterDropdownProps) => {
+//   const dispatch = useDispatch()
+
+//   const handleFilterChange = (
+//     value: AppointmentFilterValue,
+//     checked?: boolean,
+//   ) => {
+//     if (DEFAULT_FILTERS_VALUES.includes(value)) {
+//       dispatch(setActiveFilter(value))
+//       return
+//     }
+
+//     const newFilters = checked
+//       ? [...activeFilters, value]
+//       : activeFilters.filter((filter) => filter !== value)
+
+//     onFilterChange(newFilters)
+//     dispatch(setActiveFilters(newFilters))
+
+//     const newActiveFilter = newFilters.length > 0 ? newFilters[0] : 'today'
+//     dispatch(setActiveFilter(newActiveFilter))
+//   }
+
+//   return (
+//     <DropdownMenu>
+//       <DropdownMenuTrigger asChild>
+//         <Button
+//           variant="outline"
+//           className={cn(
+//             'h-10 w-[160px] justify-between text-sm font-normal text-gray-500',
+//             {
+//               'text-muted-foreground': activeFilters.length === 0,
+//             },
+//           )}
+//         >
+//           <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
+//           <div className="text-sm font-normal"> Select Filters</div>
+//           <ChevronDown strokeWidth={2.5} size={14} />
+//         </Button>
+//       </DropdownMenuTrigger>
+//       <DropdownMenuContent className="w-[160px]">
+//         {filterOptions.map((option: FilterOptionState & { count: number }) => {
+//           const isDefaultFilter = DEFAULT_FILTERS_VALUES.includes(option.value)
+
+//           return isDefaultFilter ? (
+//             <DropdownMenuItem
+//               key={option.value}
+//               onSelect={() => handleFilterChange(option.value)}
+//               className="text-sm"
+//             >
+//               <div className="flex gap-2 items-center">
+//                 <Lock size={14} className="text-gray-400" />
+//                 <span>{option.label === 'All' ? 'All' : option.label}</span>
+//                 <span className="text-xs text-muted-foreground">
+//                   ({option.count})
+//                 </span>
+//               </div>
+//             </DropdownMenuItem>
+//           ) : (
+//             <DropdownMenuCheckboxItem
+//               key={option.value}
+//               checked={activeFilters.includes(option.value)}
+//               onCheckedChange={(checked) =>
+//                 handleFilterChange(option.value, checked)
+//               }
+//               className="text-sm"
+//             >
+//               <div className="flex gap-2 items-center">
+//                 <span>{option.label}</span>
+//                 <span className="text-xs text-muted-foreground">
+//                   ({option.count})
+//                 </span>
+//               </div>
+//             </DropdownMenuCheckboxItem>
+//           )
+//         })}
+//       </DropdownMenuContent>
+//     </DropdownMenu>
+//   )
+// }
+
+// export default FilterDropdown
+
 'use client'
 
 import React from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { cn } from '@/lib/utils'
 import {
   DropdownMenu,
@@ -201,34 +316,44 @@ import {
   DropdownMenuCheckboxItem,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { AppointmentFilterValue } from '@/app/(protected)/admin/appointment/_data/data'
-import {
-  FilterOptionState,
-  setActiveFilter,
-  setActiveFilters,
-} from '@/store/slices/appointmentSlice'
+import { RootState } from '@/store/store'
 import { ChevronDown, Funnel, Lock } from 'lucide-react'
-import { DEFAULT_FILTERS_VALUES } from '@/app/(protected)/admin/appointment/_types/appointment'
 
-interface FilterDropdownProps {
-  filterOptions: (FilterOptionState & { count: number })[]
-  activeFilters: AppointmentFilterValue[]
-  onFilterChange: (filters: AppointmentFilterValue[]) => void
+// Generic FilterOptionState to support different filter value types
+export interface FilterOptionState<T extends string> {
+  label: string
+  value: T
+  textColor: string
+  border: string
+  background: string
+  icon: string
 }
 
-const FilterDropdown = ({
+interface FilterDropdownProps<T extends string> {
+  filterOptions: (FilterOptionState<T> & { count: number })[]
+  activeFilters: T[]
+  defaultFilters: T[]
+  sliceName: 'appointment' | 'customer' // Add more slice names as needed
+  onDispatch: {
+    setActiveFilter: (value: T) => any
+    setActiveFilters: (filters: T[]) => any
+  }
+}
+
+const FilterDropdown = <T extends string>({
   filterOptions,
   activeFilters,
-  onFilterChange,
-}: FilterDropdownProps) => {
+  defaultFilters,
+  sliceName,
+  onDispatch,
+}: FilterDropdownProps<T>) => {
   const dispatch = useDispatch()
+  const { activeFilter } = useSelector((state: RootState) => state[sliceName])
 
-  const handleFilterChange = (
-    value: AppointmentFilterValue,
-    checked?: boolean,
-  ) => {
-    if (DEFAULT_FILTERS_VALUES.includes(value)) {
-      dispatch(setActiveFilter(value))
+  const handleFilterChange = (value: T, checked?: boolean) => {
+    if (defaultFilters.includes(value)) {
+      dispatch(onDispatch.setActiveFilter(value))
+      dispatch(onDispatch.setActiveFilters([value]))
       return
     }
 
@@ -236,11 +361,13 @@ const FilterDropdown = ({
       ? [...activeFilters, value]
       : activeFilters.filter((filter) => filter !== value)
 
-    onFilterChange(newFilters)
-    dispatch(setActiveFilters(newFilters))
+    dispatch(onDispatch.setActiveFilters(newFilters))
 
-    const newActiveFilter = newFilters.length > 0 ? newFilters[0] : 'today'
-    dispatch(setActiveFilter(newActiveFilter))
+    const newActiveFilter =
+      newFilters.length > 0 ? newFilters[0] : defaultFilters[0]
+    if (newActiveFilter !== undefined) {
+      dispatch(onDispatch.setActiveFilter(newActiveFilter))
+    }
   }
 
   return (
@@ -256,13 +383,13 @@ const FilterDropdown = ({
           )}
         >
           <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
-          <div className="text-sm font-normal"> Select Filters</div>
+          <div className="text-sm font-normal">Select Filters</div>
           <ChevronDown strokeWidth={2.5} size={14} />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-[160px]">
-        {filterOptions.map((option: FilterOptionState & { count: number }) => {
-          const isDefaultFilter = DEFAULT_FILTERS_VALUES.includes(option.value)
+        {filterOptions.map((option) => {
+          const isDefaultFilter = defaultFilters.includes(option.value)
 
           return isDefaultFilter ? (
             <DropdownMenuItem

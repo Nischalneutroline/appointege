@@ -1,8 +1,20 @@
 import { Role, User } from '../_types/customer'
 import { CalendarDays, Clock, Users } from 'lucide-react'
 
-export type CustomerLabel = 'Active' | 'Inactive' | 'All'
-export type CustomerValue = 'active' | 'inactive' | 'all'
+export const DEFAULT_CUSTOMER_FILTERS_VALUES = ['guest', 'member', 'all']
+
+export type CustomerFilterLabel =
+  | 'Active'
+  | 'Inactive'
+  | 'All'
+  | 'Guest'
+  | 'Member'
+export type CustomerFilterValue =
+  | 'active'
+  | 'inactive'
+  | 'all'
+  | 'guest'
+  | 'member'
 
 export interface CustomerData {
   textColor: string
@@ -14,8 +26,8 @@ export interface CustomerData {
 }
 
 export interface FilterCustomerState extends CustomerData {
-  label: CustomerLabel
-  value: CustomerValue
+  label: CustomerFilterLabel
+  value: CustomerFilterValue
 }
 
 export const filterCustomerOptions = (

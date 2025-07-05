@@ -1,3 +1,36 @@
+export const DEFAULT_CUSTOMER_FILTERS_VALUES: CustomerFilterValue[] = [
+  'guest',
+  'member',
+  'all',
+]
+
+export type CustomerFilterLabel =
+  | 'Active'
+  | 'Inactive'
+  | 'All'
+  | 'Guest'
+  | 'Member'
+export type CustomerFilterValue =
+  | 'active'
+  | 'inactive'
+  | 'all'
+  | 'guest'
+  | 'member'
+
+export interface CustomerData {
+  textColor: string
+  count: number
+  data: User[]
+  border: string
+  background: string
+  icon: React.ReactNode
+}
+
+export interface FilterCustomerState extends CustomerData {
+  label: CustomerFilterLabel
+  value: CustomerFilterValue
+}
+
 export interface Address {
   street: string
   city: string
@@ -12,6 +45,13 @@ export enum Role {
   GUEST = 'GUEST',
 }
 
+export enum CustomerStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  GUEST = 'GUEST',
+  MEMBER = 'MEMBER',
+}
+
 export interface User {
   id: string
   email: string // Required
@@ -22,8 +62,22 @@ export interface User {
   isActive?: boolean // Optional, defaults to true
   address?: Address // Optional
   createdAt: string
-  lastActiveAt: string
+  lastActive: string
   updatedAt: string
+  color?: string
+  status?: CustomerStatus[]
+}
+
+// Define the data structure for creating/updating customers
+export interface PostCustomerData {
+  id?: string // Optional for create, required for update
+  email: string
+  password?: string // Optional for update
+  name: string
+  phone?: string
+  role: Role
+  isActive?: boolean
+  address?: Address
 }
 
 export interface ApiReturnType<T = any> {
