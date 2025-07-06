@@ -70,6 +70,7 @@ export async function POST(
         { status: 201 },
       )
     } catch (error) {
+      console.error('Error creating user:', error)
       // Prisma Validation
       if (error instanceof Prisma.PrismaClientValidationError) {
         // Handle the validation error specifically

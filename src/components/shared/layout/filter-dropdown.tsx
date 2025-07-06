@@ -302,7 +302,6 @@
 // }
 
 // export default FilterDropdown
-
 'use client'
 
 import React from 'react'
@@ -332,7 +331,7 @@ export interface FilterOptionState<T extends string> {
 interface FilterDropdownProps<T extends string> {
   filterOptions: (FilterOptionState<T> & { count: number })[]
   activeFilters: T[]
-  defaultFilters: T[]
+  defaultFilters: T[] // Non-removable filters
   sliceName: 'appointment' | 'customer' // Add more slice names as needed
   onDispatch: {
     setActiveFilter: (value: T) => any
@@ -351,18 +350,22 @@ const FilterDropdown = <T extends string>({
   const { activeFilter } = useSelector((state: RootState) => state[sliceName])
 
   const handleFilterChange = (value: T, checked?: boolean) => {
-    if (defaultFilters.includes(value)) {
+    const isDefaultFilter = defaultFilters.includes(value)
+
+    if (isDefaultFilter) {
+      // For default filters, only set activeFilter and do not modify activeFilters
       dispatch(onDispatch.setActiveFilter(value))
-      dispatch(onDispatch.setActiveFilters([value]))
       return
     }
 
+    // Handle non-default filters
     const newFilters = checked
       ? [...activeFilters, value]
       : activeFilters.filter((filter) => filter !== value)
 
     dispatch(onDispatch.setActiveFilters(newFilters))
 
+    // Set activeFilter to the first non-default filter or a default filter if no others are selected
     const newActiveFilter =
       newFilters.length > 0 ? newFilters[0] : defaultFilters[0]
     if (newActiveFilter !== undefined) {

@@ -674,7 +674,9 @@ const storeCreateCustomer = createAsyncThunk<
 >('customer/storeCreateCustomer', async (customerData, { rejectWithValue }) => {
   try {
     const response = await api.post('/api/user', customerData)
+    console.log('storeCreateCustomer: Response data =', response)
     const { data, success, errorDetail, message } = response.data
+
     if (success && data) {
       toast.success(message || 'Customer created successfully', {
         id: 'create-customer',

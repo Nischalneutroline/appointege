@@ -168,7 +168,12 @@ import { formatAppointmentDateTime } from '@/lib/date-time-format'
 import { getRandomColor } from '@/lib/color'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
-import { MS_PER_DAY } from '@/store/slices/customerSlice'
+import {
+  MS_PER_DAY,
+  openCustomerDeleteForm,
+  openCustomerEditForm,
+  openCustomerViewForm,
+} from '@/store/slices/customerSlice'
 import { ACTIVE_DURATION_DAYS } from '@/store/slices/customerSlice'
 
 const CustomerCard = ({ item }: { item: User }) => {
@@ -205,14 +210,16 @@ const CustomerCard = ({ item }: { item: User }) => {
   const variant = statusVariants[status as keyof typeof statusVariants]
 
   // Action handlers
-  const handleViewClick = () => {
-    // dispatch(openAppointmentViewForm({ ...item } as any)) // Adjust to customer slice if needed
+  const handleViewClick = (item: User) => {
+    dispatch(openCustomerViewForm({ ...item }))
   }
-  const handleEditClick = () => {
-    // dispatch(openAppointmentEditForm({ ...item } as any)) // Adjust to customer slice if needed
+
+  const handleEditClick = (item: User) => {
+    dispatch(openCustomerEditForm({ ...item }))
   }
-  const handleDeleteClick = () => {
-    // dispatch(openAppointmentDeleteForm({ ...item } as any)) // Adjust to customer slice if needed
+
+  const handleDeleteClick = (item: User) => {
+    dispatch(openCustomerDeleteForm({ ...item }))
   }
 
   // Date formatting
@@ -280,7 +287,7 @@ const CustomerCard = ({ item }: { item: User }) => {
       <div className="flex w-full h-10 justify-between items-center text-[#6B7280] text-sm">
         <div
           className="w-full flex border-t-[1px] border-r-[1px] border-[#DCE9F9] justify-center p-3 cursor-pointer hover:bg-gray-50"
-          onClick={handleViewClick}
+          onClick={() => handleViewClick(item)}
         >
           <div className="flex items-center gap-1">
             <Eye className="h-3.5 w-3.4 text-[#2563EB]" />
@@ -289,7 +296,7 @@ const CustomerCard = ({ item }: { item: User }) => {
         </div>
         <div
           className="w-full flex border-t-[1px] border-[#DCE9F9] justify-center p-3 cursor-pointer hover:bg-gray-50"
-          onClick={handleEditClick}
+          onClick={() => handleEditClick(item)}
         >
           <div className="flex items-center gap-1">
             <SquarePen className="h-3.5 w-3.5 text-[#10B981]" />
@@ -298,7 +305,7 @@ const CustomerCard = ({ item }: { item: User }) => {
         </div>
         <div
           className="w-full flex border-t-[1px] border-l-[1px] border-[#DCE9F9] justify-center p-3 cursor-pointer hover:bg-gray-50"
-          onClick={handleDeleteClick}
+          onClick={() => handleDeleteClick(item)}
         >
           <div className="flex items-center gap-1">
             <Trash2 className="h-3.5 w-3.5 text-red-500" />

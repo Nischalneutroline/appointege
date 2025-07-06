@@ -21,8 +21,9 @@ export const userSchema = z.object({
     .min(6, 'Password must be at least 6 characters long')
     .optional(),
   name: z.string().min(1, 'Name is required'),
+  role: roleSchema,
   phone: z.string().optional(),
   // role: roleSchema,
-  isActive: z.boolean(), // Optional, defaults to true
+  isActive: z.boolean().optional(), // Optional, defaults to true
   address: addressSchema.optional(), // Optional address
 })

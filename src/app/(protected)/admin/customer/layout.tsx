@@ -145,6 +145,13 @@ import {
 import { CalendarDays, UserRoundMinus, UserRoundPlus } from 'lucide-react'
 import DeleteModal from '../appointment/_component/delete-appointment'
 import { DEFAULT_CUSTOMER_FILTERS_VALUES } from './_data/data'
+import CustomerForm from './_component/new-customer'
+import {
+  closeCustomerForm,
+  deleteCustomer,
+  openCustomerCreateForm,
+} from '@/store/slices/customerSlice'
+import CustomerDetail from './_component/view-customer-detail'
 
 // Map icon names to LucideIcon components
 const iconMap: Record<
@@ -217,7 +224,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
             <div>
               <Button
                 className="active:scale-95"
-                onClick={() => dispatch(openAppointmentCreateForm())}
+                onClick={() => dispatch(openCustomerCreateForm())}
               >
                 <span>
                   <Plus />
@@ -237,26 +244,32 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
 
       <div className="flex-1 overflow-hidden">{children}</div>
 
-      {/* {isFormOpen &&
-        (appoinmentFormMode === 'create' || appoinmentFormMode === 'edit') && (
-          <NewAppoinment
+      {isFormOpen &&
+        (customerFormMode === 'create' || customerFormMode === 'edit') && (
+          <CustomerForm
             open={isFormOpen}
-            onChange={() => dispatch(closeAppointmentForm())}
+            onChange={() => dispatch(closeCustomerForm())}
           />
         )}
-      {isFormOpen && appoinmentFormMode === 'view' && currentAppointment && (
-        <ViewAppointment
+
+      {isFormOpen && customerFormMode === 'view' && currentCustomer && (
+        <CustomerDetail
           open={isFormOpen}
-          onChange={() => dispatch(closeAppointmentForm())}
+          onChange={() => dispatch(closeCustomerForm())}
+          filledData={currentCustomer}
         />
-      )} */}
-      {/* {isFormOpen && appoinmentFormMode === 'delete' && currentAppointment && (
+      )}
+      {isFormOpen && customerFormMode === 'delete' && currentCustomer && (
         <DeleteModal
           open={isFormOpen}
-          onChange={() => dispatch(clos())}
+          onChange={() => dispatch(closeAppointmentForm())}
           isLoading={isLoading}
+          sliceName="customer"
+          currentItem={currentCustomer}
+          deleteAction={deleteCustomer}
+          closeAction={closeCustomerForm}
         />
-      )} */}
+      )}
     </main>
   )
 }

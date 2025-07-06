@@ -111,6 +111,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
 import {
   closeAppointmentForm,
+  deleteAppointment,
   openAppointmentCreateForm,
 } from '@/store/slices/appointmentSlice'
 import { DEFAULT_APPOINTMENT_FILTERS_VALUES } from './_types/appointment'
@@ -232,6 +233,10 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
           open={isFormOpen}
           onChange={() => dispatch(closeAppointmentForm())}
           isLoading={isLoading}
+          sliceName="appoinment"
+          currentItem={currentAppointment}
+          deleteAction={deleteAppointment}
+          closeAction={closeAppointmentForm}
         />
       )}
     </main>

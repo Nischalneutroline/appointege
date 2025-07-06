@@ -30,6 +30,11 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Service } from '../../service/_types/service'
 import { formatAppointmentDateTime } from '@/lib/date-time-format'
 import { CustomerStatus, User } from '../../customer/_types/customer'
+import {
+  openCustomerDeleteForm,
+  openCustomerEditForm,
+  openCustomerViewForm,
+} from '@/store/slices/customerSlice'
 
 // Color for the Customer Name
 const getRandomColor = () => {
@@ -51,15 +56,15 @@ function AppointmentActions({ row }: { row: User }) {
   const dispatch = useDispatch()
 
   const handleViewClick = () => {
-    // dispatch(openAppointmentViewForm({ ...row }))
+    dispatch(openCustomerViewForm({ ...row }))
   }
 
   const handleEditClick = () => {
-    // dispatch(openAppointmentEditForm({ ...row }))
+    dispatch(openCustomerEditForm({ ...row }))
   }
 
   const handleDeleteClick = () => {
-    // dispatch(openAppointmentDeleteForm({ ...row }))
+    dispatch(openCustomerDeleteForm({ ...row }))
   }
 
   return (
