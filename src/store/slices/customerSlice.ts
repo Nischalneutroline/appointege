@@ -457,22 +457,6 @@ const initialState: CustomerState = {
   },
   filterOptions: [
     {
-      label: 'Active',
-      value: 'active',
-      textColor: '#103064',
-      border: '#DCE9F9',
-      background: '#E9F1FD',
-      icon: 'ShieldUser',
-    },
-    {
-      label: 'Inactive',
-      value: 'inactive',
-      textColor: '#4C3000',
-      border: '#FFF3CD',
-      background: '#FFF6E6',
-      icon: 'UserCog',
-    },
-    {
       label: 'Guest',
       value: 'guest',
       textColor: '#0F5327',
@@ -487,6 +471,22 @@ const initialState: CustomerState = {
       border: '#FEE2E2',
       background: '#FEF2F2',
       icon: 'UserRoundPlus',
+    },
+    {
+      label: 'Active',
+      value: 'active',
+      textColor: '#103064',
+      border: '#DCE9F9',
+      background: '#E9F1FD',
+      icon: 'ShieldUser',
+    },
+    {
+      label: 'Inactive',
+      value: 'inactive',
+      textColor: '#4C3000',
+      border: '#FFF3CD',
+      background: '#FFF6E6',
+      icon: 'UserCog',
     },
     {
       label: 'All',
@@ -510,9 +510,9 @@ const initialState: CustomerState = {
   activeFilters: ['guest', 'member', 'all'],
 }
 
-const ACTIVE_DURATION_DAYS = 60 // Configurable active duration in days
-const ACTIVE_DURATION_MS = ACTIVE_DURATION_DAYS * 24 * 60 * 60 * 1000 // Convert to milliseconds
-const MS_PER_DAY = 24 * 60 * 60 * 1000 // Milliseconds per day
+export const ACTIVE_DURATION_DAYS = 60 // Configurable active duration in days
+export const ACTIVE_DURATION_MS = ACTIVE_DURATION_DAYS * 24 * 60 * 60 * 1000 // Convert to milliseconds
+export const MS_PER_DAY = 24 * 60 * 60 * 1000 // Milliseconds per day
 
 export const filterCustomers = (
   customers: User[],

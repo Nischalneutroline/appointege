@@ -97,7 +97,7 @@ function AppointmentActions({ row }: { row: User }) {
 }
 
 // Appointment Table Column
-export const columns: TableColumn<User>[] = [
+export const customerColumns: TableColumn<User>[] = [
   {
     header: 'Id',
     accessor: 'id',

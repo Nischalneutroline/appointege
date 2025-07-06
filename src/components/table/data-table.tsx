@@ -22,7 +22,7 @@ const DataTable = <T,>({
   rowClassName,
 }: TableProps<T>) => {
   return (
-    <table className="lg:min-w-full min-w-[600px] border-y  overflow-auto border-[#DCE9F9] ">
+    <table className="lg:min-w-full min-w-[600px] border  overflow-auto border-[#DCE9F9] ">
       <thead className="bg-[#F8F9FA] h-12 ">
         <tr className="border-0">
           {columns.map((col, idx) => (

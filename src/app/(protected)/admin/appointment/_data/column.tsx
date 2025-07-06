@@ -103,7 +103,7 @@ function AppointmentActions({ row }: { row: AppointmentWithService }) {
 }
 
 // Appointment Table Column
-export const columns: TableColumn<AppointmentWithService>[] = [
+export const appointmentColumns: TableColumn<AppointmentWithService>[] = [
   {
     header: 'Id',
     accessor: 'id',

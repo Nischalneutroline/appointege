@@ -624,7 +624,7 @@ import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import SearchBar from '@/components/shared/layout/search-bar'
 import { RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
-import { columns } from './_data/column'
+import { appointmentColumns } from './_data/column'
 import FilterTabs from '@/components/shared/layout/filter-tabs'
 import AppointmentGrid from './_component/appointment-grid'
 import Image from 'next/image'
@@ -725,7 +725,7 @@ const Page = () => {
     [dispatch],
   )
 
-  const memoizedColumns = useMemo(() => columns, [])
+  const memoizedColumns = useMemo(() => appointmentColumns, [])
 
   useEffect(() => {
     if (

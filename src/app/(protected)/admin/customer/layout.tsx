@@ -171,7 +171,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   } = useSelector((state: RootState) => state.customer)
 
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
-  const [buttonName, setButtonName] = useState('New Appointment')
+  const [buttonName, setButtonName] = useState('New Customer')
 
   // --- Combine filterOptions with counts and map icon strings to components
   const enrichedFilterOptions = useMemo(() => {
@@ -195,7 +195,7 @@ const AppointmentLayout = ({ children }: { children: React.ReactNode }) => {
   // Adjust button name based on screen size
   useEffect(() => {
     const handleResize = () => {
-      setButtonName(window.innerWidth < 500 ? 'New' : 'New Appointment')
+      setButtonName(window.innerWidth < 500 ? 'New' : 'New Customer')
     }
     handleResize() // Set initial value
     window.addEventListener('resize', handleResize)

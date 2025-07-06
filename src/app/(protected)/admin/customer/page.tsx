@@ -210,7 +210,7 @@ import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import SearchBar from '@/components/shared/layout/search-bar'
 import { RefreshCcw } from 'lucide-react'
 import DataTable from '@/components/table/data-table'
-import { columns } from './_data/column'
+import { customerColumns } from './_data/column'
 import FilterTabs from '@/components/shared/layout/filter-tabs'
 import Image from 'next/image'
 import { useDispatch, useSelector } from 'react-redux'
@@ -306,7 +306,7 @@ const Page = () => {
     [dispatch],
   )
 
-  const memoizedColumns = useMemo(() => columns, [])
+  const memoizedColumns = useMemo(() => customerColumns, [])
 
   useEffect(() => {
     if (
