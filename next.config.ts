@@ -83,6 +83,15 @@ const nextConfig: NextConfig = {
   // For Build process ignore for now
   typescript: {
     ignoreBuildErrors: true,
+
+    strict: true,
+    target: 'es5',
+    module: 'esnext',
+    moduleResolution: 'node',
+    jsx: 'preserve',
+    esModuleInterop: true,
+    skipLibCheck: true,
+    forceConsistentCasingInFileNames: true,
   },
   eslint: {
     ignoreDuringBuilds: true,

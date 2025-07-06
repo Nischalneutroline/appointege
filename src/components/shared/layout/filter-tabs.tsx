@@ -151,7 +151,7 @@ interface FilterTabsProps<T extends string> {
   background: string
   border: string
   sliceName: 'appointment' | 'customer' // Add more slice names as needed
-  onDispatch: (value: T) => void
+  onDispatch: (value: T) => any
 }
 
 const FilterTabs = <T extends string>({
@@ -180,7 +180,7 @@ const FilterTabs = <T extends string>({
     <div
       key={value}
       className={cn(
-        `w-fit text-sm font-normal px-2 py-2 flex justify-center items-center 
+        `w-full md:w-22 text-sm font-normal px-2 py-2 flex justify-center items-center 
          transition-transform duration-300 cursor-pointer rounded-[8px] active:scale-95 hover:bg-slate-50/80 dark:hover:bg-slate-800/50
         `,
       )}
@@ -198,7 +198,7 @@ const FilterTabs = <T extends string>({
         {label === 'All' ? 'All' : label}
         <span className="flex justify-center items-center md:hidden rounded-full bg-primary size-5 text-white">
           <div className={cn('text-sm', value === activeFilter && 'font-bold')}>
-            {counts[value] || 0}
+            {counts[value as keyof typeof counts] || 0}
           </div>
         </span>
       </div>

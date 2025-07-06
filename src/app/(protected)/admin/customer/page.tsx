@@ -203,7 +203,303 @@
 //   )
 // }
 
+// // export default Page
+// 'use client'
+
+// import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react'
+// import SearchBar from '@/components/shared/layout/search-bar'
+// import { RefreshCcw } from 'lucide-react'
+// import DataTable from '@/components/table/data-table'
+// import { customerColumns } from './_data/column'
+// import FilterTabs from '@/components/shared/layout/filter-tabs'
+// import Image from 'next/image'
+// import { useDispatch, useSelector } from 'react-redux'
+// import { AppDispatch, RootState } from '@/store/store'
+// import { cn } from '@/utils/utils'
+// import FilterDropdown from '@/components/shared/layout/filter-dropdown'
+// import {
+//   User,
+//   CustomerFilterValue,
+//   DEFAULT_CUSTOMER_FILTERS_VALUES,
+// } from './_types/customer'
+// import {
+//   deleteCustomer,
+//   fetchCustomers,
+//   setActiveFilter,
+//   setActiveFilters,
+// } from '@/store/slices/customerSlice'
+// import CustomerCard from './_component/customer-card'
+
+// const Page = () => {
+//   const {
+//     isLoading,
+//     isRefreshing,
+//     filteredCustomers,
+//     filterOptions,
+//     counts,
+//     hasFetched,
+//     success,
+//     activeFilter,
+//     activeFilters,
+//   } = useSelector((state: RootState) => state.customer)
+//   const { viewMode } = useSelector((state: RootState) => state.view)
+//   const dispatch = useDispatch<AppDispatch>()
+
+//   // State for search query
+//   const [searchQuery, setSearchQuery] = useState<string>('')
+
+//   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
+//   const hasFetchedOnce = useRef(false)
+//   const hasAttemptedEmptyFetch = useRef(false)
+
+//   // Combine filterOptions with counts for FilterDropdown and FilterTabs
+//   const enrichedFilterOptions = useMemo(() => {
+//     return filterOptions.map((option) => ({
+//       ...option,
+//       count: counts[option.value] || 0,
+//     }))
+//   }, [filterOptions, counts])
+
+//   // Search logic: filter filteredCustomers based on search query: email, phone, name, status
+//   const searchedCustomers = useMemo(() => {
+//     let result = filteredCustomers
+//     if (searchQuery.trim()) {
+//       const query = searchQuery.toLowerCase().trim()
+//       console.log('Searching with query:', query)
+//       result = filteredCustomers.filter((customer: User) => {
+//         const searchableFields = [
+//           customer.name?.toLowerCase() || '',
+//           ...(customer.status ?? []).map((status) => status.toLowerCase()),
+//           customer.email?.toLowerCase() || '',
+//           customer.phone?.toLowerCase() || '',
+//         ].filter(Boolean)
+//         const matches = searchableFields.some((field) => field.includes(query))
+//         console.log(`Customer ID ${customer.id}:`, {
+//           searchableFields,
+//           matches,
+//         })
+//         return matches
+//       })
+//     }
+//     console.log('Searched customers:', result)
+//     return result
+//   }, [filteredCustomers, searchQuery])
+
+//   const handleRefresh = useCallback(() => {
+//     if (debounceTimeout.current) return
+//     console.log('Manual refresh triggered')
+//     debounceTimeout.current = setTimeout(() => {
+//       dispatch(fetchCustomers(true)).then((action) => {
+//         if (action.type === fetchCustomers.fulfilled.type) {
+//           hasAttemptedEmptyFetch.current =
+//             Array.isArray(action.payload) && action.payload.length === 0
+//         }
+//         debounceTimeout.current = null
+//       })
+//     }, 300)
+//   }, [dispatch])
+
+//   const handleDelete = useCallback(
+//     async (id: string) => {
+//       await dispatch(deleteCustomer(id))
+//     },
+//     [dispatch],
+//   )
+
+//   const memoizedColumns = useMemo(() => customerColumns, [])
+
+//   useEffect(() => {
+//     if (
+//       hasFetchedOnce.current ||
+//       isLoading ||
+//       isRefreshing ||
+//       (hasFetched && hasAttemptedEmptyFetch.current)
+//     ) {
+//       return
+//     }
+
+//     if (!hasFetched || filteredCustomers.length === 0) {
+//       console.log(
+//         `Triggering fetch: hasFetched=${hasFetched}, filteredCustomers.length=${filteredCustomers.length}`,
+//       )
+//       hasFetchedOnce.current = true
+//       dispatch(fetchCustomers(false)).then((action) => {
+//         if (action.type === fetchCustomers.fulfilled.type) {
+//           hasAttemptedEmptyFetch.current =
+//             Array.isArray(action.payload) && action.payload.length === 0
+//         }
+//       })
+//     }
+//   }, [isLoading, isRefreshing, hasFetched, filteredCustomers, dispatch])
+
+//   // Reset activeFilter and activeFilters to default after a successful update if no customers are found
+//   useEffect(() => {
+//     if (success && searchedCustomers.length === 0 && !searchQuery) {
+//       console.log(
+//         'Success detected, resetting activeFilter and activeFilters to default',
+//       )
+//       dispatch(setActiveFilter('all'))
+//       dispatch(setActiveFilters(DEFAULT_CUSTOMER_FILTERS_VALUES))
+//     }
+//   }, [success, searchedCustomers, searchQuery, dispatch])
+
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       console.log('Silent auto-refresh triggered')
+//       dispatch(fetchCustomers(false))
+//     }, 300000) // 5 minutes
+//     return () => clearInterval(interval)
+//   }, [dispatch])
+
+//   useEffect(() => {
+//     return () => {
+//       if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
+//     }
+//   }, [])
+
+//   return (
+//     <div className="flex flex-col gap-4 h-full w-full overflow-hidden py-0.5">
+//       <div className="flex flex-col md:flex-row md:justify-between gap-2 w-full">
+//         <div
+//           className={cn(
+//             'w-full md:w-fit flex items-center gap-1 overflow-x-auto px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border border-[#E5E7EB]',
+//             'scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-gray-500',
+//           )}
+//         >
+//           {enrichedFilterOptions
+//             .filter(
+//               (option) =>
+//                 activeFilters.includes(option.value) ||
+//                 option.value === activeFilter,
+//             )
+//             .map((option, index) => (
+//               <FilterTabs
+//                 key={index}
+//                 {...option}
+//                 sliceName="customer"
+//                 onDispatch={setActiveFilter}
+//               />
+//             ))}
+//         </div>
+//         <div className="flex gap-2 min-w-1/4 lg:gap-3 justify-between">
+//           <SearchBar
+//             className="bg-white rounded-[8px]"
+//             placeholder="Search by details"
+//             width="w-full max-w-[530px]"
+//             onSearch={(value) => {
+//               console.log('Search:', value)
+//               setSearchQuery(value)
+//             }}
+//           />
+//           <div className="flex gap-3 justify-end">
+//             <FilterDropdown<CustomerFilterValue>
+//               filterOptions={enrichedFilterOptions}
+//               activeFilters={activeFilters}
+//               defaultFilters={DEFAULT_CUSTOMER_FILTERS_VALUES}
+//               sliceName="customer"
+//               onDispatch={{
+//                 setActiveFilter,
+//                 setActiveFilters,
+//               }}
+//             />
+//             <div
+//               className={cn(
+//                 'flex items-center justify-center text-[#7285BD] cursor-pointer hover:rotate-90 transition duration-700 hover:scale-110',
+//                 isRefreshing && 'animate-spin',
+//               )}
+//               onClick={handleRefresh}
+//               aria-label={
+//                 isRefreshing ? 'Refreshing customers' : 'Refresh customers'
+//               }
+//               aria-busy={isRefreshing}
+//             >
+//               <RefreshCcw strokeWidth={2.5} size={18} />
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       <div className="flex-1 h-full min-h-0 rounded-lg overflow-y-auto">
+//         {isLoading && !hasFetched ? (
+//           <div className="text-center py-8 text-sm text-gray-500 italic">
+//             Loading customers...
+//           </div>
+//         ) : searchedCustomers.length > 0 ? (
+//           <>
+//             {viewMode === 'list' && (
+//               <div className="w-full overflow-x-auto">
+//                 <div className="min-w-[800px]">
+//                   <DataTable
+//                     columns={memoizedColumns}
+//                     data={searchedCustomers}
+//                     rowKey="id"
+//                   />
+//                 </div>
+//               </div>
+//             )}
+//             {viewMode === 'card' && (
+//               <div
+//                 className={cn(
+//                   'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 xxl:grid-cols-4 ',
+//                   'pb-6',
+//                 )}
+//               >
+//                 {searchedCustomers.map((item) => (
+//                   <CustomerCard item={item} key={item.id} />
+//                 ))}
+//               </div>
+//             )}
+//           </>
+//         ) : (
+//           <div className="h-full flex items-center justify-center text-gray-500">
+//             <div className="flex flex-col items-center gap-2">
+//               <Image
+//                 src="/assets/ecommerce.svg"
+//                 alt="No customers"
+//                 width={140}
+//                 height={140}
+//               />
+//               <div className="text-2xl text-[#4F7CFF] font-semibold">
+//                 No Customers Found
+//               </div>
+//               <div className="text-[#9F9C9C] text-sm font-medium">
+//                 {searchQuery ? (
+//                   <>
+//                     No customers match your search query "{searchQuery}" for{' '}
+//                     {activeFilter === 'all'
+//                       ? 'all customers'
+//                       : `${activeFilter} customers`}
+//                     .
+//                   </>
+//                 ) : (
+//                   <>
+//                     No customers found for{' '}
+//                     {activeFilter === 'all'
+//                       ? 'all customers'
+//                       : `${activeFilter} customers`}
+//                     .
+//                   </>
+//                 )}
+//                 <button
+//                   className="p-1 ml-1 text-blue-600 hover:underline disabled:opacity-50"
+//                   onClick={handleRefresh}
+//                   disabled={isRefreshing || isLoading}
+//                   aria-label="Retry fetching customers"
+//                 >
+//                   Try refreshing
+//                 </button>{' '}
+//                 or creating a new customer.
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   )
+// }
+
 // export default Page
+
 'use client'
 
 import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react'
@@ -230,6 +526,9 @@ import {
 } from '@/store/slices/customerSlice'
 import CustomerCard from './_component/customer-card'
 
+// Memoize columns outside the component to avoid recalculation
+const memoizedColumns = customerColumns
+
 const Page = () => {
   const {
     isLoading,
@@ -245,14 +544,12 @@ const Page = () => {
   const { viewMode } = useSelector((state: RootState) => state.view)
   const dispatch = useDispatch<AppDispatch>()
 
-  // State for search query
   const [searchQuery, setSearchQuery] = useState<string>('')
-
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
   const hasFetchedOnce = useRef(false)
   const hasAttemptedEmptyFetch = useRef(false)
 
-  // Combine filterOptions with counts for FilterDropdown and FilterTabs
+  // Memoize enrichedFilterOptions once with stable dependencies
   const enrichedFilterOptions = useMemo(() => {
     return filterOptions.map((option) => ({
       ...option,
@@ -260,44 +557,32 @@ const Page = () => {
     }))
   }, [filterOptions, counts])
 
-  // Search logic: filter filteredCustomers based on search query: email, phone, name, status
+  // Memoize searchedCustomers with optimized filtering
   const searchedCustomers = useMemo(() => {
-    let result = filteredCustomers
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim()
-      console.log('Searching with query:', query)
-      result = filteredCustomers.filter((customer: User) => {
-        const searchableFields = [
-          customer.name?.toLowerCase() || '',
-          ...(customer.status ?? []).map((status) => status.toLowerCase()),
-          customer.email?.toLowerCase() || '',
-          customer.phone?.toLowerCase() || '',
-        ].filter(Boolean)
-        const matches = searchableFields.some((field) => field.includes(query))
-        console.log(`Customer ID ${customer.id}:`, {
-          searchableFields,
-          matches,
-        })
-        return matches
-      })
-    }
-    console.log('Searched customers:', result)
-    return result
+    if (!searchQuery.trim()) return filteredCustomers
+    const query = searchQuery.toLowerCase().trim()
+    return filteredCustomers.filter((customer: User) =>
+      [
+        customer.name?.toLowerCase() || '',
+        ...(customer.status ?? []).map((status) => status.toLowerCase()),
+        customer.email?.toLowerCase() || '',
+        customer.phone?.toLowerCase() || '',
+      ].some((field) => field.includes(query)),
+    )
   }, [filteredCustomers, searchQuery])
 
   const handleRefresh = useCallback(() => {
-    if (debounceTimeout.current) return
-    console.log('Manual refresh triggered')
+    if (debounceTimeout.current || isRefreshing) return
     debounceTimeout.current = setTimeout(() => {
       dispatch(fetchCustomers(true)).then((action) => {
-        if (action.type === fetchCustomers.fulfilled.type) {
+        if (fetchCustomers.fulfilled.match(action)) {
           hasAttemptedEmptyFetch.current =
             Array.isArray(action.payload) && action.payload.length === 0
         }
         debounceTimeout.current = null
       })
     }, 300)
-  }, [dispatch])
+  }, [dispatch, isRefreshing])
 
   const handleDelete = useCallback(
     async (id: string) => {
@@ -306,51 +591,36 @@ const Page = () => {
     [dispatch],
   )
 
-  const memoizedColumns = useMemo(() => customerColumns, [])
-
+  // Fetch data only once on mount, avoiding redundant calls
   useEffect(() => {
-    if (
-      hasFetchedOnce.current ||
-      isLoading ||
-      isRefreshing ||
-      (hasFetched && hasAttemptedEmptyFetch.current)
-    ) {
+    if (hasFetchedOnce.current || isLoading || isRefreshing || hasFetched)
       return
-    }
+    hasFetchedOnce.current = true
+    dispatch(fetchCustomers(false)).then((action) => {
+      if (fetchCustomers.fulfilled.match(action)) {
+        hasAttemptedEmptyFetch.current =
+          Array.isArray(action.payload) && action.payload.length === 0
+      }
+    })
+  }, [isLoading, isRefreshing, hasFetched, dispatch])
 
-    if (!hasFetched || filteredCustomers.length === 0) {
-      console.log(
-        `Triggering fetch: hasFetched=${hasFetched}, filteredCustomers.length=${filteredCustomers.length}`,
-      )
-      hasFetchedOnce.current = true
-      dispatch(fetchCustomers(false)).then((action) => {
-        if (action.type === fetchCustomers.fulfilled.type) {
-          hasAttemptedEmptyFetch.current =
-            Array.isArray(action.payload) && action.payload.length === 0
-        }
-      })
-    }
-  }, [isLoading, isRefreshing, hasFetched, filteredCustomers, dispatch])
-
-  // Reset activeFilter and activeFilters to default after a successful update if no customers are found
+  // Reset filters on success with no results
   useEffect(() => {
     if (success && searchedCustomers.length === 0 && !searchQuery) {
-      console.log(
-        'Success detected, resetting activeFilter and activeFilters to default',
-      )
       dispatch(setActiveFilter('all'))
       dispatch(setActiveFilters(DEFAULT_CUSTOMER_FILTERS_VALUES))
     }
   }, [success, searchedCustomers, searchQuery, dispatch])
 
+  // Auto-refresh every 5 minutes
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log('Silent auto-refresh triggered')
       dispatch(fetchCustomers(false))
-    }, 300000) // 5 minutes
+    }, 300000)
     return () => clearInterval(interval)
   }, [dispatch])
 
+  // Cleanup debounce
   useEffect(() => {
     return () => {
       if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
@@ -386,10 +656,7 @@ const Page = () => {
             className="bg-white rounded-[8px]"
             placeholder="Search by details"
             width="w-full max-w-[530px]"
-            onSearch={(value) => {
-              console.log('Search:', value)
-              setSearchQuery(value)
-            }}
+            onSearch={(value) => setSearchQuery(value)}
           />
           <div className="flex gap-3 justify-end">
             <FilterDropdown<CustomerFilterValue>
@@ -397,10 +664,7 @@ const Page = () => {
               activeFilters={activeFilters}
               defaultFilters={DEFAULT_CUSTOMER_FILTERS_VALUES}
               sliceName="customer"
-              onDispatch={{
-                setActiveFilter,
-                setActiveFilters,
-              }}
+              onDispatch={{ setActiveFilter, setActiveFilters }}
             />
             <div
               className={cn(
@@ -440,12 +704,12 @@ const Page = () => {
             {viewMode === 'card' && (
               <div
                 className={cn(
-                  'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 xxl:grid-cols-4 ',
+                  'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 xxl:grid-cols-4',
                   'pb-6',
                 )}
               >
                 {searchedCustomers.map((item) => (
-                  <CustomerCard item={item} key={item.id} />
+                  <CustomerCard key={item.id} item={item} />
                 ))}
               </div>
             )}
