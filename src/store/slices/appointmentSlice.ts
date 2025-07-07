@@ -5,13 +5,13 @@ import { getBaseUrl } from '@/lib/baseUrl'
 import {
   Appointment,
   AppointmentStatus,
-  AxioxResponseType,
   PostAppoinmentData,
 } from '@/app/(protected)/admin/appointment/_types/appointment'
 import { AppointmentFilterValue } from '@/app/(protected)/admin/appointment/_data/data'
 import { toast } from 'sonner'
 import { isSameDay } from 'date-fns'
 import { getRandomAvatarColor } from '@/utils/randomColor.util'
+import { AxioxResponseType } from '@/types/shared'
 
 // Utility function for date comparison
 

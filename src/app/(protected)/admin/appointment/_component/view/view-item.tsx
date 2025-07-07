@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils'
 import React from 'react'
 
 interface ViewItemProps {
@@ -6,6 +7,7 @@ interface ViewItemProps {
   icon: React.ReactNode
   bgColor: string
   textColor: string
+  className?: string
 }
 
 const ViewItem = ({
@@ -14,9 +16,10 @@ const ViewItem = ({
   icon,
   bgColor,
   textColor,
+  className,
 }: ViewItemProps) => {
   return (
-    <div className="flex gap-3 items-center">
+    <div className={cn('flex gap-3 items-center', className)}>
       <div
         className={`w-8 h-8 rounded-sm flex items-center justify-center`}
         style={{ backgroundColor: bgColor, color: textColor }}

@@ -1,5 +1,5 @@
 import { CalendarDays, Clock, Users } from 'lucide-react'
-import { Service, Status, WeekDays } from '../_types/service'
+import { Service, ServiceStatus, WeekDays } from '../_types/service'
 
 export type ServiceLabel = 'Active' | 'Inactive' | 'All'
 export type ServiceValue = 'active' | 'inactive' | 'all'
@@ -26,9 +26,12 @@ export const filterServiceOptions = (
       label: 'Active',
       value: 'active',
       textColor: '#103064',
-      count: service.filter((apt: Service) => apt.status === Status.ACTIVE)
-        .length,
-      data: service.filter((apt: Service) => apt.status === Status.ACTIVE),
+      count: service.filter(
+        (apt: Service) => apt.status === ServiceStatus.ACTIVE,
+      ).length,
+      data: service.filter(
+        (apt: Service) => apt.status === ServiceStatus.ACTIVE,
+      ),
       border: '#DCE9F9',
       background: '#E9F1FD',
       icon: <CalendarDays className="text-[#1C55B2]" size={24} />,
@@ -37,9 +40,12 @@ export const filterServiceOptions = (
       label: 'Inactive',
       value: 'inactive',
       textColor: '#4C3000',
-      count: service.filter((apt: Service) => apt.status === Status.INACTIVE)
-        .length,
-      data: service.filter((apt: Service) => apt.status === Status.INACTIVE),
+      count: service.filter(
+        (apt: Service) => apt.status === ServiceStatus.INACTIVE,
+      ).length,
+      data: service.filter(
+        (apt: Service) => apt.status === ServiceStatus.INACTIVE,
+      ),
       border: '#FFF3CD',
       background: '#FFF6E6',
       icon: <Clock className="text-[#4C3000]" size={24} />,
@@ -64,7 +70,7 @@ export const filterServiceOptions = (
 //     description:
 //       'Could drop expert hard how operation. Response maybe degree government rich light.',
 //     estimatedDuration: 45,
-//     status: Status.ACTIVE,
+//     ServiceStatus: ServiceStatus.ACTIVE,
 //     serviceAvailability: [
 //       {
 //         weekDay: WeekDays.TUESDAY,
@@ -91,7 +97,7 @@ export const filterServiceOptions = (
 //     description:
 //       'Well choice serve important direction. Have sit anything two there.',
 //     estimatedDuration: 60,
-//     status: Status.ACTIVE,
+//     ServiceStatus: ServiceStatus.ACTIVE,
 //     serviceAvailability: [
 //       {
 //         weekDay: WeekDays.WEDNESDAY,
@@ -124,7 +130,7 @@ export const filterServiceOptions = (
 //     title: 'Printmaker',
 //     description: 'Glass nearly half within. Road court staff enjoy.',
 //     estimatedDuration: 45,
-//     status: Status.ACTIVE,
+//     ServiceStatus: ServiceStatus.ACTIVE,
 //     serviceAvailability: [
 //       {
 //         weekDay: WeekDays.TUESDAY,
@@ -157,7 +163,7 @@ export const filterServiceOptions = (
 //     description:
 //       'Occur pay chance. Full include win up wear. Travel rather tell public personal.',
 //     estimatedDuration: 30,
-//     status: Status.ACTIVE,
+//     ServiceStatus: ServiceStatus.ACTIVE,
 //     serviceAvailability: [
 //       {
 //         weekDay: WeekDays.FRIDAY,
@@ -183,7 +189,7 @@ export const filterServiceOptions = (
 //     description:
 //       'Organization newspaper memory always produce new. Staff majority water consumer rest.',
 //     estimatedDuration: 45,
-//     status: Status.ACTIVE,
+//     ServiceStatus: ServiceStatus.ACTIVE,
 //     serviceAvailability: [
 //       {
 //         weekDay: WeekDays.FRIDAY,

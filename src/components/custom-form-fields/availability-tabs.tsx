@@ -1,19 +1,21 @@
-"use client";
+'use client'
 
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Label } from '@/components/ui/label'
 
-import { LucideIcon } from "lucide-react";
-import { useFormContext } from "react-hook-form";
+import { LucideIcon } from 'lucide-react'
+import { useFormContext } from 'react-hook-form'
 const AvailabilityTabs = ({
   name,
   icon: Icon,
+  className,
 }: {
-  name: string;
-  icon?: LucideIcon;
+  name: string
+  icon?: LucideIcon
+  className?: string
 }) => {
-  const { watch, setValue } = useFormContext();
-  const value = watch(name);
+  const { watch, setValue } = useFormContext()
+  const value = watch(name)
 
   return (
     <div className="space-y-2">
@@ -32,7 +34,7 @@ const AvailabilityTabs = ({
           className="data-[state=on]:bg-[#E98651]  data-[state=on]:border-none data-[state=on]:text-white rounded-lg border px-4"
           style={{
             boxShadow:
-              value === "default" ? "0px 2px 4px 0px #001F5280 inset" : "",
+              value === 'default' ? '0px 2px 4px 0px #001F5280 inset' : '',
           }}
         >
           Default
@@ -42,14 +44,14 @@ const AvailabilityTabs = ({
           className="data-[state=on]:bg-[#E98651] data-[state=on]:inset-shadow-sm data-[state=on]:border-none data-[state=on]:text-white rounded-lg border px-4"
           style={{
             boxShadow:
-              value === "custom" ? "0px 2px 4px 0px #001F5280 inset" : "",
+              value === 'custom' ? '0px 2px 4px 0px #001F5280 inset' : '',
           }}
         >
           Custom
         </ToggleGroupItem>
       </ToggleGroup>
     </div>
-  );
-};
+  )
+}
 
-export default AvailabilityTabs;
+export default AvailabilityTabs

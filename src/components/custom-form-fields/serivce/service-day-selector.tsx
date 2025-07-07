@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import { useFormContext } from "react-hook-form"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { Calendar, Info } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { useFormContext } from 'react-hook-form'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Calendar, Info } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-export type WeekDay = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun"
+export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 type BusinessAvailability = {
   breaks: Record<WeekDay, [string, string][]>
   holidays: WeekDay[]
@@ -15,26 +15,28 @@ type BusinessAvailability = {
 interface Props {
   name: string
   businessAvailability: BusinessAvailability
+  className?: string
 }
 
-const days: WeekDay[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+const days: WeekDay[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 /* Format holidays for display */
 const formatHolidays = (holidays: WeekDay[]) => {
   if (!holidays || holidays.length === 0) {
-    return "No holidays scheduled."
+    return 'No holidays scheduled.'
   }
   if (holidays.length === 1) {
     return `Holiday on ${holidays[0]}.`
   }
   const holidayStrings = [...holidays]
   const lastHoliday = holidayStrings.pop()
-  return `Holidays are on ${holidayStrings.join(", ")}, and ${lastHoliday}.`
+  return `Holidays are on ${holidayStrings.join(', ')}, and ${lastHoliday}.`
 }
 
 export default function ServiceDaySelector({
   name,
   businessAvailability,
+  className,
 }: Props) {
   const { watch, setValue } = useFormContext()
   const selectedDays: WeekDay[] = watch(name) || []
@@ -48,7 +50,7 @@ export default function ServiceDaySelector({
 
   // Exclude holidays from selectable days
   const availableDays = days.filter(
-    (day) => !businessAvailability.holidays?.includes(day)
+    (day) => !businessAvailability.holidays?.includes(day),
   )
 
   return (
@@ -62,10 +64,12 @@ export default function ServiceDaySelector({
           <Button
             type="button"
             key={day}
-            variant={selectedDays.includes(day) ? "default" : "outline"}
+            variant={selectedDays.includes(day) ? 'default' : 'outline'}
             className={cn(
-              "min-w-[72px] px-6",
-              selectedDays.includes(day) && "shadow-[inset_0_2px_4px_#001F5280]"
+              'min-w-[72px] px-6',
+              selectedDays.includes(day) &&
+                'shadow-[inset_0_2px_4px_#001F5280]',
+              // className,
             )}
             onClick={() => toggleDay(day)}
           >

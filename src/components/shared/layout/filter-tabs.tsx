@@ -150,7 +150,7 @@ interface FilterTabsProps<T extends string> {
   value: T
   background: string
   border: string
-  sliceName: 'appointment' | 'customer' // Add more slice names as needed
+  sliceName: 'appointment' | 'customer' | 'service' // Add more slice names as needed
   onDispatch: (value: T) => any
 }
 

@@ -4,7 +4,7 @@ import authReducer from './slices/authSlice'
 import navReducer from './slices/navSlice'
 import viewReducer from './slices/viewSlice'
 import appointmentReducer from './slices/appointmentSlice'
-import serviceReducer from './slices/serviceslice'
+import serviceReducer from './slices/serviceSlice'
 import customerReducer from './slices/customerSlice'
 
 export const store = configureStore({

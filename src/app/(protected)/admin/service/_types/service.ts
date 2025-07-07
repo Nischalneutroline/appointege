@@ -1,15 +1,25 @@
+export const DEFAULT_SERVICE_FILTERS_VALUES: ServiceFilterValue[] = [
+  'active',
+  'inactive',
+  'all',
+]
+
 export interface Service {
   id: string
   title: string
   description: string
   estimatedDuration: number // in minutes
-  status?: Status // ACTIVE or INACTIVE
+  status: ServiceStatus // ACTIVE or INACTIVE
   serviceAvailability?: ServiceAvailability[]
   resourceId?: string
   createdAt: string
   updatedAt: string
   businessDetailId: string
+  color?: string
 }
+
+export type ServiceFilterLabel = 'Active' | 'Inactive' | 'All'
+export type ServiceFilterValue = 'active' | 'inactive' | 'all'
 
 export interface ServiceAvailability {
   weekDay: WeekDays // SUNDAY, MONDAY, etc.
@@ -21,7 +31,7 @@ export interface ServiceTime {
   endTime: string // ISO 8601 Date string
 }
 
-export enum Status {
+export enum ServiceStatus {
   ACTIVE = 'ACTIVE',
   INACTIVE = 'INACTIVE',
 }
@@ -36,13 +46,3 @@ export enum WeekDays {
   SATURDAY = 'SATURDAY',
 }
 export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
-
-export interface ApiReturnType<T = any> {
-  data?: T
-  success: boolean
-  message?: string
-  error?: string
-}
-export interface AxiosResponseType<T> {
-  data: { success: boolean; error?: string; message?: string; data: T }
-}

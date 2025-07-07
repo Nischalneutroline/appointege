@@ -9,6 +9,7 @@ interface User {
   email?: string | null
   image?: string | null
   role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | null
+  businessDetailId?: string
 }
 
 interface AuthState {

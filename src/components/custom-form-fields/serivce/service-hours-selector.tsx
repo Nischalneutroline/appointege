@@ -1,40 +1,39 @@
-"use client"
+'use client'
 
-import { useFormContext } from "react-hook-form"
+import { useFormContext } from 'react-hook-form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
-import { cn } from "@/lib/utils"
-import { CalendarDays, Hourglass, Plus, Trash2, Info } from "lucide-react"
-import { useMemo, useState } from "react"
-import { timeOptions, toMin } from "@/lib/lib"
+} from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
+import { CalendarDays, Hourglass, Plus, Trash2, Info } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { timeOptions, toMin } from '@/lib/lib'
 
 // Helper functions
-
 
 /* ────────────────────────────────────────────────────────────────── */
 /* 1. Business Availability (from props)                            */
 /* ────────────────────────────────────────────────────────────────── */
-export type WeekDay = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun"
+export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 export type BreakRecord = Record<WeekDay, [string, string][]>
 
 /* ────────────────────────────────────────────────────────────────── */
 /* 2. Constants & Helpers                                           */
 /* ────────────────────────────────────────────────────────────────── */
-const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const
+const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const
 
 type Day = (typeof days)[number]
 type Slot = [string, string]
 
 /* Check if a time or slot overlaps with any break slot */
 const overlapsBreak = (timeOrSlot: string | Slot, breaks: Slot[]) => {
-  if (typeof timeOrSlot === "string") {
+  if (typeof timeOrSlot === 'string') {
     const min = toMin(timeOrSlot)
     return breaks
       .map(([bStart, bEnd]) => {
@@ -63,9 +62,9 @@ const overlapsBreak = (timeOrSlot: string | Slot, breaks: Slot[]) => {
 const getNextValidStartTime = (
   endTime: string,
   breaks: Slot[],
-  options: string[]
+  options: string[],
 ) => {
-  if (!endTime || !options.includes(endTime)) return options[0] || ""
+  if (!endTime || !options.includes(endTime)) return options[0] || ''
   const endMin = toMin(endTime)
   for (const time of options) {
     const timeMin = toMin(time)
@@ -77,7 +76,7 @@ const getNextValidStartTime = (
     })
     if (!overlap) return time
   }
-  return options[0] || ""
+  return options[0] || ''
 }
 
 /* Format break times for display */
@@ -92,7 +91,7 @@ const formatBreaks = (day: Day, breaks: Slot[]) => {
   const breakStrings = breaks.map(([start, end]) => `${start} to ${end}`)
   const lastBreak = breakStrings.pop()
   return `Breaks on ${day} are from ${breakStrings.join(
-    ", "
+    ', ',
   )}, and ${lastBreak}.`
 }
 
@@ -104,22 +103,27 @@ interface Props {
   name: string
   /** Business break times */
   businessBreaks: BreakRecord
+  className?: string
 }
 
-export default function ServiceHourSelector({ name, businessBreaks }: Props) {
+export default function ServiceHourSelector({
+  name,
+  businessBreaks,
+  className,
+}: Props) {
   const { watch, setValue } = useFormContext()
 
   /* -------- RHF values -------- */
-  const serviceDays: Day[] = watch("serviceDays") || []
+  const serviceDays: Day[] = watch('serviceDays') || []
   const serviceHours: Record<Day, Slot[]> = watch(name) || {}
 
   /* -------- UI state ---------- */
-  const [activeDay, setActiveDay] = useState<Day>(serviceDays[0] ?? "Mon")
+  const [activeDay, setActiveDay] = useState<Day>(serviceDays[0] ?? 'Mon')
 
   /* -------- Filter options to exclude break times, but allow boundaries -------- */
   const workTimeOptions = useMemo(() => {
     const breaks = businessBreaks[activeDay] ?? []
-    return timeOptions.filter((t:any) => {
+    return timeOptions.filter((t: any) => {
       const min = toMin(t)
       // Exclude times strictly inside a break (allow start/end boundaries)
       return !breaks.some(([s, e]) => {
@@ -134,7 +138,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
   const getAvailableTimes = (
     afterTime: string | undefined,
     options: string[],
-    isEnd: boolean = false
+    isEnd: boolean = false,
   ) => {
     if (!afterTime || !options.includes(afterTime)) return options
     const index = options.indexOf(afterTime)
@@ -147,7 +151,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
     time: string,
     breaks: Slot[],
     isEnd: boolean,
-    referenceTime: string
+    referenceTime: string,
   ): boolean => {
     // For end times, disable times before or equal to start time
     // For start times, disable times before previous end time
@@ -177,7 +181,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
   const update = (idx: number, pos: 0 | 1, val: string) => {
     const updated = { ...serviceHours }
     const slots = [...(updated[activeDay] || [])]
-    const slot = slots[idx] ? [...slots[idx]] : ["", ""]
+    const slot = slots[idx] ? [...slots[idx]] : ['', '']
     slot[pos] = val
     slots[idx] = slot as Slot
     updated[activeDay] = slots
@@ -191,7 +195,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
     const prevEnd = prevSlots.at(-1)?.[1] ?? workTimeOptions[0]
     const breaks = businessBreaks[activeDay] ?? []
     const nextStart = getNextValidStartTime(prevEnd, breaks, workTimeOptions)
-    updated[activeDay] = [...prevSlots, [nextStart, ""]]
+    updated[activeDay] = [...prevSlots, [nextStart, '']]
     setValue(name, updated, { shouldDirty: true })
   }
 
@@ -219,10 +223,11 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
             <Button
               type="button"
               key={d}
-              variant={d === activeDay ? "default" : "outline"}
+              variant={d === activeDay ? 'default' : 'outline'}
               className={cn(
-                "min-w-[72px] px-6",
-                d === activeDay && "shadow-[inset_0_2px_4px_#001F5280]"
+                'min-w-[72px] px-6',
+                d === activeDay && 'shadow-[inset_0_2px_4px_#001F5280]',
+                className,
               )}
               onClick={() => setActiveDay(d)}
             >
@@ -242,7 +247,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
             slot[0] = getNextValidStartTime(prevEnd, breaks, workTimeOptions)
           }
 
-          const prevEnd = idx > 0 ? serviceHours[activeDay][idx - 1][1] : ""
+          const prevEnd = idx > 0 ? serviceHours[activeDay][idx - 1][1] : ''
           const breaks = businessBreaks[activeDay] ?? []
           const startList = getAvailableTimes(prevEnd, workTimeOptions, false)
           const endList = getAvailableTimes(slot[0], workTimeOptions, true)
@@ -266,7 +271,7 @@ export default function ServiceHourSelector({ name, businessBreaks }: Props) {
                         t,
                         breaks,
                         false,
-                        prevEnd || workTimeOptions[0]
+                        prevEnd || workTimeOptions[0],
                       )}
                     >
                       {t}

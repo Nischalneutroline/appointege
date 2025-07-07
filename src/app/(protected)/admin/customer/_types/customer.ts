@@ -1,3 +1,5 @@
+import { Appointment } from '../../appointment/_types/appointment'
+
 export const DEFAULT_CUSTOMER_FILTERS_VALUES: CustomerFilterValue[] = [
   'guest',
   'member',
@@ -66,6 +68,7 @@ export interface User {
   updatedAt: string
   color?: string
   status?: CustomerStatus[]
+  appointments?: Appointment[]
 }
 
 // Define the data structure for creating/updating customers

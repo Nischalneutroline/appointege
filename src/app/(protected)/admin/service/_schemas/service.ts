@@ -1,6 +1,6 @@
 // src/features/service/schemas/schema.ts
 import { z } from 'zod'
-import { Status, WeekDays } from '../_types/service'
+import { ServiceStatus, WeekDays } from '../_types/service'
 
 export const serviceSchema = z.object({
   id: z.string().optional(),
@@ -11,7 +11,9 @@ export const serviceSchema = z.object({
   estimatedDuration: z
     .number()
     .min(1, 'Estimated duration must be a positive number'),
-  status: z.enum([Status.ACTIVE, Status.INACTIVE]).optional(),
+  ServiceStatus: z
+    .enum([ServiceStatus.ACTIVE, ServiceStatus.INACTIVE])
+    .optional(),
   serviceAvailability: z.array(
     z.object({
       weekDay: z.enum([
@@ -34,4 +36,6 @@ export const serviceSchema = z.object({
   ),
   // .optional(),
   businessDetailId: z.string().min(1, 'Business ID is required'),
+  message: z.string().optional(),
+  image: z.string().optional(),
 })

@@ -332,7 +332,7 @@ interface FilterDropdownProps<T extends string> {
   filterOptions: (FilterOptionState<T> & { count: number })[]
   activeFilters: T[]
   defaultFilters: T[] // Non-removable filters
-  sliceName: 'appointment' | 'customer' // Add more slice names as needed
+  sliceName: 'appointment' | 'customer' | 'service' // Add more slice names as needed
   onDispatch: {
     setActiveFilter: (value: T) => any
     setActiveFilters: (filters: T[]) => any
@@ -357,6 +357,11 @@ const FilterDropdown = <T extends string>({
       dispatch(onDispatch.setActiveFilter(value))
       return
     }
+
+    // TODO: For non-default filters, if they are not in activeFilters then dispatch activeFilter
+    // if (!activeFilters.includes(value)) {
+    //   dispatch(onDispatch.setActiveFilter(value))
+    // }
 
     // Handle non-default filters
     const newFilters = checked

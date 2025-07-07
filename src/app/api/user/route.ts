@@ -118,7 +118,15 @@ export async function POST(
 export async function GET(): Promise<NextResponse<ReturnType>> {
   try {
     // get all users
-    const users = await prisma.user.findMany()
+    const users = await prisma.user.findMany({
+      include: {
+        appointments: {
+          include: {
+            service: true,
+          },
+        },
+      },
+    })
     console.log(users)
 
     // Check if there are any users

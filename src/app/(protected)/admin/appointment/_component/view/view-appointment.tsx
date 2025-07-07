@@ -55,9 +55,9 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
 
   return (
     <Dialog onOpenChange={onChange} open={open}>
-      <DialogContent className="max-w-md md:max-w-2xl max-h-[80dvh] overflow-y-auto px-4 sm:px-6">
-        <DialogHeader className="gap-0">
-          <DialogTitle className="flex justify-center text-blue-700 text-xl">
+      <DialogContent className="max-w-md md:max-w-2xl max-h-[80dvh] overflow-y-auto ">
+        <DialogHeader className="gap-0 bg-[#F7F7F7] h-20 p-3 -m-6 ">
+          <DialogTitle className="flex justify-center text-blue-700 font-semibold text-xl md:text-2xl">
             Appointment Details
           </DialogTitle>
           <DialogDescription className="flex justify-center text-sm text-muted-foreground">
@@ -65,148 +65,162 @@ const ViewAppointment = ({ open, onChange }: ViewAppointmentProps) => {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col items-center text-muted-foreground gap-4">
-          {/* Customer Information */}
-          <div className="w-full flex border border-[#E6E6EA] rounded-[8px] p-3 gap-3">
-            <div
-              className="h-12 w-12 text-lg font-semibold text-white flex items-center justify-center rounded-[8px]"
-              style={{
-                backgroundColor: currentAppointment.color || getRandomColor(),
-              }}
-            >
-              {getInitials(currentAppointment.customerName)}
-            </div>
-            <div className="flex-1 flex-col justify-center items-center">
-              <div className="text-[#2563EB] text-base font-semibold">
-                {currentAppointment.customerName}
+        <div className="py-5">
+          <div className="flex flex-col items-center text-muted-foreground gap-4">
+            {/* Customer Information */}
+            <div className="w-full flex border border-[#E6E6EA] rounded-[8px] p-3 gap-2 h-20">
+              <div
+                className="size-[50px] text-lg font-semibold text-white flex items-center justify-center rounded-[8px]"
+                style={{
+                  backgroundColor: currentAppointment.color || getRandomColor(),
+                }}
+              >
+                {getInitials(currentAppointment.customerName)}
               </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <div className="flex gap-1 items-center">
-                  <Mail className="w-4 h-4" />
-                  <div className="text-sm font-normal">
-                    {currentAppointment.email || 'alex.j@gmail.com'}
-                  </div>
-                </div>
-                <div className="flex gap-1 items-center">
-                  <Phone className="w-3.5 h-3.5" />
-                  <div className="text-sm font-normal">
-                    {currentAppointment.phone || '+9779818275115'}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <Pill variant={variant} withDot>
-              {currentAppointment.status}
-            </Pill>
-          </div>
-          {/* Appointment Information */}
-          <div className="w-full flex flex-col justify-start gap-2">
-            <div className="flex items-center text-[#2563EB] font-medium text-base gap-2">
-              <CalendarDays className="w-5 h-5" />
-              Appointment Information
-            </div>
-            <div className="w-full flex flex-col border border-[#E6E6EA] rounded-[8px] p-3 gap-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 items-center">
-                {/* Service */}
-                <div className="w-full flex flex-col items-start text-[#111827]">
-                  <div className="text-sm font-semibold">Service</div>
-                  <div className="text-sm font-normal">{service?.title}</div>
-                </div>
-                {/* Type */}
-                <div className="w-full flex flex-col items-start text-[#111827]">
-                  <div className="text-sm font-semibold">Type</div>
-                  <div className="text-sm font-normal">Physical</div>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 items-center">
-                {/* Date */}
-                <div className="w-full flex flex-col items-start text-[#111827]">
-                  <div className="text-sm font-semibold">Date</div>
-                  <div className="text-sm font-normal">{formattedDate}</div>
-                </div>
-                {/* Time */}
-                <div className="w-full flex flex-col items-start text-[#111827]">
-                  <div className="text-sm font-semibold">Time</div>
-                  <div className="text-sm font-normal">{formattedTime}</div>
-                </div>
-              </div>
-              {/* Customer Note */}
-              <div className="flex flex-col w-full text-[#111827]">
-                <div className="text-sm font-semibold">Customer Note</div>
-                <div className="text-sm font-normal text-[#B57200]">
-                  {currentAppointment?.message}
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Booking Details */}
-          <div className="w-full flex flex-col justify-start gap-2">
-            <div className="flex items-center text-[#2563EB] font-medium text-base gap-2">
-              <UserRound className="w-5 h-5" />
-              Booking Details
-            </div>
-            <div className="w-full flex flex-col border border-[#E6E6EA] rounded-[8px] p-3 gap-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 items-center">
-                {/* Booked for */}
-                <div className="w-full flex flex-col items-start text-[#111827]">
-                  <div className="text-sm font-semibold">Booked for</div>
-                  <div className="text-sm font-normal">
-                    {currentAppointment.isForSelf ? 'Self' : 'Other'}
-                  </div>
-                </div>
-                {/* Created by */}
-                <div className="w-full flex flex-col items-start text-[#111827]">
-                  <div className="text-sm font-semibold">Created by</div>
-                  <div className="text-sm font-normal">
-                    {currentAppointment?.createdById}
-                  </div>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 items-center">
-                {/* Date */}
-                <div className="w-full flex flex-col items-start text-[#111827]">
-                  <div className="text-sm font-semibold">Date</div>
-                  <div className="text-sm font-normal">{formattedDate}</div>
-                </div>
-                {/* Last Updated */}
-                <div className="w-full flex flex-col items-start text-[#111827]">
-                  <div className="text-sm font-semibold">Last Updated</div>
-                  <div className="text-sm font-normal">
-                    {lastUpdatedDate} {lastUpdatedTime}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {/* Admin's Note */}
-          <div className="w-full flex flex-col justify-start gap-2">
-            <div className="flex items-center text-[#2563EB] font-medium text-base gap-2">
-              <ShieldUser className="w-5 h-5" />
-              For Admin
-            </div>
-            <div className="w-full flex border border-[#E6E6EA] rounded-[8px] p-3 gap-3">
-              <div className="w-full flex flex-col items-start text-[#111827]">
-                <div className="text-sm font-semibold">Admin's Note</div>
-                <div className="text-sm font-normal">
-                  {currentAppointment?.message}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
-        <div className="flex flex-col gap-3 md:flex-row justify-center mt-6">
-          <Button
-            type="button"
-            onClick={() => {
-              dispatch(closeAppointmentForm())
-              onChange(false)
-            }}
-            variant="default"
-            className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
-          >
-            Done
-          </Button>
+              {/* Name and Email */}
+              <div className="flex-1">
+                {/* Customer Name */}
+                <div className="text-blue-700 text-lg font-semibold">
+                  {currentAppointment.customerName}
+                </div>
+                <div className="flex gap-2">
+                  {/* Customer Email */}
+                  <div className="flex gap-1 items-center">
+                    <Mail className="w-3.5 h-3.5 text-blue-500" />
+                    <span className="text-sm">
+                      {currentAppointment.email || 'alex.j@gmail.com'}
+                    </span>
+                  </div>
+                  {/* Customer Phone */}
+                  <div className="flex gap-1 items-center">
+                    <Phone className="w-3.5 h-3.5 text-blue-500 " />
+                    <span className="text-sm">
+                      {currentAppointment.phone || '+9779818275115'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <Pill variant={variant} withDot className="">
+                {currentAppointment.status}
+              </Pill>
+            </div>
+            {/* Appointment Information */}
+            <div className="w-full flex flex-col justify-start gap-2">
+              <div className="flex items-center text-[#2563EB] font-medium text-lg gap-2">
+                <CalendarDays className="w-5 h-5" />
+                Appointment Information
+              </div>
+              {/* Appointment Detail */}
+              <div className="w-full flex flex-col border border-[#E6E6EA] rounded-[8px] p-3 gap-3">
+                <div className="grid grid-cols-1  sm:grid-cols-2 items-center">
+                  {/* Service */}
+                  <div className="w-full flex flex-col items-start text-[#111827]">
+                    <div className="text-sm font-semibold">Service</div>
+                    <div className="text-sm font-normal">
+                      {currentAppointment.service?.title}
+                    </div>
+                  </div>
+                  {/* Type */}
+                  <div className="w-full flex flex-col items-start text-[#111827]">
+                    <div className="text-sm font-semibold">Type</div>
+                    <div className="text-sm font-normal">Physical</div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 items-center">
+                  {/* Date */}
+                  <div className="w-full flex flex-col items-start text-[#111827]">
+                    <div className="text-sm font-semibold">Date</div>
+                    <div className="text-sm font-normal">{formattedDate}</div>
+                  </div>
+                  {/* Time */}
+                  <div className="w-full flex flex-col items-start text-[#111827]">
+                    <div className="text-sm font-semibold">Time</div>
+                    <div className="text-sm font-normal">{formattedTime}</div>
+                  </div>
+                </div>
+                {/* Customer Note */}
+                <div className="flex flex-col w-full text-[#111827]">
+                  <div className="text-sm font-semibold">Customer Note</div>
+                  <div className="text-sm font-normal text-[#B57200]">
+                    {currentAppointment?.message || 'No message found.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Booking Details */}
+            <div className="w-full flex flex-col justify-start gap-2">
+              <div className="flex items-center text-[#2563EB] font-medium text-base gap-2">
+                <UserRound className="w-5 h-5" />
+                Booking Details
+              </div>
+              <div className="w-full flex flex-col border border-[#E6E6EA] rounded-[8px] p-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 items-center">
+                  {/* Booked for */}
+                  <div className="w-full flex flex-col items-start text-[#111827]">
+                    <div className="text-sm font-semibold">Booked for</div>
+                    <div className="text-sm font-normal">
+                      {currentAppointment.isForSelf ? 'Self' : 'Other'}
+                    </div>
+                  </div>
+                  {/* Created by */}
+                  <div className="w-full flex flex-col items-start text-[#111827]">
+                    <div className="text-sm font-semibold">Created by</div>
+                    <div className="text-sm font-normal capitalize">
+                      {currentAppointment?.user?.name ||
+                        currentAppointment.createdById}
+                    </div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 items-center">
+                  {/* Date */}
+                  <div className="w-full flex flex-col items-start text-[#111827]">
+                    <div className="text-sm font-semibold">Date</div>
+                    <div className="text-sm font-normal">{formattedDate}</div>
+                  </div>
+                  {/* Last Updated */}
+                  <div className="w-full flex flex-col items-start text-[#111827]">
+                    <div className="text-sm font-semibold">Last Updated</div>
+                    <div className="text-sm font-normal">
+                      {lastUpdatedDate} {lastUpdatedTime}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Admin's Note */}
+            <div className="w-full flex flex-col justify-start gap-2">
+              <div className="flex items-center text-[#2563EB] font-medium text-base gap-2">
+                <ShieldUser className="w-5 h-5" />
+                For Admin
+              </div>
+              <div className="w-full flex border border-[#E6E6EA] rounded-[8px] ">
+                <div className="w-full flex flex-col items-start text-[#111827] ">
+                  <div className="w-full text-sm font-semibold bg-[#F7F7F7] px-3 py-1">
+                    Admin's Note
+                  </div>
+                  <div className="text-sm font-normal px-3 py-1">
+                    {currentAppointment?.message || 'No admin note found.'}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 md:flex-row justify-center mt-6">
+            <Button
+              type="button"
+              onClick={() => {
+                dispatch(closeAppointmentForm())
+                onChange(false)
+              }}
+              variant="default"
+              className="w-30 hover:opacity-80 active:outline active:outline-blue-700 transition-colors duration-200"
+            >
+              Done
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

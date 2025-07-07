@@ -138,7 +138,7 @@ const Pill = React.forwardRef<HTMLDivElement, PillProps>(
           <span className="flex items-center">{leftElement}</span>
         )}
         {children && (
-          <span className="flex items-center text-xs ">
+          <span className="flex items-center text-xs capitalize ">
             {typeof children === 'string'
               ? capitalizeFirstLetter(children)
               : children}

@@ -245,25 +245,27 @@ const CustomerForm = ({
           style={{ boxSizing: 'border-box' }}
           aria-describedby="dialog-description"
         >
-          <DialogHeader className="">
-            <DialogTitle className="text-center text-blue-700 text-base sm:text-lg md:text-xl font-semibold">
-              {isSubmitted
-                ? 'Customer Confirmation'
-                : customerFormMode === 'edit'
-                  ? 'Edit Customer'
-                  : 'Create New Customer'}
-            </DialogTitle>
-            <DialogDescription
-              id="dialog-description"
-              className="text-center text-xs sm:text-sm text-muted-foreground"
-            >
-              {isSubmitted
-                ? 'Review the details of the confirmed customer action'
-                : customerFormMode === 'edit'
-                  ? 'Update existing customer details'
-                  : 'Fill the details below to create a new customer'}
-            </DialogDescription>
-          </DialogHeader>
+          {!isSubmitted && (
+            <DialogHeader className="">
+              <DialogTitle className="text-center text-blue-700 text-base sm:text-lg md:text-xl font-semibold">
+                {isSubmitted
+                  ? 'Customer Confirmation'
+                  : customerFormMode === 'edit'
+                    ? 'Edit Customer'
+                    : 'Create New Customer'}
+              </DialogTitle>
+              <DialogDescription
+                id="dialog-description"
+                className="text-center text-xs sm:text-sm text-muted-foreground"
+              >
+                {isSubmitted
+                  ? 'Review the details of the confirmed customer action'
+                  : customerFormMode === 'edit'
+                    ? 'Update existing customer details'
+                    : 'Fill the details below to create a new customer'}
+              </DialogDescription>
+            </DialogHeader>
+          )}
           {isSubmitted ? (
             <div className="space-y-4">
               <div className="flex flex-col items-center gap-2">

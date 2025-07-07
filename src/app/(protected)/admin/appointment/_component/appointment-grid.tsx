@@ -76,7 +76,7 @@ const AppointmentGrid = ({ item }: { item: Appointment }) => {
           </Pill>
         </div>
         {/* Date and Time */}
-        <div className="flex flex-col gap-1.5 text-sm font-medium text-[#111827]">
+        <div className="flex flex-col gap-1.5 text-xs font-medium text-[#111827]">
           <div className="flex gap-2">
             <div className="flex items-center justify-center">
               <Calendar
@@ -107,8 +107,9 @@ const AppointmentGrid = ({ item }: { item: Appointment }) => {
       {/* Buttons */}
       <div className="flex w-full h-10 justify-between items-center text-[#6B7280] text-sm">
         <div className="w-full flex border-t-[1px] border-r-[1px] border-[#DCE9F9] justify-center p-3 cursor-pointer">
+          {/* View */}
           <div
-            className="flex  items-center "
+            className="flex-1 flex justify-center  items-center "
             onClick={() => {
               dispatch(openAppointmentViewForm(item))
             }}
@@ -118,9 +119,10 @@ const AppointmentGrid = ({ item }: { item: Appointment }) => {
           </div>
         </div>
 
+        {/* Edit */}
         <div className="w-full flex border-t-[1px]  border-[#DCE9F9] justify-center p-3 cursor-pointer">
           <div
-            className="flex items-center"
+            className="flex-1 flex justify-center  items-center "
             onClick={() => {
               dispatch(openAppointmentEditForm(item))
             }}

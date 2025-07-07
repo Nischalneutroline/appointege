@@ -1038,6 +1038,7 @@ import { format } from 'date-fns'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from '@/store/store'
 import {
+  Appointment,
   AppointmentStatus,
   PostAppoinmentData,
 } from '@/app/(protected)/admin/appointment/_types/appointment'
@@ -1048,7 +1049,7 @@ import {
   closeAppointmentForm,
 } from '@/store/slices/appointmentSlice'
 import { toast } from 'sonner'
-import { fetchServices } from '@/store/slices/serviceslice'
+import { fetchServices } from '@/store/slices/serviceSlice'
 
 interface ServiceOption {
   label: string
@@ -1112,7 +1113,7 @@ const NewAppointment = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [filledData, setFilledData] = useState<FormData | null>(null)
+  const [filledData, setFilledData] = useState<Appointment | null>(null)
 
   const form = useForm<FormData>({
     resolver: zodResolver(appointmentSchema),
@@ -1230,7 +1231,7 @@ const NewAppointment = ({
       } else {
         await dispatch(storeCreateAppointment(appointmentData)).unwrap()
       }
-      setFilledData(formData)
+      setFilledData(currentAppointment)
     } catch (error: any) {
       console.error(
         `Error ${appoinmentFormMode === 'edit' ? 'updating' : 'creating'} appointment:`,
@@ -1247,107 +1248,109 @@ const NewAppointment = ({
   }
 
   return (
+    // <style jsx>{`
+    //   .dialog-content {
+    //     box-sizing: border-box;
+    //     width: 90vmin;
+    //     max-width: min(500px, 90vw);
+    //     min-width: 280px;
+    //     max-height: 85vh;
+    //     position: fixed;
+    //     top: 50%;
+    //     left: 50%;
+    //     transform: translate(-50%, -50%) scale(1);
+    //     overflow-y: auto;
+    //     overflow-x: hidden;
+    //     border-radius: 0.5rem;
+    //     font-size: 1rem;
+    //     line-height: 1.5;
+    //     padding: 1rem;
+    //   }
+    //   @media (min-width: 640px) {
+    //     .dialog-content {
+    //       max-width: min(600px, 90vw);
+    //       padding: 1.5rem;
+    //       font-size: 1.125rem;
+    //     }
+    //   }
+    //   @media (max-width: 400px) {
+    //     .dialog-content {
+    //       width: 95vmin;
+    //       max-width: 95vw;
+    //       min-width: 260px;
+    //       padding: 0.75rem;
+    //       font-size: 0.875rem;
+    //     }
+    //     .dialog-content h2 {
+    //       font-size: 1rem;
+    //     }
+    //   }
+    //   @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    //     .dialog-content {
+    //       transform: translate(-50%, -50%) scale(1) !important;
+    //       -webkit-font-smoothing: antialiased;
+    //       -moz-osx-font-smoothing: grayscale;
+    //     }
+    //   }
+    //   @media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+    //     .dialog-content {
+    //       transform: translate(-50%, -50%) scale(1) !important;
+    //     }
+    //   }
+    //   @media (max-height: 600px) {
+    //     .dialog-content {
+    //       max-height: 90vh;
+    //       padding: 0.75rem;
+    //     }
+    //   }
+    //   /* Ensure no browser zoom interference */
+    //   @media screen and (max-width: 1024px) and (min-resolution: 192dpi) {
+    //     .dialog-content {
+    //       width: 92vmin;
+    //       max-width: min(550px, 92vw);
+    //     }
+    //   }
+    //   /* Accessibility: Handle macOS Zoom or high contrast */
+    //   @media (prefers-contrast: high) {
+    //     .dialog-content {
+    //       border: 2px solid #000 !important;
+    //       background: #fff !important;
+    //     }
+    //   }
+    // `}</style>
     <>
-      <style jsx>{`
-        .dialog-content {
-          box-sizing: border-box;
-          width: 90vmin;
-          max-width: min(500px, 90vw);
-          min-width: 280px;
-          max-height: 85vh;
-          position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) scale(1);
-          overflow-y: auto;
-          overflow-x: hidden;
-          border-radius: 0.5rem;
-          font-size: 1rem;
-          line-height: 1.5;
-          padding: 1rem;
-        }
-        @media (min-width: 640px) {
-          .dialog-content {
-            max-width: min(600px, 90vw);
-            padding: 1.5rem;
-            font-size: 1.125rem;
-          }
-        }
-        @media (max-width: 400px) {
-          .dialog-content {
-            width: 95vmin;
-            max-width: 95vw;
-            min-width: 260px;
-            padding: 0.75rem;
-            font-size: 0.875rem;
-          }
-          .dialog-content h2 {
-            font-size: 1rem;
-          }
-        }
-        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-          .dialog-content {
-            transform: translate(-50%, -50%) scale(1) !important;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-          }
-        }
-        @media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
-          .dialog-content {
-            transform: translate(-50%, -50%) scale(1) !important;
-          }
-        }
-        @media (max-height: 600px) {
-          .dialog-content {
-            max-height: 90vh;
-            padding: 0.75rem;
-          }
-        }
-        /* Ensure no browser zoom interference */
-        @media screen and (max-width: 1024px) and (min-resolution: 192dpi) {
-          .dialog-content {
-            width: 92vmin;
-            max-width: min(550px, 92vw);
-          }
-        }
-        /* Accessibility: Handle macOS Zoom or high contrast */
-        @media (prefers-contrast: high) {
-          .dialog-content {
-            border: 2px solid #000 !important;
-            background: #fff !important;
-          }
-        }
-      `}</style>
       <Dialog onOpenChange={handleBack} open={open}>
         <DialogContent
-          className="dialog-content bg-white shadow-lg"
+          className="dialog-content bg-white shadow-lg w-[90dvw] max-w-[min(550px,90vw)] min-w-[260px] max-h-[85vh] overflow-y-auto overflow-x-hidden"
           style={{ boxSizing: 'border-box' }}
           aria-describedby="dialog-description"
         >
-          <DialogHeader className="">
-            <DialogTitle className="text-center text-blue-700 text-base sm:text-lg md:text-xl font-semibold">
-              {appoinmentFormMode === 'edit'
-                ? 'Edit Appointment'
-                : 'Create New Appointment'}
-            </DialogTitle>
-            <DialogDescription
-              id="dialog-description"
-              className="text-center text-xs sm:text-sm text-muted-foreground"
-            >
-              {appoinmentFormMode === 'edit'
-                ? 'Update existing appointment details'
-                : 'Fill the details below to create an appointment on behalf of the customer'}
-            </DialogDescription>
-          </DialogHeader>
+          {!isSubmitted && (
+            <DialogHeader className="gap-0.5">
+              <DialogTitle className="text-center text-blue-700 text-base sm:text-xl md:text-lg font-semibold">
+                {appoinmentFormMode === 'edit'
+                  ? 'Edit Appointment'
+                  : 'Create New Appointment'}
+              </DialogTitle>
+              <DialogDescription
+                id="dialog-description"
+                className="text-center text-xs sm:text-sm text-muted-foreground"
+              >
+                {appoinmentFormMode === 'edit'
+                  ? 'Update existing appointment details'
+                  : 'Fill the details below to create an appointment on behalf of the customer'}
+              </DialogDescription>
+            </DialogHeader>
+          )}
 
           {isSubmitted ? (
             <div className="space-y-4">
-              <div className="flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center gap-1">
                 <CircleCheckBig
                   strokeWidth={2.5}
                   className="text-[#4caf50] w-6 h-6 sm:w-8 sm:h-8"
                 />
-                <h2 className="text-blue-700 text-base sm:text-lg font-semibold">
+                <h2 className="text-blue-900 text-base md:text-xl font-semibold">
                   Appointment Confirmed!
                 </h2>
                 <p className="text-xs sm:text-sm text-muted-foreground text-center">
@@ -1359,7 +1362,7 @@ const NewAppointment = ({
               <div className="flex flex-col gap-3 sm:gap-4 p-3 sm:p-4 bg-[#eff5ff] rounded-lg">
                 <ViewItem
                   title="Name"
-                  value={filledData?.fullName || ''}
+                  value={filledData?.customerName || ''}
                   icon={<UserRound className="w-4 h-4" strokeWidth={2.5} />}
                   bgColor="#dae8fe"
                   textColor="#3d73ed"
@@ -1379,10 +1382,14 @@ const NewAppointment = ({
                   textColor="#3d73ed"
                 />
                 <ViewItem
+                  className="border-t border-[#BEDAFE] w-full pt-3 md:pt-4"
                   title="Service"
                   value={
                     filledData?.service
-                      ? getLabelFromValue(filledData.service, serviceOptions)
+                      ? filledData.service.title +
+                        ' (' +
+                        filledData.service.estimatedDuration +
+                        'min)'
                       : ''
                   }
                   icon={<HandHeart className="w-4 h-4" strokeWidth={2} />}
@@ -1392,12 +1399,12 @@ const NewAppointment = ({
                 <ViewItem
                   title="Date & Time"
                   value={
-                    filledData?.date && filledData?.time
+                    filledData?.selectedDate && filledData?.selectedTime
                       ? `${format(
-                          new Date(filledData.date),
+                          new Date(filledData.selectedDate),
                           'MMM d yyyy',
-                        )}, ${filledData.time}, ${format(
-                          new Date(filledData.date),
+                        )}, ${filledData.selectedTime}, ${format(
+                          new Date(filledData.selectedDate),
                           'EEE',
                         )}`
                       : ''
@@ -1406,7 +1413,7 @@ const NewAppointment = ({
                   bgColor="#d2fae5"
                   textColor="#099668"
                 />
-                <ViewItem
+                {/* <ViewItem
                   title="Type"
                   value={
                     filledData?.appointmentType
@@ -1419,7 +1426,7 @@ const NewAppointment = ({
                   icon={<Clock className="w-4 h-4" strokeWidth={2} />}
                   bgColor="#d2fae5"
                   textColor="#099668"
-                />
+                /> */}
                 {appoinmentFormMode === 'edit' && filledData?.status && (
                   <ViewItem
                     title="Status"

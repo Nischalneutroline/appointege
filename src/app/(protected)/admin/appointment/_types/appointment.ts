@@ -1,3 +1,4 @@
+import { User } from '../../customer/_types/customer'
 import { Service } from '../../service/_types/service'
 import { AppointmentFilterValue } from '../_data/data'
 
@@ -37,6 +38,7 @@ export interface Appointment {
   updatedAt?: string // Optional: Updated at timestamp
   color?: string
   service?: Service
+  user?: User
 }
 
 export interface AppointmentWithColor extends Appointment {
@@ -58,10 +60,6 @@ export interface PostAppoinmentData {
   createdById?: string
   status?: AppointmentStatus
   // service?: Service
-}
-
-export interface AxioxResponseType<T> {
-  data: { success: boolean; errorDetail?: any; message?: string; data: T }
 }
 
 // ----- Reminder
