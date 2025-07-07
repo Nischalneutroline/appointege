@@ -37,6 +37,7 @@ import {
 } from '@/store/slices/serviceSlice'
 
 // Utility function to truncate description to 3–5 words
+// Used in Service Table
 const truncateDescription = (text: string): string => {
   const words = text.trim().split(/\s+/)
   const maxWords = 5
