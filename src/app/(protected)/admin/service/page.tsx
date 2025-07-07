@@ -24,6 +24,7 @@ import {
   setActiveFilter,
   setActiveFilters,
 } from '@/store/slices/serviceSlice'
+import ServiceCard from './_components/service-card'
 
 // Memoize columns outside the component to avoid recalculation
 const memoizedColumns = serviceColumns
@@ -207,9 +208,9 @@ const Page = () => {
                   'pb-6',
                 )}
               >
-                {/* {searchedService.map((item) => (
-                  <AppointmentGrid key={item.id} item={item} />
-                ))} */}
+                {searchedService.map((item) => (
+                  <ServiceCard key={item.id} item={item} />
+                ))}
               </div>
             )}
           </>
