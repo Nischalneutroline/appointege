@@ -28,7 +28,6 @@ import {
 } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Service, ServiceStatus } from '../../service/_types/service'
-import { formatAppointmentDateTime } from '@/lib/date-time-format'
 import { getRandomColor } from '@/lib/color'
 import {
   openServiceDeleteForm,
@@ -37,7 +36,7 @@ import {
 } from '@/store/slices/serviceSlice'
 
 // Utility function to truncate description to 3–5 words
-// Used in Service Table
+//
 const truncateDescription = (text: string): string => {
   const words = text.trim().split(/\s+/)
   const maxWords = 5
