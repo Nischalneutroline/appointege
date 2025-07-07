@@ -53,7 +53,7 @@ import {
   closeAppointmentForm,
 } from '@/store/slices/appointmentSlice'
 import { toast } from 'sonner'
-import { fetchServices } from '@/store/slices/serviceSlice'
+import { fetchServices } from '@/store/slices/serviceslice'
 
 interface ServiceOption {
   label: string

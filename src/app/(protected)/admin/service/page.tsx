@@ -18,13 +18,14 @@ import {
   Service,
   ServiceFilterValue,
 } from './_types/service'
+
+import ServiceCard from './_components/service-card'
 import {
   deleteService,
   fetchServices,
   setActiveFilter,
   setActiveFilters,
-} from '@/store/slices/serviceSlice'
-import ServiceCard from './_components/service-card'
+} from '@/store/slices/serviceslice'
 
 // Memoize columns outside the component to avoid recalculation
 const memoizedColumns = serviceColumns

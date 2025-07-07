@@ -26,7 +26,7 @@ import {
   closeServiceForm,
   deleteService,
   openServiceCreateForm,
-} from '@/store/slices/serviceSlice'
+} from '@/store/slices/serviceslice'
 import NewServiceForm from './_components/new-service'
 import DeleteModal from '../appointment/_component/delete-appointment'
 

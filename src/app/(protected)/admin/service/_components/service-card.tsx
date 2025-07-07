@@ -3,7 +3,7 @@ import { getInitials } from '@/lib/utils'
 import {
   openServiceViewForm,
   openServiceEditForm,
-} from '@/store/slices/serviceSlice' // Adjust slice import as needed
+} from '@/store/slices/serviceslice' // Adjust slice import as needed
 import { Calendar, Clock, Eye, SquarePen } from 'lucide-react'
 import React from 'react'
 import { useDispatch } from 'react-redux'

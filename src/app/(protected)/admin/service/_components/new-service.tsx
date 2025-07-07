@@ -349,7 +349,7 @@ import { format } from 'date-fns'
 import SelectField from '@/components/custom-form-fields/select-field'
 import ViewItem from '../../appointment/_component/view/view-item'
 import LoadingSpinner from '@/components/loading-spinner'
-import { closeServiceForm } from '@/store/slices/serviceSlice'
+import { closeServiceForm } from '@/store/slices/serviceslice'
 
 export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 export type BusinessAvailability = {

@@ -2,7 +2,7 @@
 
 import { fetchAppointments } from '@/store/slices/appointmentSlice'
 import { fetchCustomers } from '@/store/slices/customerSlice'
-import { fetchServices } from '@/store/slices/serviceSlice'
+import { fetchServices } from '@/store/slices/serviceslice'
 import { AppDispatch } from '@/store/store'
 import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'

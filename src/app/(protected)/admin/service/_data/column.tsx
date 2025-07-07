@@ -33,7 +33,7 @@ import {
   openServiceDeleteForm,
   openServiceEditForm,
   openServiceViewForm,
-} from '@/store/slices/serviceSlice'
+} from '@/store/slices/serviceslice'
 
 // Utility function to truncate description to 3–5 words
 //
