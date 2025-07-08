@@ -54,6 +54,7 @@ import {
 } from '@/store/slices/appointmentSlice'
 import { toast } from 'sonner'
 import { fetchServices } from '@/store/slices/serviceslice'
+import { Service } from '../../service/_types/service'
 
 interface ServiceOption {
   label: string
@@ -189,6 +190,63 @@ const NewAppointment = ({
     return option ? option.label : value
   }
 
+  // const onSubmit = async (formData: FormData) => {
+  //   const errors = form.formState.errors
+  //   if (Object.keys(errors).length > 0) {
+  //     console.log('Validation errors:', errors)
+  //     toast.error('Please correct the form errors and try again.')
+  //     return
+  //   }
+
+  //   if (!user?.id) {
+  //     console.error('User is not authenticated')
+  //     toast.error('You must be logged in to create or update an appointment')
+  //     return
+  //   }
+
+  //   try {
+  //     setIsSubmitting(true)
+  //     const appointmentData: PostAppoinmentData = {
+  //       customerName: formData.fullName,
+  //       email: formData.email,
+  //       phone: formData.phone,
+  //       serviceId: formData.service,
+  //       selectedDate: normalDateToIso(formData.date),
+  //       selectedTime: formData.time,
+  //       status:
+  //         appoinmentFormMode === 'edit' && formData.status
+  //           ? formData.status
+  //           : AppointmentStatus.SCHEDULED,
+  //       message: formData.message,
+  //       userId: user?.id,
+  //       isForSelf: false,
+  //       bookedById: user?.id,
+  //       createdById: user?.id,
+  //     }
+
+  //     console.log('Submitting appointment:', appointmentData)
+
+  //     if (appoinmentFormMode === 'edit' && currentAppointment?.id) {
+  //       await dispatch(
+  //         updateAppointment({
+  //           id: currentAppointment.id,
+  //           data: appointmentData,
+  //         }),
+  //       ).unwrap()
+  //       setFilledData(currentAppointment)
+  //     } else {
+  //       setFilledData(currentAppointment)
+  //       await dispatch(storeCreateAppointment(appointmentData)).unwrap()
+  //     }
+  //   } catch (error: any) {
+  //     console.error(
+  //       `Error ${appoinmentFormMode === 'edit' ? 'updating' : 'creating'} appointment:`,
+  //       error,
+  //     )
+  //   } finally {
+  //     setIsSubmitting(false)
+  //   }
+  // }
   const onSubmit = async (formData: FormData) => {
     const errors = form.formState.errors
     if (Object.keys(errors).length > 0) {
@@ -205,6 +263,41 @@ const NewAppointment = ({
 
     try {
       setIsSubmitting(true)
+
+      // Find the selected service to populate service details
+      const selectedService = services.find(
+        (service) => service.id === formData.service,
+      )
+
+      // Construct filledData from formData
+      const newFilledData: Appointment = {
+        id: appoinmentFormMode === 'edit' ? currentAppointment?.id || '' : '',
+        customerName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        serviceId: formData.service,
+        service: selectedService
+          ? ({
+              id: selectedService.id,
+              title: selectedService.title,
+              estimatedDuration: selectedService.estimatedDuration,
+              // Add other required service fields if needed
+            } as Service)
+          : undefined,
+        selectedDate: normalDateToIso(formData.date),
+        selectedTime: formData.time,
+        status:
+          appoinmentFormMode === 'edit' && formData.status
+            ? formData.status
+            : AppointmentStatus.SCHEDULED,
+        message: formData.message,
+        userId: user?.id,
+        isForSelf: false,
+        bookedById: user?.id,
+        createdById: user?.id,
+        // Add other required Appointment fields if needed
+      }
+
       const appointmentData: PostAppoinmentData = {
         customerName: formData.fullName,
         email: formData.email,
@@ -232,10 +325,11 @@ const NewAppointment = ({
             data: appointmentData,
           }),
         ).unwrap()
+        setFilledData(newFilledData) // Set filledData with updated form data
       } else {
         await dispatch(storeCreateAppointment(appointmentData)).unwrap()
+        setFilledData(newFilledData) // Set filledData with new form data
       }
-      setFilledData(currentAppointment)
     } catch (error: any) {
       console.error(
         `Error ${appoinmentFormMode === 'edit' ? 'updating' : 'creating'} appointment:`,
@@ -245,7 +339,6 @@ const NewAppointment = ({
       setIsSubmitting(false)
     }
   }
-
   const handleBack = () => {
     dispatch(closeAppointmentForm())
     onChange(false)
