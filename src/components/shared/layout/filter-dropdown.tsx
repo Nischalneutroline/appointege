@@ -384,7 +384,7 @@ const FilterDropdown = <T extends string>({
         <Button
           variant="outline"
           className={cn(
-            'h-10 w-[160px] justify-between text-sm font-normal text-gray-500',
+            'h-10 w-auto justify-between text-sm font-normal text-gray-500',
             {
               'text-muted-foreground': activeFilters.length === 0,
             },
