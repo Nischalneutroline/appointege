@@ -8,11 +8,7 @@ import ViewTabs from '@/components/shared/layout/view-tabs'
 import LayoutCards from '@/components/shared/layout/layout-cards'
 import { useSelector, useDispatch } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
-import {
-  closeAppointmentForm,
-  deleteAppointment,
-  openAppointmentCreateForm,
-} from '@/store/slices/appointmentSlice'
+
 import {
   CalendarDays,
   Clock,
@@ -29,6 +25,7 @@ import {
 } from '@/store/slices/serviceslice'
 import NewServiceForm from './_components/new-service'
 import DeleteModal from '../appointment/_component/delete-appointment'
+import ViewService from './_components/view-service'
 
 // Map icon names to LucideIcon components
 const iconMap: Record<
@@ -126,15 +123,15 @@ const ServiceLayout = React.memo(
           (serviceFormMode === 'create' || serviceFormMode === 'edit') && (
             <NewServiceForm
               open={isFormOpen}
-              onChange={() => dispatch(closeAppointmentForm())}
+              onChange={() => dispatch(closeServiceForm())}
             />
           )}
-        {/* {isFormOpen && serviceFormMode === 'view' && currentService && (
-          <ViewAppointment
+        {isFormOpen && serviceFormMode === 'view' && currentService && (
+          <ViewService
             open={isFormOpen}
-            onChange={() => dispatch(closeAppointmentForm())}
+            onChange={() => dispatch(closeServiceForm())}
           />
-        )} */}
+        )}
         {isFormOpen && serviceFormMode === 'delete' && currentService && (
           <DeleteModal
             open={isFormOpen}

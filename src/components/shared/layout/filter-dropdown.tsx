@@ -391,7 +391,7 @@ const FilterDropdown = <T extends string>({
           )}
         >
           <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
-          <div className="text-sm font-normal">Select Filters</div>
+          <div className="text-sm font-normal">Filters</div>
           <ChevronDown strokeWidth={2.5} size={14} />
         </Button>
       </DropdownMenuTrigger>

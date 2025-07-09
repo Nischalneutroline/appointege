@@ -1,33 +1,31 @@
-import React from 'react'
-import { Appointment } from '@/data/appointment'
-import {
-  Calendar,
-  Clock,
-  Ellipsis,
-  Eye,
-  MapPin,
-  SquarePen,
-  Trash2,
-} from 'lucide-react'
 import { Pill } from '@/components/ui/pill'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { getInitials } from '@/lib/utils'
 import {
   openAppointmentDeleteForm,
   openAppointmentEditForm,
   openAppointmentViewForm,
 } from '@/store/slices/appointmentSlice'
+
+import {
+  Calendar,
+  Clock,
+  Ellipsis,
+  Eye,
+  Mail,
+  MapPin,
+  MoreHorizontal,
+  PhoneCall,
+  SquarePen,
+  Trash2,
+} from 'lucide-react'
+import React from 'react'
 import { useDispatch } from 'react-redux'
-import { AppointmentWithService } from '../_data/column'
+// import { AppointmentWithService } from '../_data/column'
 import { formatAppointmentDateTime } from '@/lib/date-time-format'
 import { getRandomColor } from '@/lib/color'
+import { Appointment } from '../_types/appointment'
 
-const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
+const AppointmentCard = ({ item }: { item: Appointment }) => {
   const dispatch = useDispatch()
   const statusVariants = {
     COMPLETED: 'success',
@@ -35,82 +33,104 @@ const AppointmentCard = ({ item }: { item: AppointmentWithService }) => {
     CANCELED: 'default',
     SCHEDULED: 'warning',
   } as const
+
   const variant =
     statusVariants[item.status as keyof typeof statusVariants] || 'default'
+
+  // Date formatting
   const { formattedDate, formattedTime } = formatAppointmentDateTime(
     item.selectedDate,
   )
 
   return (
-    <div className="  relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px] bg-white cursor-pointer">
-      <div
-        className="h-16 w-16 text-lg font-semibold text-white flex items-center justify-center rounded-[8px]"
-        style={{ backgroundColor: getRandomColor() }}
-      >
-        {getInitials(item.customerName)}
-      </div>
-      <div className="w-full flex flex-col gap-1">
-        <div className="flex w-full justify-between pr-8 md:pr-20">
-          <div className="text-[#111827] font-semibold text-sm">
-            {item.customerName}
+    <div className="w-full flex flex-col items-stretch bg-white rounded-[10px] border-[1px] border-[#DCE9F9] gap-4 ">
+      <div className="flex flex-col px-6 pt-6 gap-5">
+        {/* Header: Name */}
+        <div className="flex flex-col gap-3 ">
+          <div className="flex gap-2 items-center ">
+            <div
+              className="h-full w-10 p-1.5 font-semibold text-white flex items-center justify-center rounded-[8px] "
+              style={{ backgroundColor: item.color || getRandomColor() }}
+            >
+              <div className="text-lg leading-[71.694%]">
+                {getInitials(item.customerName)}
+              </div>
+            </div>
+            <div className="h-full flex flex-col">
+              <div className="text-[16px] font-medium text-[#111827]">
+                {item.customerName}
+              </div>
+              <div className="flex gap-2 text-xs font-normal">
+                <div className="text-[#78818C]">{item?.service?.title}</div>
+                <div className="flex gap-1 items-center justify-center">
+                  <div className="flex w-full h-full justify-center items-center">
+                    <MapPin size={14} strokeWidth={2.5} color="#92ABF3" />
+                  </div>
+                  <div className="text-[#78818C]">Physical</div>
+                </div>
+              </div>
+            </div>
           </div>
           <Pill variant={variant} withDot>
             {item.status}
           </Pill>
         </div>
-        <div className="flex flex-col gap-2">
-          <div className="flex gap-4 text-sm font-normal leading-[100%]">
-            <div className="text-[#6B7280]">{item?.service?.title}</div>
-            <div className="flex gap-2">
-              <MapPin size={14} strokeWidth={2.5} color="#92AAF3" />
-              <div className="font-medium text-[#78818C]">Physical</div>
+        {/* Date and Time */}
+        <div className="flex flex-col gap-1.5 text-xs font-medium text-[#111827]">
+          <div className="flex gap-2">
+            <div className="flex items-center justify-center">
+              <Calendar
+                className="h-3.5 w-3.5"
+                strokeWidth={2.5}
+                color="#92AAF3"
+              />
             </div>
+            <div className="">{formattedDate}</div>
           </div>
-          <div className="flex gap-4 text-sm font-normal leading-[100%]">
-            <div className="flex gap-2">
-              <Calendar size={14} strokeWidth={2.5} color="#4e7dff" />
-              <div className="text-[#6B7280]">{formattedDate}</div>
+          <div className="flex gap-2">
+            <div className="flex items-center justify-center">
+              <Clock
+                className="h-3.5 w-3.5"
+                strokeWidth={2.5}
+                color="#92AAF3"
+              />
             </div>
-            <div className="flex gap-2">
-              <Clock size={14} strokeWidth={2.6} color="#4e7dff" />
-              <div className="text-[#6B7280]">
-                {formattedTime} ({item?.service?.estimatedDuration} min)
-              </div>
+            <div>
+              {item.selectedTime}{' '}
+              <span className=" font-light">
+                ({item?.service?.estimatedDuration} min)
+              </span>
             </div>
           </div>
         </div>
       </div>
-      <div className="absolute top-4 right-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="text-gray-400 hover:text-gray-600 cursor-pointer">
-              <Ellipsis size={16} />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="">
-            <DropdownMenuItem
-              className="group/view text-gray-500 hover:bg-gray-50 gap-0"
-              onClick={() => dispatch(openAppointmentViewForm({ ...item }))}
-            >
-              <Eye className="mr-4 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
-              <div className="group-hover/view:text-[#2563EB]">View</div>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => dispatch(openAppointmentEditForm({ ...item }))}
-              className="group/edit text-gray-500 hover:bg-gray-50 gap-0"
-            >
-              <SquarePen className="mr-4 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
-              <div className="group-hover/edit:text-[#10B981]">Edit</div>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => dispatch(openAppointmentDeleteForm({ ...item }))}
-              className="group/delete text-gray-500 hover:bg-gray-50 gap-0"
-            >
-              <Trash2 className="mr-4 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
-              <div className="group-hover/delete:text-red-500">Delete</div>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      {/* Buttons */}
+      <div className="flex w-full h-10 justify-between items-center text-[#6B7280] text-sm">
+        <div className="w-full flex border-t-[1px] border-r-[1px] border-[#DCE9F9] justify-center p-3 cursor-pointer">
+          {/* View */}
+          <div
+            className="flex-1 flex justify-center  items-center "
+            onClick={() => {
+              dispatch(openAppointmentViewForm(item))
+            }}
+          >
+            <Eye className="mr-1 h-3.5 w-3.4 " />
+            <div>View</div>
+          </div>
+        </div>
+
+        {/* Edit */}
+        <div className="w-full flex border-t-[1px]  border-[#DCE9F9] justify-center p-3 cursor-pointer">
+          <div
+            className="flex-1 flex justify-center  items-center "
+            onClick={() => {
+              dispatch(openAppointmentEditForm(item))
+            }}
+          >
+            <SquarePen className="mr-2 h-3.5 w-3.5" />
+            <div>Edit</div>
+          </div>
+        </div>
       </div>
     </div>
   )

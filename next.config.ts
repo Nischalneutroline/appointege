@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'www.gravatar.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'plus.unsplash.com',
+      },
     ],
   },
   /* config options here */
@@ -83,9 +87,8 @@ const nextConfig: NextConfig = {
   // For Build process ignore for now
   typescript: {
     ignoreBuildErrors: true,
-    
   },
-  
+
   eslint: {
     ignoreDuringBuilds: true,
   },
