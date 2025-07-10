@@ -1,6 +1,7 @@
 // store/authSlice.ts
 import { signOut } from 'next-auth/react'
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { BusinessDetail } from '@prisma/client'
 
 // Define user interface based on NextAuth session
 interface User {
@@ -9,7 +10,7 @@ interface User {
   email?: string | null
   image?: string | null
   role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | null
-  businessDetailId?: string
+  ownedBusinesses?: BusinessDetail[] | null // Update this to the correct type as needed
 }
 
 interface AuthState {

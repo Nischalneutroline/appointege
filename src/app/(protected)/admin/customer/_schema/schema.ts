@@ -10,7 +10,7 @@ export const addressSchema = z.object({
 export type Address = z.infer<typeof addressSchema>
 
 // Zod schema for Role (Enum)
-export const roleSchema = z.enum(['USER', 'ADMIN', 'SUPER_ADMIN'])
+export const roleSchema = z.enum(['USER', 'ADMIN', 'SUPER_ADMIN', 'GUEST'])
 
 // Zod schema for User
 export const userSchema = z.object({
@@ -26,4 +26,5 @@ export const userSchema = z.object({
   // role: roleSchema,
   isActive: z.boolean().optional(), // Optional, defaults to true
   address: addressSchema.optional(), // Optional address
+  businessId: z.string().optional(), // Optional business ID
 })

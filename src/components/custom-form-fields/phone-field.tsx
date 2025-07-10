@@ -741,7 +741,7 @@ const PhoneField = ({
           className={cn(
             className,
             error && 'border-red-400 border',
-            ' rounded-e-none  border-r-gray-400',
+            'rounded-e-none  border-r-gray-400',
           )}
         />
         <PhoneInput
@@ -754,7 +754,7 @@ const PhoneField = ({
           className={cn(
             className,
             error && 'border-red-400 border',
-            ' rounded-s-none border-l-0',
+            'rounded-s-none border-l-0',
           )}
         />
       </div>

@@ -1,22 +1,466 @@
+// import { NextRequest, NextResponse } from 'next/server'
+// import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
+// import { getAppointmentById } from '@/db/appointment'
+// import { getServiceById } from '@/db/service'
+// import { prisma } from '@/lib/prisma'
+// import { z, ZodError } from 'zod'
+// import { Prisma, Service } from '@prisma/client'
+// import { serviceSchema } from '@/app/(protected)/admin/service/_schemas/service'
+// import { ReturnType } from '@/features/shared/api-route-types'
+
+// interface ParamsProps {
+//   params: Promise<{ id: string }>
+// }
+
+// export async function GET(
+//   req: NextRequest,
+//   { params }: ParamsProps,
+// ): Promise<NextResponse<ReturnType>> {
+//   try {
+//     const { id } = await params
+//     const service = await getServiceById(id)
+
+//     if (!service) {
+//       return NextResponse.json(
+//         {
+//           data: null,
+//           status: 404,
+//           success: false,
+//           message: 'Service with id not found!',
+//           errorDetail: 'Service not found',
+//         },
+//         { status: 404 },
+//       )
+//     }
+//     return NextResponse.json(
+//       {
+//         data: service,
+//         status: 200,
+//         success: true,
+//         message: 'Service fetched successfully!',
+//         errorDetail: null,
+//       },
+//       { status: 200 },
+//     )
+//   } catch (error) {
+//     return NextResponse.json(
+//       {
+//         data: null,
+//         status: 500,
+//         success: false,
+//         message: 'Failed to fetch service!',
+//         errorDetail: error instanceof Error ? error.message : String(error),
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
+
+// //edit or  update service
+// export async function PUT(
+//   req: NextRequest,
+//   { params }: ParamsProps,
+// ): Promise<NextResponse<ReturnType>> {
+//   try {
+//     const { id } = await params
+
+//     if (!id) {
+//       return NextResponse.json(
+//         {
+//           data: null,
+//           status: 400,
+//           success: false,
+//           message: 'Service Id required!',
+//           errorDetail: 'Service Id required!',
+//         },
+//         { status: 400 },
+//       )
+//     }
+
+//     const body = await req.json()
+//     const parsedData = serviceSchema.parse(body)
+
+//     const existingService = await getServiceById(id)
+
+//     if (!existingService) {
+//       return NextResponse.json(
+//         {
+//           data: null,
+//           status: 404,
+//           success: false,
+//           message: 'Service not found!',
+//           errorDetail: 'Service not found',
+//         },
+//         { status: 404 },
+//       )
+//     }
+//     // Service Availability TimeSlot update logic
+//     // const deledtedService = await prisma.service.delete({
+//     //   where: { id },
+//     // })
+//     // if (deledtedService) {
+
+//     const serviceAvailability = await prisma.serviceAvailability.deleteMany({
+//       where: {
+//         serviceId: id,
+//       },
+//     })
+
+//     console.log('serviceAvailability----------', serviceAvailability)
+
+//     if (serviceAvailability) {
+//       const updatedService = await prisma.service.update({
+//         where: { id },
+//         data: {
+//           title: parsedData.title,
+//           description: parsedData.description,
+//           estimatedDuration: parsedData.estimatedDuration,
+//           status: parsedData.status,
+//           businessDetailId: parsedData.businessDetailId,
+//           serviceAvailability: {
+//             create: parsedData.serviceAvailability?.map((availability) => ({
+//               weekDay: availability.weekDay,
+//               timeSlots: {
+//                 create: availability.timeSlots?.map((timeSlot) => ({
+//                   startTime: timeSlot.startTime,
+//                   endTime: timeSlot.endTime,
+//                 })),
+//               },
+//             })),
+//           },
+//         },
+//       })
+//       if (updatedService) {
+//         return NextResponse.json(
+//           {
+//             data: updatedService,
+//             status: 200,
+//             success: true,
+//             message: 'Service updated successfully!',
+//             errorDetail: null,
+//           },
+//           { status: 200 },
+//         )
+//       }
+//     }
+//     // update service
+
+//     // -------------------------_//
+
+//     return NextResponse.json(
+//       {
+//         data: null,
+//         status: 400,
+//         success: false,
+//         message: 'Failed to update service!',
+//         errorDetail: 'Failed to update service!',
+//       },
+//       { status: 400 },
+//     )
+//   } catch (error) {
+//     if (error instanceof Prisma.PrismaClientValidationError) {
+//       // Handle the validation error specifically
+//       return NextResponse.json(
+//         {
+//           data: null,
+//           status: 400,
+//           success: false,
+//           message: 'Prisma Validation failed',
+//           errorDetail: error,
+//         },
+//         { status: 400 },
+//       )
+//     }
+//     if (error instanceof ZodError) {
+//       return NextResponse.json(
+//         {
+//           data: null,
+//           status: 400,
+//           success: false,
+//           message: 'Zod Validation failed!',
+//           errorDetail: error.errors[0].message,
+//         },
+//         { status: 400 },
+//       )
+//     }
+//     return NextResponse.json(
+//       {
+//         data: null,
+//         status: 500,
+//         success: false,
+//         message: 'Failed to update service!',
+//         errorDetail: error,
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
+// // import { NextRequest, NextResponse } from "next/server"
+// // import { z, ZodError } from "zod"
+// // import { prisma } from "@/lib/prisma" // Adjust based on your Prisma setup
+// // import { getServiceById } from "@/features/service/api/api" // Adjust import path
+// // import { Status, WeekDays } from "@/lib/enums" // Adjust based on your enums
+
+// // // Zod schema
+// // export const serviceSchema = z.object({
+// //   id: z.string().optional(),
+// //   title: z.string().min(3, "Title must be at least 3 characters long"),
+// //   description: z
+// //     .string()
+// //     .min(10, "Description must be at least 10 characters long"),
+// //   estimatedDuration: z
+// //     .number()
+// //     .min(1, "Estimated duration must be a positive number"),
+// //   status: z.enum([Status.ACTIVE, Status.INACTIVE]).optional(),
+// //   serviceAvailability: z
+// //     .array(
+// //       z.object({
+// //         weekDay: z.enum([
+// //           WeekDays.SUNDAY,
+// //           WeekDays.MONDAY,
+// //           WeekDays.TUESDAY,
+// //           WeekDays.WEDNESDAY,
+// //           WeekDays.THURSDAY,
+// //           WeekDays.FRIDAY,
+// //           WeekDays.SATURDAY,
+// //         ]),
+// //         timeSlots: z
+// //           .array(
+// //             z.object({
+// //               startTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
+// //                 message: "Invalid start time format",
+// //               }),
+// //               endTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
+// //                 message: "Invalid end time format",
+// //               }),
+// //             })
+// //           )
+// //           .optional(),
+// //       })
+// //     )
+// //     .optional(),
+// //   businessDetailId: z.string().min(1, "Business ID is required"),
+// // })
+
+// // interface ParamsProps {
+// //   params: { id: string }
+// // }
+
+// // export async function PUT(req: NextRequest, { params }: ParamsProps) {
+// //   try {
+// //     const { id } = await params
+
+// //     if (!id) {
+// //       return NextResponse.json(
+// //         { error: "Service ID required!" },
+// //         { status: 400 }
+// //       )
+// //     }
+
+// //     const existingService = await getServiceById(id)
+
+// //     if (!existingService) {
+// //       return NextResponse.json({ error: "Service not found" }, { status: 404 })
+// //     }
+
+// //     const body = (await req.json()) as z.infer<typeof serviceSchema>
+// //     const parsedData = serviceSchema.parse(body)
+
+// //     // Start a transaction to ensure atomicity
+// //     const updatedService = await prisma.$transaction(async (tx) => {
+// //       // Delete existing service availability
+// //       await tx.serviceAvailability.deleteMany({
+// //         where: { serviceId: id },
+// //       })
+
+// //       // Update the service
+// //       const service = await tx.service.update({
+// //         where: { id },
+// //         data: {
+// //           title: parsedData.title,
+// //           description: parsedData.description,
+// //           estimatedDuration: parsedData.estimatedDuration,
+// //           status: parsedData.status || "ACTIVE",
+// //           businessDetailId: parsedData.businessDetailId,
+// //           serviceAvailability: {
+// //             create: parsedData.serviceAvailability?.map((availability) => ({
+// //               weekDay: availability.weekDay,
+// //               timeSlots: {
+// //                 create: availability.timeSlots?.map((timeSlot) => ({
+// //                   startTime: new Date(timeSlot.startTime),
+// //                   endTime: new Date(timeSlot.endTime),
+// //                 })),
+// //               },
+// //             })),
+// //           },
+// //         },
+// //       })
+
+// //       return service
+// //     })
+
+// //     return NextResponse.json(
+// //       { message: "Service updated successfully", service: updatedService },
+// //       { status: 200 }
+// //     )
+// //   } catch (error) {
+// //     if (error instanceof ZodError) {
+// //       return NextResponse.json(
+// //         { error: "Validation failed", details: error.errors },
+// //         { status: 400 }
+// //       )
+// //     }
+// //     console.error("Error updating service:", error)
+// //     return NextResponse.json(
+// //       { error: "Internal server error", message: String(error) },
+// //       { status: 500 }
+// //     )
+// //   }
+// // }
+// //delete service
+// export async function DELETE(req: NextRequest, { params }: ParamsProps) {
+//   try {
+//     const { id } = await params
+
+//     if (!id) {
+//       return NextResponse.json(
+//         { message: 'Service Id required!', success: false },
+//         { status: 400 },
+//       )
+//     }
+
+//     const existingService = await getServiceById(id)
+
+//     if (!existingService) {
+//       return NextResponse.json(
+//         { message: 'Service not found!', success: false },
+//         { status: 404 },
+//       )
+//     }
+
+//     const deletedService = await prisma.service.delete({
+//       where: { id },
+//     })
+
+//     if (!deletedService) {
+//       return NextResponse.json(
+//         { message: 'Service could not be deleted!', success: false },
+//         { status: 404 },
+//       )
+//     }
+//     return NextResponse.json(
+//       {
+//         data: deletedService,
+//         success: true,
+//         message: 'Service deleted successfully!',
+//       },
+//       { status: 200 },
+//     )
+//   } catch (error) {
+//     return NextResponse.json(
+//       {
+//         data: null,
+//         status: 500,
+//         success: false,
+//         message: 'Failed to delete service!',
+//         errorDetail: error instanceof Error ? error.message : String(error),
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
+
 import { NextRequest, NextResponse } from 'next/server'
-import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
-import { getAppointmentById } from '@/db/appointment'
-import { getServiceById } from '@/db/service'
+import { auth } from '@/auth'
+import { ZodError } from 'zod'
 import { prisma } from '@/lib/prisma'
-import { z, ZodError } from 'zod'
-import { Prisma, Service } from '@prisma/client'
+import { getServiceById } from '@/db/service'
 import { serviceSchema } from '@/app/(protected)/admin/service/_schemas/service'
 import { ReturnType } from '@/features/shared/api-route-types'
+import { Prisma, Service } from '@prisma/client'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
 }
 
+// Interface for user data with business relations
+interface UserWithBusiness {
+  id: string
+  role: string
+  ownedBusinesses: { id: string }[]
+}
+
+// Helper function to check if user has access to a service
+async function hasServiceAccess(
+  user: UserWithBusiness,
+  service: Service,
+): Promise<boolean> {
+  if (user.role === 'SUPER_ADMIN') {
+    return true // SUPER_ADMIN has access to all services
+  }
+
+  if (user.role === 'ADMIN') {
+    const ownedBusinessIds = user.ownedBusinesses.map((b) => b.id)
+    return ownedBusinessIds.includes(service.businessDetailId ?? '')
+  }
+
+  return false // No access for USER, GUEST, or other roles
+}
+
+// Fetch a single service by ID
 export async function GET(
   req: NextRequest,
   { params }: ParamsProps,
 ): Promise<NextResponse<ReturnType>> {
   try {
+    // Check authentication
+    const session = await auth()
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 401,
+          success: false,
+          message: 'Unauthorized: Please log in to view service',
+          errorDetail: null,
+        },
+        { status: 401 },
+      )
+    }
+
+    // Fetch user with business relations
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { ownedBusinesses: { select: { id: true } } },
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 404,
+          success: false,
+          message: 'User not found',
+          errorDetail: null,
+        },
+        { status: 404 },
+      )
+    }
+
+    // Validate role
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 403,
+          success: false,
+          message: 'Forbidden: Insufficient permissions to view service',
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
     const { id } = await params
     const service = await getServiceById(id)
 
@@ -26,12 +470,28 @@ export async function GET(
           data: null,
           status: 404,
           success: false,
-          message: 'Service with id not found!',
+          message: 'Service with id not found',
           errorDetail: 'Service not found',
         },
         { status: 404 },
       )
     }
+
+    // Check if user has access to the service
+    const hasAccess = await hasServiceAccess(user, service)
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 403,
+          success: false,
+          message: 'Forbidden: You do not have access to this service',
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
     return NextResponse.json(
       {
         data: service,
@@ -43,27 +503,75 @@ export async function GET(
       { status: 200 },
     )
   } catch (error) {
+    console.error('Error fetching service:', error)
     return NextResponse.json(
       {
         data: null,
         status: 500,
         success: false,
         message: 'Failed to fetch service!',
-        errorDetail: error instanceof Error ? error.message : String(error),
+        errorDetail: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
     )
   }
 }
 
-//edit or  update service
+// Update an existing service
 export async function PUT(
   req: NextRequest,
   { params }: ParamsProps,
 ): Promise<NextResponse<ReturnType>> {
   try {
-    const { id } = await params
+    // Check authentication
+    const session = await auth()
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 401,
+          success: false,
+          message: 'Unauthorized: Please log in to update service',
+          errorDetail: null,
+        },
+        { status: 401 },
+      )
+    }
 
+    // Fetch user with business relations
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { ownedBusinesses: { select: { id: true } } },
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 404,
+          success: false,
+          message: 'User not found',
+          errorDetail: null,
+        },
+        { status: 404 },
+      )
+    }
+
+    // Validate role
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 403,
+          success: false,
+          message: 'Forbidden: Insufficient permissions to update service',
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
+    const { id } = await params
     if (!id) {
       return NextResponse.json(
         {
@@ -77,45 +585,76 @@ export async function PUT(
       )
     }
 
-    const body = await req.json()
-    const parsedData = serviceSchema.parse(body)
-
+    // Find the service by ID
     const existingService = await getServiceById(id)
-
     if (!existingService) {
       return NextResponse.json(
         {
           data: null,
           status: 404,
           success: false,
-          message: 'Service not found!',
+          message: 'Service not found',
           errorDetail: 'Service not found',
         },
         { status: 404 },
       )
     }
-    // Service Availability TimeSlot update logic
-    // const deledtedService = await prisma.service.delete({
-    //   where: { id },
-    // })
-    // if (deledtedService) {
 
-    const serviceAvailability = await prisma.serviceAvailability.deleteMany({
-      where: {
-        serviceId: id,
-      },
-    })
+    // Check if user has access to the service
+    const hasAccess = await hasServiceAccess(user, existingService)
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 403,
+          success: false,
+          message: 'Forbidden: You do not have access to this service',
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
 
-    console.log('serviceAvailability----------', serviceAvailability)
+    // Parse and validate request body
+    const body = await req.json()
+    const parsedData = serviceSchema.parse(body)
 
-    if (serviceAvailability) {
-      const updatedService = await prisma.service.update({
+    // Validate business access for ADMIN if businessDetailId is updated
+    if (
+      user.role === 'ADMIN' &&
+      parsedData.businessDetailId &&
+      parsedData.businessDetailId !== existingService.businessDetailId
+    ) {
+      const ownedBusinessIds = user.ownedBusinesses.map((b) => b.id)
+      if (!ownedBusinessIds.includes(parsedData.businessDetailId)) {
+        return NextResponse.json(
+          {
+            data: null,
+            status: 403,
+            success: false,
+            message: 'Forbidden: You do not have access to this business',
+            errorDetail: null,
+          },
+          { status: 403 },
+        )
+      }
+    }
+
+    // Update service within a transaction
+    const updatedService = await prisma.$transaction(async (tx) => {
+      // Delete existing service availability
+      await tx.serviceAvailability.deleteMany({
+        where: { serviceId: id },
+      })
+
+      // Update the service
+      return tx.service.update({
         where: { id },
         data: {
           title: parsedData.title,
           description: parsedData.description,
           estimatedDuration: parsedData.estimatedDuration,
-          status: parsedData.status,
+          status: parsedData.ServiceStatus || 'ACTIVE',
           businessDetailId: parsedData.businessDetailId,
           serviceAvailability: {
             create: parsedData.serviceAvailability?.map((availability) => ({
@@ -129,44 +668,33 @@ export async function PUT(
             })),
           },
         },
+        include: {
+          serviceAvailability: { include: { timeSlots: true } },
+          businessDetail: true,
+        },
       })
-      if (updatedService) {
-        return NextResponse.json(
-          {
-            data: updatedService,
-            status: 200,
-            success: true,
-            message: 'Service updated successfully!',
-            errorDetail: null,
-          },
-          { status: 200 },
-        )
-      }
-    }
-    // update service
-
-    // -------------------------_//
+    })
 
     return NextResponse.json(
       {
-        data: null,
-        status: 400,
-        success: false,
-        message: 'Failed to update service!',
-        errorDetail: 'Failed to update service!',
+        data: updatedService,
+        status: 200,
+        success: true,
+        message: 'Service updated successfully!',
+        errorDetail: null,
       },
-      { status: 400 },
+      { status: 200 },
     )
   } catch (error) {
+    console.error('Error updating service:', error)
     if (error instanceof Prisma.PrismaClientValidationError) {
-      // Handle the validation error specifically
       return NextResponse.json(
         {
           data: null,
           status: 400,
           success: false,
           message: 'Prisma Validation failed',
-          errorDetail: error,
+          errorDetail: error.message,
         },
         { status: 400 },
       )
@@ -178,7 +706,7 @@ export async function PUT(
           status: 400,
           success: false,
           message: 'Zod Validation failed!',
-          errorDetail: error.errors[0].message,
+          errorDetail: error.errors,
         },
         { status: 400 },
       )
@@ -189,181 +717,154 @@ export async function PUT(
         status: 500,
         success: false,
         message: 'Failed to update service!',
-        errorDetail: error,
+        errorDetail: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
     )
   }
 }
-// import { NextRequest, NextResponse } from "next/server"
-// import { z, ZodError } from "zod"
-// import { prisma } from "@/lib/prisma" // Adjust based on your Prisma setup
-// import { getServiceById } from "@/features/service/api/api" // Adjust import path
-// import { Status, WeekDays } from "@/lib/enums" // Adjust based on your enums
 
-// // Zod schema
-// export const serviceSchema = z.object({
-//   id: z.string().optional(),
-//   title: z.string().min(3, "Title must be at least 3 characters long"),
-//   description: z
-//     .string()
-//     .min(10, "Description must be at least 10 characters long"),
-//   estimatedDuration: z
-//     .number()
-//     .min(1, "Estimated duration must be a positive number"),
-//   status: z.enum([Status.ACTIVE, Status.INACTIVE]).optional(),
-//   serviceAvailability: z
-//     .array(
-//       z.object({
-//         weekDay: z.enum([
-//           WeekDays.SUNDAY,
-//           WeekDays.MONDAY,
-//           WeekDays.TUESDAY,
-//           WeekDays.WEDNESDAY,
-//           WeekDays.THURSDAY,
-//           WeekDays.FRIDAY,
-//           WeekDays.SATURDAY,
-//         ]),
-//         timeSlots: z
-//           .array(
-//             z.object({
-//               startTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
-//                 message: "Invalid start time format",
-//               }),
-//               endTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
-//                 message: "Invalid end time format",
-//               }),
-//             })
-//           )
-//           .optional(),
-//       })
-//     )
-//     .optional(),
-//   businessDetailId: z.string().min(1, "Business ID is required"),
-// })
-
-// interface ParamsProps {
-//   params: { id: string }
-// }
-
-// export async function PUT(req: NextRequest, { params }: ParamsProps) {
-//   try {
-//     const { id } = await params
-
-//     if (!id) {
-//       return NextResponse.json(
-//         { error: "Service ID required!" },
-//         { status: 400 }
-//       )
-//     }
-
-//     const existingService = await getServiceById(id)
-
-//     if (!existingService) {
-//       return NextResponse.json({ error: "Service not found" }, { status: 404 })
-//     }
-
-//     const body = (await req.json()) as z.infer<typeof serviceSchema>
-//     const parsedData = serviceSchema.parse(body)
-
-//     // Start a transaction to ensure atomicity
-//     const updatedService = await prisma.$transaction(async (tx) => {
-//       // Delete existing service availability
-//       await tx.serviceAvailability.deleteMany({
-//         where: { serviceId: id },
-//       })
-
-//       // Update the service
-//       const service = await tx.service.update({
-//         where: { id },
-//         data: {
-//           title: parsedData.title,
-//           description: parsedData.description,
-//           estimatedDuration: parsedData.estimatedDuration,
-//           status: parsedData.status || "ACTIVE",
-//           businessDetailId: parsedData.businessDetailId,
-//           serviceAvailability: {
-//             create: parsedData.serviceAvailability?.map((availability) => ({
-//               weekDay: availability.weekDay,
-//               timeSlots: {
-//                 create: availability.timeSlots?.map((timeSlot) => ({
-//                   startTime: new Date(timeSlot.startTime),
-//                   endTime: new Date(timeSlot.endTime),
-//                 })),
-//               },
-//             })),
-//           },
-//         },
-//       })
-
-//       return service
-//     })
-
-//     return NextResponse.json(
-//       { message: "Service updated successfully", service: updatedService },
-//       { status: 200 }
-//     )
-//   } catch (error) {
-//     if (error instanceof ZodError) {
-//       return NextResponse.json(
-//         { error: "Validation failed", details: error.errors },
-//         { status: 400 }
-//       )
-//     }
-//     console.error("Error updating service:", error)
-//     return NextResponse.json(
-//       { error: "Internal server error", message: String(error) },
-//       { status: 500 }
-//     )
-//   }
-// }
-//delete service
-export async function DELETE(req: NextRequest, { params }: ParamsProps) {
+// Delete a service
+export async function DELETE(
+  req: NextRequest,
+  { params }: ParamsProps,
+): Promise<NextResponse<ReturnType>> {
   try {
-    const { id } = await params
+    // Check authentication
+    const session = await auth()
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 401,
+          success: false,
+          message: 'Unauthorized: Please log in to delete service',
+          errorDetail: null,
+        },
+        { status: 401 },
+      )
+    }
 
+    // Fetch user with business relations
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: { ownedBusinesses: { select: { id: true } } },
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 404,
+          success: false,
+          message: 'User not found',
+          errorDetail: null,
+        },
+        { status: 404 },
+      )
+    }
+
+    // Validate role
+    if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 403,
+          success: false,
+          message: 'Forbidden: Insufficient permissions to delete service',
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
+    const { id } = await params
     if (!id) {
       return NextResponse.json(
-        { message: 'Service Id required!', success: false },
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Service Id required!',
+          errorDetail: 'Service Id required!',
+        },
         { status: 400 },
       )
     }
 
+    // Find the service by ID
     const existingService = await getServiceById(id)
-
     if (!existingService) {
       return NextResponse.json(
-        { message: 'Service not found!', success: false },
+        {
+          data: null,
+          status: 404,
+          success: false,
+          message: 'Service not found',
+          errorDetail: 'Service not found',
+        },
         { status: 404 },
       )
     }
 
+    // Check if user has access to the service
+    const hasAccess = await hasServiceAccess(user, existingService)
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 403,
+          success: false,
+          message: 'Forbidden: You do not have access to this service',
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
+    // Delete service
     const deletedService = await prisma.service.delete({
       where: { id },
+      include: {
+        serviceAvailability: { include: { timeSlots: true } },
+        businessDetail: true,
+      },
     })
 
-    if (!deletedService) {
-      return NextResponse.json(
-        { message: 'Service could not be deleted!', success: false },
-        { status: 404 },
-      )
-    }
     return NextResponse.json(
       {
         data: deletedService,
+        status: 200,
         success: true,
         message: 'Service deleted successfully!',
+        errorDetail: null,
       },
       { status: 200 },
     )
   } catch (error) {
+    console.error('Error deleting service:', error)
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === 'P2003') {
+        return NextResponse.json(
+          {
+            data: null,
+            status: 400,
+            success: false,
+            message:
+              'Cannot delete service with associated appointments or resources',
+            errorDetail: error.message,
+          },
+          { status: 400 },
+        )
+      }
+    }
     return NextResponse.json(
       {
         data: null,
         status: 500,
         success: false,
         message: 'Failed to delete service!',
-        errorDetail: error instanceof Error ? error.message : String(error),
+        errorDetail: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
     )

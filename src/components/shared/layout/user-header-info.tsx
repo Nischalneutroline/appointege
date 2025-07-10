@@ -15,6 +15,7 @@ import { LogoutButton } from '@/components/auth/logout-button'
 import { useDispatch, useSelector } from 'react-redux'
 import { setSession } from '@/store/slices/authSlice'
 import type { RootState } from '@/store/store'
+import { BusinessDetail } from '@prisma/client'
 
 // Define User interface to match NextAuth session
 interface User {
@@ -23,6 +24,7 @@ interface User {
   email?: string | null
   image?: string | null
   role?: 'USER' | 'ADMIN' | 'SUPER_ADMIN' | null
+  ownedBusinesses?: BusinessDetail[] | null // TODO: Update this to the correct type
 }
 
 export function UserButton({ user }: { user: User | null }) {
@@ -42,6 +44,7 @@ export function UserButton({ user }: { user: User | null }) {
             email: user.email,
             image: user.image,
             role: user.role,
+            ownedBusinesses: user.ownedBusinesses || null, // Ensure ownedBusinesses is handled
           },
           isLoading: false,
         }),

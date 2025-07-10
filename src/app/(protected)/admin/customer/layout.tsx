@@ -407,13 +407,12 @@ const CustomerLayout = React.memo(
           <CustomerDetail
             open={isFormOpen}
             onChange={() => dispatch(closeCustomerForm())}
-            filledData={currentCustomer}
           />
         )}
         {isFormOpen && customerFormMode === 'delete' && currentCustomer && (
           <DeleteModal
             open={isFormOpen}
-            onChange={() => dispatch(closeAppointmentForm())}
+            onChange={() => dispatch(closeCustomerForm())}
             isLoading={isLoading}
             sliceName="customer"
             currentItem={currentCustomer}

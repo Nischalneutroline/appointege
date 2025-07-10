@@ -134,7 +134,8 @@ const CustomerForm = ({
         role:
           customerFormMode === 'edit' && currentCustomer?.role
             ? currentCustomer.role
-            : Role.USER,
+            : Role.GUEST,
+        businessId: user.ownedBusinesses?.[0]?.id,
       }
 
       console.log('Submitting customer:', customerData)
@@ -155,6 +156,7 @@ const CustomerForm = ({
         `Error ${customerFormMode === 'edit' ? 'updating' : 'creating'} customer:`,
         error,
       )
+      toast.error(error.message || 'Failed to process customer')
     } finally {
       setIsSubmitting(false)
     }

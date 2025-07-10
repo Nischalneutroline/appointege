@@ -1,3 +1,4 @@
+import { BusinessCustomer } from '@prisma/client'
 import { Appointment } from '../../appointment/_types/appointment'
 
 export const DEFAULT_CUSTOMER_FILTERS_VALUES: CustomerFilterValue[] = [
@@ -57,7 +58,7 @@ export enum CustomerStatus {
 export interface User {
   id: string
   email: string // Required
-  password: string // Required
+  password?: string // Required
   name: string // Required
   phone?: string // Optional
   role: Role // Required
@@ -68,6 +69,8 @@ export interface User {
   updatedAt: string
   color?: string
   status?: CustomerStatus[]
+  image?: string // Optional, can be used for profile picture
+  businessCustomer?: BusinessCustomer // Optional, indicates if the user is a business customer
   appointments?: Appointment[]
 }
 
@@ -81,6 +84,8 @@ export interface PostCustomerData {
   role: Role
   isActive?: boolean
   address?: Address
+  createdBy?: string // Optional, can be set by the system
+  businessId?: string // Optional, can be used to link to a business
 }
 
 export interface ApiReturnType<T = any> {

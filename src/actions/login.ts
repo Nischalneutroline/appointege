@@ -35,7 +35,7 @@ export async function login(values: LoginSchemaType) {
     await sendVerificationEmail(
       verificationToken.email,
       verificationToken.token,
-      existingUser.name,
+      existingUser.name || 'User',
     )
     // return success message
     return { success: 'Email Confirmation Sent!' }

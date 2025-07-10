@@ -14,29 +14,30 @@ datasource db {
 }
 
 model User {
-  id             String           @id @default(cuid())
-  name           String?
-  email          String           @unique
-  emailVerified  DateTime?
-  phone          String?
-  password       String?
-  role           Role             @default(USER)
-  isActive       Boolean          @default(true)
-  image          String?
-  accounts       Account[]
-  appointments   Appointment[]    @relation("BookedUser")
-  bookings       Appointment[]    @relation("BookedBy")
-  adminBookings  Appointment[]    @relation("CreatedBy")
-  address        Address?
-  FAQ            FAQ[]
-  Ticket         Ticket[]
-  individual     Individual?
-  events         Event[]
-  businessAdmins BusinessAdmin[] // Admins for businesses
-  lastActive     DateTime         @default(now())
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  BusinessDetail BusinessDetail[]
+  id                String             @id @default(cuid())
+  name              String?
+  email             String             @unique
+  emailVerified     DateTime?
+  phone             String?
+  password          String?
+  role              Role               @default(USER)
+  isActive          Boolean            @default(true)
+  image             String?
+  accounts          Account[]
+  appointments      Appointment[]      @relation("BookedUser")
+  bookings          Appointment[]      @relation("BookedBy")
+  adminBookings     Appointment[]      @relation("CreatedBy")
+  address           Address?
+  FAQ               FAQ[]
+  Ticket            Ticket[]
+  individual        Individual?
+  events            Event[]
+  businessAdmins    BusinessAdmin[] // Admins for businesses
+  businessCustomers BusinessCustomer[] // Customers who booked with businesses
+  lastActive        DateTime           @default(now())
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  ownedBusinesses   BusinessDetail[]
 }
 
 model Account {
@@ -59,7 +60,7 @@ model Account {
 }
 
 enum Role {
-  GUEST // For non-logged-in users (replaces GUEST)
+  GUEST
   USER
   ADMIN
   SUPER_ADMIN
@@ -107,7 +108,7 @@ model Service {
   updatedAt           DateTime              @updatedAt
   businessDetail      BusinessDetail?       @relation(fields: [businessDetailId], references: [id])
   businessDetailId    String?
-  documents           Document[] // Added for RAG
+  documents           Document[]
 }
 
 model ServiceAvailability {
@@ -224,7 +225,7 @@ model Appointment {
   Resource        Resource?                   @relation(fields: [resourceId], references: [id])
   resourceId      String?
   reminderOffsets AppointmentReminderOffset[]
-  documents       Document[] // Added for RAG
+  documents       Document[]
 }
 
 enum AppointmentStatus {
@@ -284,7 +285,8 @@ model BusinessDetail {
   timeZone                   String?
   user                       User?                  @relation(fields: [businessOwner], references: [id], onDelete: Cascade)
   businessOwner              String?
-  businessAdmins             BusinessAdmin[] // Added for multiple admins
+  businessAdmins             BusinessAdmin[]
+  businessCustomers          BusinessCustomer[] // Customers who booked with this business
   businessAvailability       BusinessAvailability[]
   holiday                    Holiday[]
   createdAt                  DateTime               @default(now())
@@ -292,7 +294,7 @@ model BusinessDetail {
   supportBusinessDetail      SupportBusinessDetail?
   resources                  Resource[]
   services                   Service[]
-  documents                  Document[] // Added for RAG
+  documents                  Document[]
 }
 
 model BusinessAdmin {
@@ -304,7 +306,19 @@ model BusinessAdmin {
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
 
-  @@unique([userId, businessId]) // One admin per business per user
+  @@unique([userId, businessId])
+}
+
+model BusinessCustomer {
+  id         String         @id @default(cuid())
+  userId     String
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessId String
+  business   BusinessDetail @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([userId, businessId])
 }
 
 model BusinessAddress {

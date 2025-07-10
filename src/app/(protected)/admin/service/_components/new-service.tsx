@@ -412,7 +412,7 @@ const NewServiceForm = ({
       description: '',
       estimatedDuration: 0,
       serviceAvailability: [],
-      businessDetailId: user?.businessDetailId || '',
+      businessDetailId: user?.ownedBusinesses?.[0]?.id ?? '',
       ServiceStatus: ServiceStatus.ACTIVE,
       message: '',
       image: '',
@@ -427,7 +427,9 @@ const NewServiceForm = ({
         estimatedDuration: currentService.estimatedDuration || 0,
         serviceAvailability: currentService.serviceAvailability,
         businessDetailId:
-          currentService.businessDetailId || user?.businessDetailId || '',
+          currentService.businessDetailId ||
+          user?.ownedBusinesses?.[0]?.id ||
+          '',
         ServiceStatus: currentService.status,
         // message: currentService. || '',
         // image: currentService.image || '',
@@ -476,7 +478,8 @@ const NewServiceForm = ({
             endTime,
           })),
         })),
-        businessDetailId: data.businessDetailId,
+        businessDetailId:
+          data.businessDetailId || user.ownedBusinesses?.[0]?.id || '',
         status: data.ServiceStatus,
         message: data.message,
         image: data.image,

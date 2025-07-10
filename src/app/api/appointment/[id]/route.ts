@@ -1,14 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
+import { auth } from '@/auth' // Assuming next-auth utility is set up
+import { ZodError } from 'zod'
+import { prisma } from '@/lib/prisma'
 import { getAppointmentById } from '@/db/appointment'
 import { appointmentSchema } from '@/app/(protected)/admin/appointment/_schema/appoinment'
-import { prisma } from '@/lib/prisma'
-import { ZodError } from 'zod'
 import { ReturnType } from '@/features/shared/api-route-types'
-import { Prisma } from '@prisma/client'
+import { Prisma, Appointment } from '@prisma/client'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
+}
+
+// Helper function to check if user has access to an appointment
+async function hasAppointmentAccess(
+  user: {
+    id: string
+    role: string
+    ownedBusinesses: { id: string }[]
+    businessAdmins: { businessId: string }[]
+  },
+  appointment: Appointment,
+): Promise<boolean> {
+  if (user.role === 'SUPER_ADMIN') {
+    return true // SUPER_ADMIN has access to all appointments
+  }
+
+  if (user.role === 'USER') {
+    // USER can access their own appointments
+    return appointment.userId === user.id || appointment.bookedById === user.id
+  }
+
+  if (user.role === 'ADMIN') {
+    // ADMIN can access appointments for their businesses (owned or administered)
+    const service = await prisma.service.findUnique({
+      where: { id: appointment.serviceId },
+      select: { businessDetailId: true },
+    })
+    if (!service?.businessDetailId) return false
+    const adminBusinessIds = user.businessAdmins.map((ba) => ba.businessId)
+    const ownedBusinessIds = user.ownedBusinesses.map((b) => b.id)
+    const accessibleBusinessIds = [
+      ...new Set([...adminBusinessIds, ...ownedBusinessIds]),
+    ]
+    return accessibleBusinessIds.includes(service.businessDetailId)
+  }
+
+  return false // Default: no access for other roles (e.g., GUEST)
 }
 
 export async function GET(
@@ -16,10 +53,65 @@ export async function GET(
   { params }: ParamsProps,
 ): Promise<NextResponse<ReturnType>> {
   try {
-    const { id } = await params
-    const announcement = await getAppointmentById(id)
+    // Check authentication
+    const session = await auth()
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        {
+          message: 'Unauthorized: Please log in to view appointment',
+          data: null,
+          status: 401,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 401 },
+      )
+    }
 
-    if (!announcement) {
+    // Fetch user with ownedBusinesses and businessAdmins
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        ownedBusinesses: true,
+        businessAdmins: { include: { business: true } },
+      },
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          message: 'User not found',
+          data: null,
+          status: 404,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 404 },
+      )
+    }
+
+    // Validate role
+    if (
+      user.role !== 'USER' &&
+      user.role !== 'ADMIN' &&
+      user.role !== 'SUPER_ADMIN'
+    ) {
+      return NextResponse.json(
+        {
+          message: 'Forbidden: Insufficient permissions to view appointment',
+          data: null,
+          status: 403,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
+    const { id } = await params
+    const appointment = await getAppointmentById(id)
+
+    if (!appointment) {
       return NextResponse.json(
         {
           message: 'Appointment with id not found',
@@ -31,10 +123,26 @@ export async function GET(
         { status: 404 },
       )
     }
+
+    // Check if user has access to the appointment
+    const hasAccess = await hasAppointmentAccess(user, appointment)
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          message: 'Forbidden: You do not have access to this appointment',
+          data: null,
+          status: 403,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
     return NextResponse.json(
       {
         message: 'Appointment fetched successfully',
-        data: announcement,
+        data: appointment,
         status: 200,
         success: true,
         errorDetail: null,
@@ -60,8 +168,62 @@ export async function PUT(
   { params }: ParamsProps,
 ): Promise<NextResponse<ReturnType>> {
   try {
-    const { id } = await params
+    // Check authentication
+    const session = await auth()
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        {
+          message: 'Unauthorized: Please log in to update appointment',
+          data: null,
+          status: 401,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 401 },
+      )
+    }
 
+    // Fetch user with ownedBusinesses and businessAdmins
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        ownedBusinesses: true,
+        businessAdmins: { include: { business: true } },
+      },
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          message: 'User not found',
+          data: null,
+          status: 404,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 404 },
+      )
+    }
+
+    // Validate role
+    if (
+      user.role !== 'USER' &&
+      user.role !== 'ADMIN' &&
+      user.role !== 'SUPER_ADMIN'
+    ) {
+      return NextResponse.json(
+        {
+          message: 'Forbidden: Insufficient permissions to update appointment',
+          data: null,
+          status: 403,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
+    const { id } = await params
     if (!id) {
       return NextResponse.json(
         {
@@ -75,9 +237,8 @@ export async function PUT(
       )
     }
 
-    // Find the service by ID
+    // Find the appointment by ID
     const existingAppointment = await getAppointmentById(id)
-
     if (!existingAppointment) {
       return NextResponse.json(
         {
@@ -91,11 +252,67 @@ export async function PUT(
       )
     }
 
+    // Check if user has access to the appointment
+    const hasAccess = await hasAppointmentAccess(user, existingAppointment)
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          message: 'Forbidden: You do not have access to this appointment',
+          data: null,
+          status: 403,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
     const body = await req.json()
     const parsedData = appointmentSchema.parse(body)
 
-    // update appointment in prisma database
-    const updatedService = await prisma.appointment.update({
+    // Validate business access for ADMIN if serviceId is updated
+    if (
+      user.role === 'ADMIN' &&
+      parsedData.serviceId &&
+      parsedData.serviceId !== existingAppointment.serviceId
+    ) {
+      const service = await prisma.service.findUnique({
+        where: { id: parsedData.serviceId },
+        select: { businessDetailId: true },
+      })
+      if (!service?.businessDetailId) {
+        return NextResponse.json(
+          {
+            data: null,
+            status: 400,
+            success: false,
+            message: 'Invalid service ID',
+            errorDetail: null,
+          },
+          { status: 400 },
+        )
+      }
+      const adminBusinessIds = user.businessAdmins.map((ba) => ba.businessId)
+      const ownedBusinessIds = user.ownedBusinesses.map((b) => b.id)
+      const accessibleBusinessIds = [
+        ...new Set([...adminBusinessIds, ...ownedBusinessIds]),
+      ]
+      if (!accessibleBusinessIds.includes(service.businessDetailId)) {
+        return NextResponse.json(
+          {
+            data: null,
+            status: 403,
+            success: false,
+            message: 'Forbidden: You do not have access to this business',
+            errorDetail: null,
+          },
+          { status: 403 },
+        )
+      }
+    }
+
+    // Update appointment in Prisma
+    const updatedAppointment = await prisma.appointment.update({
       where: { id },
       data: {
         customerName: parsedData.customerName,
@@ -119,23 +336,10 @@ export async function PUT(
       },
     })
 
-    if (!updatedService) {
-      return NextResponse.json(
-        {
-          message: 'Failed to update appointment',
-          data: null,
-          status: 500,
-          success: false,
-          errorDetail: 'Failed to update appointment',
-        },
-        { status: 500 },
-      )
-    }
-
     return NextResponse.json(
       {
         message: 'Appointment updated successfully',
-        data: updatedService,
+        data: updatedAppointment,
         status: 200,
         success: true,
         errorDetail: null,
@@ -144,14 +348,13 @@ export async function PUT(
     )
   } catch (error) {
     if (error instanceof Prisma.PrismaClientValidationError) {
-      // Handle the validation error specifically
       return NextResponse.json(
         {
           data: null,
           status: 400,
           success: false,
           message: 'Prisma Validation failed',
-          errorDetail: error,
+          errorDetail: error.message,
         },
         { status: 400 },
       )
@@ -163,7 +366,7 @@ export async function PUT(
           data: null,
           status: 400,
           success: false,
-          errorDetail: error,
+          errorDetail: error.errors,
         },
         { status: 400 },
       )
@@ -174,21 +377,74 @@ export async function PUT(
         data: null,
         status: 500,
         success: false,
-        errorDetail: error,
+        errorDetail: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
     )
   }
 }
 
-//delete appointment
 export async function DELETE(
   req: NextRequest,
   { params }: ParamsProps,
 ): Promise<NextResponse<ReturnType>> {
   try {
-    const { id } = await params
+    // Check authentication
+    const session = await auth()
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        {
+          message: 'Unauthorized: Please log in to delete appointment',
+          data: null,
+          status: 401,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 401 },
+      )
+    }
 
+    // Fetch user with ownedBusinesses and businessAdmins
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        ownedBusinesses: true,
+        businessAdmins: { include: { business: true } },
+      },
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        {
+          message: 'User not found',
+          data: null,
+          status: 404,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 404 },
+      )
+    }
+
+    // Validate role
+    if (
+      user.role !== 'USER' &&
+      user.role !== 'ADMIN' &&
+      user.role !== 'SUPER_ADMIN'
+    ) {
+      return NextResponse.json(
+        {
+          message: 'Forbidden: Insufficient permissions to delete appointment',
+          data: null,
+          status: 403,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
+    const { id } = await params
     if (!id) {
       return NextResponse.json(
         {
@@ -202,8 +458,8 @@ export async function DELETE(
       )
     }
 
+    // Find the appointment by ID
     const existingAppointment = await getAppointmentById(id)
-
     if (!existingAppointment) {
       return NextResponse.json(
         {
@@ -217,6 +473,22 @@ export async function DELETE(
       )
     }
 
+    // Check if user has access to the appointment
+    const hasAccess = await hasAppointmentAccess(user, existingAppointment)
+    if (!hasAccess) {
+      return NextResponse.json(
+        {
+          message: 'Forbidden: You do not have access to this appointment',
+          data: null,
+          status: 403,
+          success: false,
+          errorDetail: null,
+        },
+        { status: 403 },
+      )
+    }
+
+    // Delete appointment
     const deletedAppointment = await prisma.appointment.delete({
       where: { id },
     })
@@ -238,7 +510,7 @@ export async function DELETE(
         data: null,
         status: 500,
         success: false,
-        errorDetail: error,
+        errorDetail: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
     )
