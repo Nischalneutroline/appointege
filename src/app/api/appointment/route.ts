@@ -120,7 +120,7 @@ export async function POST(
       selectedDate: parsedData.selectedDate,
       selectedTime: parsedData.selectedTime,
       message: parsedData.message,
-      isForSelf: parsedData.isForSelf,
+      isForSelf: parsedData.isForSelf || false,
       createdById: parsedData.createdById || session.user.id,
       resourceId: parsedData.resourceId,
     })

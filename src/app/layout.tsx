@@ -6,6 +6,7 @@ import { ReduxProvider } from '@/store/ReduxProvider'
 import { Toaster } from '@/components/ui/sonner'
 import { SessionProvider } from 'next-auth/react'
 import { auth } from '@/auth'
+import ChatDialog from '@/components/ChatBox'
 
 // Load Inter font
 const inter = Inter({
@@ -32,6 +33,7 @@ export default async function RootLayout({
           <SessionProvider session={session}>
             {children}
             <Toaster position="top-right" richColors closeButton />
+            <ChatDialog />
           </SessionProvider>
         </ReduxProvider>
       </body>

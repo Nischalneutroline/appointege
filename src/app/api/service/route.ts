@@ -355,6 +355,178 @@ export async function POST(
   }
 }
 
+// import { generateServiceEmbedding } from '@/lib/ai/embedding'
+// import { Role } from '@prisma/client'
+// import logger from '@/lib/logger'
+// import { z } from 'zod'
+
+// const serviceSchema = z.object({
+//   title: z.string().min(1, 'Title is required'),
+//   description: z.string().min(1, 'Description is required'),
+//   estimatedDuration: z
+//     .number()
+//     .int()
+//     .positive('Estimated duration must be a positive integer'),
+//   status: z.enum(['ACTIVE', 'INACTIVE']).optional(),
+//   businessDetailId: z.string().optional(),
+// })
+
+// export type ReturnType<T = any> = {
+//   data: T | null
+//   status: number
+//   success: boolean
+//   message: string
+//   errorDetail: string | null
+// }
+
+// export async function POST(req: Request) {
+//   try {
+//     logger.info('Starting POST /api/service')
+//     const session = await auth()
+//     if (!session?.user?.id) {
+//       logger.warn('Unauthorized access attempt to create service', {
+//         path: '/api/service',
+//       })
+//       return NextResponse.json(
+//         {
+//           data: null,
+//           status: 401,
+//           success: false,
+//           message: 'Unauthorized',
+//           errorDetail: null,
+//         },
+//         { status: 401 },
+//       )
+//     }
+
+//     const user = await prisma.user.findUnique({
+//       where: { id: session.user.id },
+//       include: { ownedBusinesses: { select: { id: true } } },
+//     })
+//     if (!user) {
+//       logger.warn('User not found', { userId: session.user.id })
+//       return NextResponse.json(
+//         {
+//           data: null,
+//           status: 404,
+//           success: false,
+//           message: 'User not found',
+//           errorDetail: null,
+//         },
+//         { status: 404 },
+//       )
+//     }
+
+//     if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
+//       logger.warn('Forbidden access attempt', {
+//         userId: user.id,
+//         role: user.role,
+//       })
+//       return NextResponse.json(
+//         {
+//           data: null,
+//           status: 403,
+//           success: false,
+//           message: 'Forbidden: Insufficient permissions',
+//           errorDetail: null,
+//         },
+//         { status: 403 },
+//       )
+//     }
+
+//     const body = await req.json()
+//     const parsedData = serviceSchema.parse(body)
+//     logger.info('Parsed service data', { parsedData })
+
+//     if (user.role === 'ADMIN' && parsedData.businessDetailId) {
+//       const ownedBusinessIds = user.ownedBusinesses.map((b) => b.id)
+//       if (!ownedBusinessIds.includes(parsedData.businessDetailId)) {
+//         logger.warn('Unauthorized business access', {
+//           userId: user.id,
+//           businessId: parsedData.businessDetailId,
+//         })
+//         return NextResponse.json(
+//           {
+//             data: null,
+//             status: 403,
+//             success: false,
+//             message: 'Forbidden: You do not have access to this business',
+//             errorDetail: null,
+//           },
+//           { status: 403 },
+//         )
+//       }
+//     }
+
+//     const { content, vector } = await generateServiceEmbedding({
+//       title: parsedData.title,
+//       description: parsedData.description,
+//       estimatedDuration: parsedData.estimatedDuration,
+//     })
+//     logger.info('Generated embedding for service', { title: parsedData.title })
+
+//     const service = await prisma.$transaction(async (tx) => {
+//       logger.info('Starting transaction for service and document creation')
+//       const newService = await tx.service.create({
+//         data: {
+//           title: parsedData.title,
+//           description: parsedData.description,
+//           estimatedDuration: parsedData.estimatedDuration,
+//           status: parsedData.ServiceStatus || 'ACTIVE',
+//           businessDetailId: parsedData.businessDetailId,
+//         },
+//       })
+//       logger.info('Service created', { serviceId: newService.id })
+
+//       await tx.document.create({
+//         data: {
+//           content,
+//           accessLevel:
+//             parsedData.ServiceStatus === 'ACTIVE'
+//               ? [Role.ADMIN, Role.USER, Role.GUEST]
+//               : [Role.ADMIN, Role.SUPER_ADMIN],
+//           embedding: vector,
+//           serviceId: newService.id,
+//           businessId: parsedData.businessDetailId,
+//         },
+//       })
+//       logger.info('Document created', { serviceId: newService.id })
+
+//       return newService
+//     })
+
+//     logger.info('Service and document created successfully', {
+//       serviceId: service.id,
+//     })
+//     return NextResponse.json(
+//       {
+//         data: service,
+//         status: 201,
+//         success: true,
+//         message: 'Service created successfully!',
+//         errorDetail: null,
+//       },
+//       { status: 201 },
+//     )
+//   } catch (error) {
+//     logger.error(
+//       `Failed to create service: ${error instanceof Error ? error.message : 'Unknown error'}`,
+//       {
+//         error,
+//       },
+//     )
+//     return NextResponse.json(
+//       {
+//         data: null,
+//         status: 500,
+//         success: false,
+//         message: 'Failed to create service!',
+//         errorDetail: error instanceof Error ? error.message : 'Unknown error',
+//       },
+//       { status: 500 },
+//     )
+//   }
+// }
 // Fetch all services
 export async function GET(req: NextRequest): Promise<NextResponse<ReturnType>> {
   try {

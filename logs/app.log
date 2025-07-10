@@ -1,0 +1,14 @@
+{"level":"info","message":"Generating embedding for content: Dental Cleaning Routine cleaning Duration: 60 minutes","timestamp":"2025-07-10T16:08:28.334Z"}
+{"level":"info","message":"Embedding generated in 1490ms, vector length: 1536","timestamp":"2025-07-10T16:08:29.827Z"}
+{"level":"info","message":"Success: Content: Dental Cleaning Routine cleaning Duration: 60 minutes, Vector sample: 0.014906593598425388,0.017037974670529366,0.011787977069616318,-0.006145700812339783,-0.030100857838988304...","timestamp":"2025-07-10T16:08:29.829Z"}
+{"level":"info","message":"Generating embedding for content: Dental Cleaning Routine cleaning Duration: 60 minutes","timestamp":"2025-07-10T16:17:33.510Z"}
+{"level":"info","message":"Embedding generated in 1892ms, vector length: 1536","timestamp":"2025-07-10T16:17:35.403Z"}
+{"level":"info","message":"Success: Content: Dental Cleaning Routine cleaning Duration: 60 minutes, Vector sample: 0.014906593598425388,0.017037974670529366,0.011787977069616318,-0.006145700812339783,-0.030100857838988304...","timestamp":"2025-07-10T16:17:35.407Z"}
+{"level":"info","message":"Starting appointment creation","serviceId":"cmcxfqied0058msfyzh16f1gz","timestamp":"2025-07-10T16:23:48.175Z","userId":"cmcxfidww004omsfydedav9kc"}
+{"level":"info","message":"Generating embedding for appointment content: Customer: Krishna Pandey, Email: krisnapande@yahoo.com, Service: Admin Dental Car, Description: But your car teeth here to wash , Date: 2025-07-09T18:15:00.000Z, Time: 03:00 PM, Message: what do you whant","timestamp":"2025-07-10T16:23:48.641Z"}
+{"durationMs":2968,"level":"info","message":"Appointment embedding generated","timestamp":"2025-07-10T16:23:51.609Z","vectorLength":1536,"vectorSample":[0.005157926119863987,0.008065865375101566,0.005597696639597416,-0.003552253358066082,-0.01652718149125576]}
+{"content":"Customer: Krishna Pandey, Email: krisnapande@yahoo.com, Service: Admin Dental Car, Description: But your car teeth here to wash , Date: 2025-07-09T18:15:00.000Z, Time: 03:00 PM, Message: what do you whant","level":"info","message":"Generated embedding for appointment","timestamp":"2025-07-10T16:23:51.610Z"}
+{"level":"info","message":"Starting transaction for appointment and document creation","timestamp":"2025-07-10T16:23:51.849Z"}
+{"appointmentId":"cmcxlkylp0001msorla988mxh","level":"info","message":"Appointment created","timestamp":"2025-07-10T16:23:52.340Z"}
+{"appointmentId":"cmcxlkylp0001msorla988mxh","level":"info","message":"Document created for appointment","timestamp":"2025-07-10T16:23:53.337Z"}
+{"appointmentId":"cmcxlkylp0001msorla988mxh","level":"info","message":"Appointment and document created successfully","timestamp":"2025-07-10T16:23:53.570Z"}

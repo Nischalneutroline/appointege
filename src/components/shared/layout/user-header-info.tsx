@@ -29,6 +29,7 @@ interface User {
 
 export function UserButton({ user }: { user: User | null }) {
   const dispatch = useDispatch()
+
   const reduxState = useSelector((state: RootState) => state.auth)
 
   useEffect(() => {
