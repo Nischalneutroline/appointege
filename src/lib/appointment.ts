@@ -170,7 +170,7 @@
 
 import { prisma } from '@/lib/prisma'
 import { Prisma, Role } from '@prisma/client'
-import logger from '@/lib/logger'
+// import logger from '@/lib/logger'
 import { generateAppointmentEmbedding } from './embeddings/appoinment'
 
 export async function createAppointment(data: {
@@ -189,10 +189,10 @@ export async function createAppointment(data: {
   resourceId?: string
 }) {
   try {
-    logger.info('Starting appointment creation', {
-      serviceId: data.serviceId,
-      userId: data.userId,
-    })
+    // logger.info('Starting appointment creation', {
+    // serviceId: data.serviceId,
+    // userId: data.userId,
+    // })
     const { content, vector } = await generateAppointmentEmbedding({
       customerName: data.customerName,
       email: data.email,
@@ -201,10 +201,10 @@ export async function createAppointment(data: {
       selectedTime: data.selectedTime,
       message: data.message || '',
     })
-    logger.info('Generated embedding for appointment', { content })
+    // logger.info('Generated embedding for appointment', { content })
 
     const appointment = await prisma.$transaction(async (tx) => {
-      logger.info('Starting transaction for appointment and document creation')
+      // logger.info('Starting transaction for appointment and document creation')
       const newAppointment = await tx.appointment.create({
         data: {
           customerName: data.customerName,
@@ -224,7 +224,7 @@ export async function createAppointment(data: {
           updatedAt: new Date(),
         },
       })
-      logger.info('Appointment created', { appointmentId: newAppointment.id })
+      // logger.info('Appointment created', { appointmentId: newAppointment.id })
 
       const service = await tx.service.findUnique({
         where: { id: data.serviceId },
@@ -246,19 +246,19 @@ export async function createAppointment(data: {
           businessId: service.businessDetailId,
         },
       })
-      logger.info('Document created for appointment', {
-        appointmentId: newAppointment.id,
-      })
+      // logger.info('Document created for appointment', {
+      //   appointmentId: newAppointment.id,
+      // })
 
       return newAppointment
     })
 
-    logger.info('Appointment and document created successfully', {
-      appointmentId: appointment.id,
-    })
+    // logger.info('Appointment and document created successfully', {
+    // appointmentId: appointment.id,
+    // })
     return appointment
   } catch (error) {
-    logger.error(
+    console.log(
       `Failed to create appointment: ${error instanceof Error ? error.message : 'Unknown error'}`,
       { error },
     )
