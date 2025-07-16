@@ -54,7 +54,10 @@ const BusinessHours = ({
 }: BusinessHoursProps) => {
   const form = useFormContext()
   const { control, setValue } = form
-  const { fields, append, remove, replace } = useFieldArray({ control, name })
+  const { fields, append, remove, replace } = useFieldArray({
+    control,
+    name, // this now reflects 'businessHours.monday', 'businessHours.tuesday' etc.
+  })
 
   const [applyToAll, setApplyToAll] = useState(false)
   const currentDay = name.split('.').pop()?.toLowerCase() || ''
@@ -66,14 +69,6 @@ const BusinessHours = ({
     ? watchedData?.[manuallySelectedDay] || []
     : watchedData?.[currentDay] || []
 
-  useEffect(() => {
-    if (currentDaySlots.length > 0) {
-      replace(currentDaySlots)
-    } else if (fields.length === 0) {
-      append({ open: '09:00', close: '17:00' })
-    }
-  }, [manuallySelectedDay])
-
   const allDays = [
     'monday',
     'tuesday',
@@ -83,18 +78,6 @@ const BusinessHours = ({
     'saturday',
     'sunday',
   ]
-
-  const handleApplyToAll = (value: boolean) => {
-    setApplyToAll(value)
-    if (value && fields.length > 0 && currentDay && currentDay !== 'default') {
-      const slots = JSON.parse(JSON.stringify(fields))
-      allDays.forEach((day) => {
-        if (day !== currentDay) {
-          setValue(`${baseKey}.${day}`, slots)
-        }
-      })
-    }
-  }
 
   const generateTimeSlots = () => {
     const times = []
@@ -113,6 +96,56 @@ const BusinessHours = ({
   }
 
   const timeSlots = generateTimeSlots()
+  const isBusinessHourField = baseKey === 'businessHours'
+
+  const breakData = form.getValues('breakHours')
+
+  const getMinutes = (time: string) => {
+    const [hours, minutes] = time.split(':').map(Number)
+    return hours * 60 + minutes
+  }
+
+  // Helper: check if a time is in range
+  const isTimeInRange = (time: string, start: string, end: string) => {
+    const t = getMinutes(time)
+    return t > getMinutes(start) && t < getMinutes(end)
+  }
+
+  // Compute times to disable based on break slots
+  const disabledTimes = isBusinessHourField
+    ? allDays.flatMap((day) => {
+        if (manuallySelectedDay && day !== manuallySelectedDay) return []
+
+        const breaks: TimeSlot[] = breakData?.[day] || []
+
+        return breaks.flatMap((slot) => {
+          const disabled: string[] = []
+          for (const time of timeSlots.map((t) => t.value)) {
+            if (
+              isTimeInRange(time, slot.open, slot.close) ||
+              time === slot.open // Also disable the exact break start time
+            ) {
+              disabled.push(time)
+            }
+          }
+          return disabled
+        })
+      })
+    : []
+
+  const handleApplyToAll = (value: boolean) => {
+    setApplyToAll(value)
+    if (value && fields.length > 0 && currentDay && currentDay !== 'default') {
+      const slots = JSON.parse(JSON.stringify(fields))
+      allDays.forEach((day) => {
+        if (day !== currentDay) {
+          setValue(`${baseKey}.${day}`, slots)
+        }
+      })
+    }
+  }
+
+  const usedTimes = currentDaySlots.map((slot) => slot.open)
 
   const handleAddTimeSlot = () => {
     const lastSlot = fields[fields.length - 1] as FieldTimeSlot | undefined
@@ -167,7 +200,11 @@ const BusinessHours = ({
                     </SelectTrigger>
                     <SelectContent>
                       {timeSlots.map((time) => (
-                        <SelectItem key={time.value} value={time.value}>
+                        <SelectItem
+                          key={time.value}
+                          value={time.value}
+                          disabled={disabledTimes.includes(time.value)}
+                        >
                           {time.label}
                         </SelectItem>
                       ))}
