@@ -4,6 +4,7 @@
 import Header from '@/components/shared/layout/header'
 import SidebarDesktop from '@/components/shared/layout/sidebar-desktop'
 import SidebarMobile from '@/components/shared/layout/sidebar-mobile'
+import { cn } from '@/lib/utils'
 
 // import { use, useEffect } from 'react'
 // import { useDispatch } from 'react-redux'
@@ -21,7 +22,11 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
           <Header />
           {/* Main Content */}
           {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1 relative  shadow p-6 pb-0.5  overflow-y-auto md:overflow-hidden">
+          <div
+            className={cn(
+              'flex-1 relative  shadow p-6 pb-0.5  overflow-y-auto md:overflow-hidden',
+            )}
+          >
             {children}
           </div>
         </div>

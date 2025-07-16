@@ -332,7 +332,7 @@ interface FilterDropdownProps<T extends string> {
   filterOptions: (FilterOptionState<T> & { count: number })[]
   activeFilters: T[]
   defaultFilters: T[] // Non-removable filters
-  sliceName: 'appointment' | 'customer' | 'service' // Add more slice names as needed
+  sliceName: 'appointment' | 'customer' | 'service' | 'faq' // Add more slice names as needed
   onDispatch: {
     setActiveFilter: (value: T) => any
     setActiveFilters: (filters: T[]) => any

@@ -123,14 +123,17 @@ model Service {
   updatedAt           DateTime              @updatedAt
   businessDetail      BusinessDetail?       @relation(fields: [businessDetailId], references: [id]) // Link to business
   businessDetailId    String? // Optional foreign key
+  documents       Document[] // Added for RAG
 }
 
 model ServiceAvailability {
   id        String        @id @default(cuid()) // Unique ID
-  service   Service       @relation(fields: [serviceId], references: [id], onDelete: Cascade) // Link to Service
-  serviceId String // Foreign key
+  service   Service?       @relation(fields: [serviceId], references: [id], onDelete: Cascade) // Link to Service
+  serviceId String? // Foreign key
   weekDay   WeekDays // Day of the week (e.g., MONDAY)
   timeSlots ServiceTime[] // Available time slots for this day
+  businessDetail BusinessDetail?  @relation(fields: [businessDetailId], references: [id])
+  businessDetailId String?  
 }
 
 model ServiceTime {
@@ -244,7 +247,23 @@ model Appointment {
   Resource        Resource?                   @relation(fields: [resourceId], references: [id])
   resourceId      String? // Optional resource (e.g., staff)
   reminderOffsets AppointmentReminderOffset[] // Appointment-specific reminders
+  documents       Document[] // Added for RAG
 }
+
+
+model Document {
+  id            String          @id @default(cuid())
+  content       String
+  accessLevel   Role[]
+  embedding     Float[]
+  appointmentId String?
+  appointment   Appointment?    @relation(fields: [appointmentId], references: [id])
+  serviceId     String?
+  service       Service?        @relation(fields: [serviceId], references: [id])
+  businessId    String?
+  business      BusinessDetail? @relation(fields: [businessId], references: [id])
+}
+
 
 // Appointment Status 
 enum AppointmentStatus {
@@ -319,6 +338,8 @@ model BusinessDetail {
   supportBusinessDetail SupportBusinessDetail? // Optional support details
   resources             Resource[] // Staff/resources
   services              Service[] // Services offered
+  serviceAvailability   ServiceAvailability[]
+  documents       Document[] // Added for RAG
 }
 
 model BusinessAddress {
@@ -535,3 +556,5 @@ model Event {
   availability Availability[]
   meetings     Meeting[]
 }
+
+

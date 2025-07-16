@@ -37,7 +37,7 @@ export enum BusinessTimeType {
 }
 // Interface for BusinessTime (Working hours)
 export interface BusinessTime {
-  id: string
+  id?: string
   type: BusinessTimeType
   startTime: string // ISO string for start time
   endTime: string // ISO string for end time
@@ -53,7 +53,7 @@ export interface BusinessAvailability {
 
 // Interface for Holiday (Holidays for business)
 export interface Holiday {
-  id: string
+  id?: string
   holiday: WeekDays // Day of the week
   type: HolidayType // Either GENERAL or SUPPORT
   date?: string // Optional specific date for holiday (if needed)
@@ -61,9 +61,10 @@ export interface Holiday {
 
 // Interface for BusinessAddress (Address for branches of the business)
 export interface BusinessAddress {
-  id: string
+  id?: string
   street: string
   city: string
+  state: string
   country: string
   zipCode: string
   googleMap: string // Google Map URL for the address

@@ -38,6 +38,24 @@ const businessAddressSchema = z.object({
   googleMap: z.string(),
 })
 
+const serviceAvailabilitySchema = z.object({
+  weekDay: z.enum([
+    WeekDays.SUNDAY,
+    WeekDays.MONDAY,
+    WeekDays.TUESDAY,
+    WeekDays.WEDNESDAY,
+    WeekDays.THURSDAY,
+    WeekDays.FRIDAY,
+    WeekDays.SATURDAY,
+  ]),
+  timeSlots: z.array(
+    z.object({
+      startTime: z.string(),
+      endTime: z.string(),
+    }),
+  ),
+})
+
 // Zod schema for BusinessDetail
 export const businessDetailSchema = z.object({
   name: z.string(),
@@ -58,4 +76,5 @@ export const businessDetailSchema = z.object({
       supportEmail: z.string().optional(),
     })
     .optional(),
+  serviceAvailability: z.array(serviceAvailabilitySchema).optional(),
 })

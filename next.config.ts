@@ -23,6 +23,17 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  // experimental: {
+  //   turbo: {
+  //     rules: {
+  //       '*.svg': {
+  //         loaders: ['@svgr/webpack'],
+  //         as: '*.js',
+  //       },
+  //     },
+  //   },
+  // },
   /* config options here */
   webpack(config) {
     // Grab the existing rule that handles SVG imports
@@ -69,23 +80,11 @@ const nextConfig: NextConfig = {
     return config
   },
 
-  experimental: {
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
-  },
-
   // For Build process ignore for now
   typescript: {
     ignoreBuildErrors: true,
-    
   },
-  
+
   eslint: {
     ignoreDuringBuilds: true,
   },
