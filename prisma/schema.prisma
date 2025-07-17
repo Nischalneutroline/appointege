@@ -247,6 +247,7 @@ model AnnouncementOrOffer {
   expiredAt   ExpirationDuration @default(THIRTY_DAYS)
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+  isSent      Boolean  @default(false)
 }
 
 enum Showon {
@@ -280,6 +281,10 @@ model BusinessDetail {
   website                    String?
   address                    BusinessAddress[]
   businessRegistrationNumber String
+  taxId                    String?
+  taxIdFileId                String? 
+  logo                       String? 
+  logoFileId                 String? 
   status                     BusinessStatus         @default(PENDING)
   timeZone                   String?
   user                       User?                  @relation(fields: [businessOwner], references: [id], onDelete: Cascade)
@@ -463,8 +468,11 @@ model Individual {
 }
 
 enum VideoProvider {
-  ZOOM
+   ZOOM
   GOOGLE_MEET
+  MICROSOFT_TEAMS
+  WEBEX
+  GOTO_MEETING
 }
 
 model Meeting {
@@ -506,14 +514,23 @@ model Event {
 }
 
 model Document {
-  id            String          @id @default(cuid())
-  content       String
-  accessLevel   Role[]
-  embedding     Float[]
+  id        String   @id @default(uuid())
+  content   String // Text to be indexed (e.g., "Appointment for haircut at 10 AM")
+  source    String? 
+  accessLevel Role[] // Roles that can access this document
   appointmentId String?
-  appointment   Appointment?    @relation(fields: [appointmentId], references: [id])
-  serviceId     String?
-  service       Service?        @relation(fields: [serviceId], references: [id])
-  businessId    String?
+  appointment Appointment? @relation(fields: [appointmentId], references: [id])
+  embedding   Unsupported("vector(1024)")?
+  serviceId    String?
+  service      Service?     @relation(fields: [serviceId], references: [id])
+   businessId    String?
   business      BusinessDetail? @relation(fields: [businessId], references: [id])
+}
+
+model ConversationState {
+  userId         String   @id
+  flow           String?      // e.g. 'booking', 'cancellation', etc.
+  collectedFields Json?       // Stores partial fields (e.g. {"customerName": "...", "email": "..."})
+  missingFields  String[]     // e.g. ["selectedDate", "selectedTime"]
+  updatedAt      DateTime @updatedAt
 }
