@@ -39,6 +39,8 @@ interface BusinessHoursProps {
   openLabel: string
   endLabel: string
   isDefaultMode: boolean
+  businessHours?: Record<string, TimeSlot[]>
+  onCustomModeActivate?: () => void
   manuallySelectedDay: string | null
 }
 
@@ -50,18 +52,26 @@ const BusinessHours = ({
   openLabel,
   endLabel,
   isDefaultMode,
+  onCustomModeActivate,
   manuallySelectedDay,
+  businessHours,
 }: BusinessHoursProps) => {
   const form = useFormContext()
   const { control, setValue } = form
+  const baseKey = name.split('.')[0] // businessHours or breakHours
+
+  const fieldArrayName = isDefaultMode
+    ? `${baseKey}.default`
+    : `${baseKey}.${manuallySelectedDay}`
+
   const { fields, append, remove, replace } = useFieldArray({
     control,
-    name, // this now reflects 'businessHours.monday', 'businessHours.tuesday' etc.
+    name: fieldArrayName,
+    keyName: 'id', // react-hook-form default
   })
 
   const [applyToAll, setApplyToAll] = useState(false)
   const currentDay = name.split('.').pop()?.toLowerCase() || ''
-  const baseKey = name.split('.')[0] // businessHours or breakHours
 
   const watchedData = useWatch({ name: baseKey, control })
 
@@ -111,28 +121,6 @@ const BusinessHours = ({
     return t > getMinutes(start) && t < getMinutes(end)
   }
 
-  // Compute times to disable based on break slots
-  const disabledTimes = isBusinessHourField
-    ? allDays.flatMap((day) => {
-        if (manuallySelectedDay && day !== manuallySelectedDay) return []
-
-        const breaks: TimeSlot[] = breakData?.[day] || []
-
-        return breaks.flatMap((slot) => {
-          const disabled: string[] = []
-          for (const time of timeSlots.map((t) => t.value)) {
-            if (
-              isTimeInRange(time, slot.open, slot.close) ||
-              time === slot.open // Also disable the exact break start time
-            ) {
-              disabled.push(time)
-            }
-          }
-          return disabled
-        })
-      })
-    : []
-
   const handleApplyToAll = (value: boolean) => {
     setApplyToAll(value)
     if (value && fields.length > 0 && currentDay && currentDay !== 'default') {
@@ -152,12 +140,128 @@ const BusinessHours = ({
     const defaultOpen = lastSlot?.close || '09:00'
     const nextHour = (parseInt(defaultOpen.split(':')[0]) + 1) % 24
     const defaultClose = `${nextHour.toString().padStart(2, '0')}:00`
+
+    if (isDefaultMode && manuallySelectedDay) {
+      onCustomModeActivate?.()
+
+      const cloned = fields.map(({ open, close }) => ({ open, close }))
+      const updated = [...cloned, { open: defaultOpen, close: defaultClose }]
+      setValue(`${baseKey}.${manuallySelectedDay}`, updated)
+
+      // Re-initialize field array state
+      replace(updated)
+      return
+    }
+
     append({ open: defaultOpen, close: defaultClose })
   }
 
+  useEffect(() => {
+    if (manuallySelectedDay) {
+      const existingSlots = watchedData?.[manuallySelectedDay] ?? []
+
+      if (existingSlots.length > 0) {
+        const updated = existingSlots.map((slot: any) => ({
+          id: Math.random().toString(),
+          ...slot,
+        }))
+        setValue(`${baseKey}.${manuallySelectedDay}`, updated, {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: false,
+        })
+        replace(updated)
+      }
+    }
+
+    if (watchedData?.default?.length > 0) {
+      const updated = watchedData.default.map((slot: any) => ({
+        id: Math.random().toString(),
+        ...slot,
+      }))
+      setValue(`${baseKey}.default`, updated, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      })
+      replace(updated)
+    }
+  }, [manuallySelectedDay, isDefaultMode])
+
   const handleRemoveTimeSlot = (index: number) => {
+    if (isDefaultMode && manuallySelectedDay) {
+      onCustomModeActivate?.()
+
+      const cloned = fields.map(({ open, close }) => ({ open, close }))
+      if (cloned.length > 1) {
+        cloned.splice(index, 1)
+        setValue(`${baseKey}.${manuallySelectedDay}`, cloned)
+
+        // Re-initialize field array state
+        replace(cloned)
+      }
+      return
+    }
+
     if (fields.length > 1) remove(index)
   }
+  const selectedDay = manuallySelectedDay || currentDay
+
+  const selectedBusinessSlots: TimeSlot[] = businessHours?.[selectedDay] || []
+  const selectedBreakSlots: TimeSlot[] = breakData?.[selectedDay] || []
+
+  const isServiceHourField = baseKey === 'serviceHours'
+
+  let allowedTimes: string[] = []
+
+  if (isServiceHourField) {
+    // Only allow times within business hours
+    allowedTimes = timeSlots
+      .map((t) => t.value)
+      .filter((time) =>
+        selectedBusinessSlots.some(
+          (slot) =>
+            isTimeInRange(time, slot.open, slot.close) || time === slot.open,
+        ),
+      )
+  }
+
+  // Remove break time slots from allowed times
+  let finalTimeSlots = timeSlots
+  if (isServiceHourField) {
+    finalTimeSlots = timeSlots.filter((t) => {
+      const inAllowed = allowedTimes.includes(t.value)
+      const inBreak = selectedBreakSlots.some(
+        (slot) =>
+          isTimeInRange(t.value, slot.open, slot.close) ||
+          t.value === slot.open,
+      )
+      return inAllowed && !inBreak
+    })
+  }
+
+  // For disabling items in SelectItem
+  const disabledTimes = isServiceHourField
+    ? timeSlots
+        .map((t) => t.value)
+        .filter((time) => !finalTimeSlots.map((t) => t.value).includes(time))
+    : isBusinessHourField
+      ? allDays.flatMap((day) => {
+          if (manuallySelectedDay && day !== manuallySelectedDay) return []
+
+          const breaks: TimeSlot[] = breakData?.[day] || []
+
+          return breaks.flatMap((slot) => {
+            return timeSlots
+              .map((t) => t.value)
+              .filter(
+                (time) =>
+                  isTimeInRange(time, slot.open, slot.close) ||
+                  time === slot.open,
+              )
+          })
+        })
+      : []
 
   return (
     <div className={`flex flex-col gap-4 ${className}`}>
@@ -194,12 +298,27 @@ const BusinessHours = ({
                 name={`${name}.${index}.open`}
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <Select value={value} onValueChange={onChange}>
+                  <Select
+                    value={value}
+                    onValueChange={(val) => {
+                      onChange(val)
+                      if (isDefaultMode && manuallySelectedDay) {
+                        onCustomModeActivate?.()
+
+                        const cloned = fields.map(({ open, close }) => ({
+                          open,
+                          close,
+                        }))
+                        setValue(`${baseKey}.${manuallySelectedDay}`, cloned)
+                        replace(cloned)
+                      }
+                    }}
+                  >
                     <SelectTrigger className="w-56">
                       <SelectValue placeholder="Open Time" />
                     </SelectTrigger>
                     <SelectContent>
-                      {timeSlots.map((time) => (
+                      {finalTimeSlots.map((time) => (
                         <SelectItem
                           key={time.value}
                           value={time.value}
@@ -222,13 +341,32 @@ const BusinessHours = ({
                 name={`${name}.${index}.close`}
                 control={control}
                 render={({ field: { onChange, value } }) => (
-                  <Select value={value} onValueChange={onChange}>
+                  <Select
+                    value={value}
+                    onValueChange={(val) => {
+                      onChange(val)
+                      if (isDefaultMode && manuallySelectedDay) {
+                        onCustomModeActivate?.()
+
+                        const cloned = fields.map(({ open, close }) => ({
+                          open,
+                          close,
+                        }))
+                        setValue(`${baseKey}.${manuallySelectedDay}`, cloned)
+                        replace(cloned)
+                      }
+                    }}
+                  >
                     <SelectTrigger className="w-56">
                       <SelectValue placeholder="Close Time" />
                     </SelectTrigger>
                     <SelectContent>
-                      {timeSlots.map((time) => (
-                        <SelectItem key={time.value} value={time.value}>
+                      {finalTimeSlots.map((time) => (
+                        <SelectItem
+                          key={time.value}
+                          value={time.value}
+                          disabled={disabledTimes.includes(time.value)}
+                        >
                           {time.label}
                         </SelectItem>
                       ))}
@@ -240,22 +378,22 @@ const BusinessHours = ({
 
             <div className="flex gap-2 pt-6">
               {index === 0 && !isDefaultMode && (
-                <Button
+                <button
                   type="button"
                   onClick={handleAddTimeSlot}
-                  variant="outline"
+                  className="rounded-full border border-blue-600 text-blue-600 hover:bg-blue-50 transition"
                 >
-                  <Plus className="h-3 w-3 mr-1" /> Add
-                </Button>
+                  <Plus className="h-3 w-3" strokeWidth={2.5} />
+                </button>
               )}
               {index > 0 && (
-                <Button
+                <button
                   type="button"
                   onClick={() => handleRemoveTimeSlot(index)}
-                  variant="destructive"
+                  className="rounded-full border border-red-600 text-red-600 hover:bg-red-50 transition"
                 >
-                  <Minus className="h-3 w-3 mr-1" /> Remove
-                </Button>
+                  <Minus className="h-3 w-3" strokeWidth={2.5} />
+                </button>
               )}
             </div>
           </div>

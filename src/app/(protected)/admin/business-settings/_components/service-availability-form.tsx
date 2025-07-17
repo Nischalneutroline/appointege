@@ -173,6 +173,13 @@ export const ServiceAvailabilityForm: React.FC<
     return () => subscription.unsubscribe()
   }, [form.watch])
 
+  // Ensure default mode hours are initialized
+  useEffect(() => {
+    if (currentMode === 'default' && !form.getValues('serviceHours.default')) {
+      form.setValue('serviceHours.default', [{ open: '', close: '' }])
+    }
+  }, [currentMode, form])
+
   const onSubmit = async (data: ServiceFormValues) => {
     try {
       setIsLoading(true)
@@ -302,14 +309,14 @@ export const ServiceAvailabilityForm: React.FC<
               />
 
               <BusinessHours
-                key={`service-${manuallySelectedDay}`}
+                key={`service-${manuallySelectedDay || 'default'}`}
                 name={
                   manuallySelectedDay
                     ? `serviceHours.${manuallySelectedDay}`
-                    : 'serviceHours'
+                    : 'serviceHours.default'
                 }
-                label="Service Hours"
                 openLabel="Open Time"
+                label="Service Hours"
                 endLabel="Close Time"
                 isDefaultMode={currentMode === 'default'}
                 isEditMode={true}

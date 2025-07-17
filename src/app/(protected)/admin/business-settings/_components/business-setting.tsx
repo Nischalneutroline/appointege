@@ -19,7 +19,7 @@ const STORAGE_KEY1 = 'business-detail-form'
 const STORAGE_KEY2 = 'business-availability-form'
 
 const BusinessSetting = () => {
-  const businessId = 'cmd1knwcn0004msbwkogvbvx62'
+  const businessId = 'cmd1knwcn0004msbwkogvbvx6'
   const dispatch = useDispatch<AppDispatch>()
   const [data1, setData1] = useState<string | null>(null)
   const [data2, setData2] = useState<string | null>(null)

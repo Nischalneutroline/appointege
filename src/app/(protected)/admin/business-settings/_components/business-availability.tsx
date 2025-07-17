@@ -91,17 +91,10 @@ const BusinessAvailabilityForm = ({
 
   // Load data from API or fallback to default values
   useEffect(() => {
-    const formData = data ? transformBusinessAvailability(data) : defaultValues
-    // Fix breakHours if missing or empty
-    const fixedFormData = {
-      ...formData,
-      breakHours:
-        Object.keys(formData.breakHours || {}).length > 0
-          ? formData.breakHours
-          : defaultValues.breakHours,
-    }
-    console.log(fixedFormData, 'fromData')
-    form.reset(fixedFormData)
+    const transformedData = transformBusinessAvailability(data)
+    console.log(transformedData, 'transformedData')
+    const formData = data ? transformedData : defaultValues
+    form.reset(formData)
   }, [data, form])
 
   // Handle form submit
@@ -109,14 +102,12 @@ const BusinessAvailabilityForm = ({
     console.log(formData, 'Value from the form')
     const selectedDays = new Set<string>()
     for (const range of formData.businessDays) {
-      const startIndex = defaultValues.businessDays.findIndex(
+      const startIndex = formData.businessDays.findIndex(
         (d) => d.from === range.from,
       )
-      const endIndex = defaultValues.businessDays.findIndex(
-        (d) => d.to === range.to,
-      )
+      const endIndex = formData.businessDays.findIndex((d) => d.to === range.to)
       for (let i = startIndex; i <= endIndex; i++) {
-        selectedDays.add(defaultValues.businessDays[i].from)
+        selectedDays.add(formData.businessDays[i].from)
       }
     }
 
@@ -210,6 +201,7 @@ const BusinessAvailabilityForm = ({
           endLabel="Close Time"
           isDefaultMode={currentMode === 'default'}
           isEditMode={manuallySelectedDay !== null}
+          onCustomModeActivate={() => setCurrentMode('custom')}
           manuallySelectedDay={manuallySelectedDay}
         />
 
