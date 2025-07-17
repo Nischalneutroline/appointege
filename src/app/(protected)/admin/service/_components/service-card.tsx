@@ -1,5 +1,10 @@
 import { Pill } from '@/components/ui/pill'
-import { getInitials } from '@/lib/utils'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
   openServiceViewForm,
   openServiceEditForm,
@@ -9,6 +14,9 @@ import React from 'react'
 import { useDispatch } from 'react-redux'
 import { getRandomColor } from '@/lib/color'
 import { Service, ServiceStatus } from '../_types/service'
+import Image from 'next/image'
+import { truncateDescription } from '@/utils/truncateSentence'
+import { formatAvailability } from '@/utils/formatAvailability'
 
 const ServiceCard = ({ item }: { item: Service }) => {
   const dispatch = useDispatch()
@@ -21,60 +29,49 @@ const ServiceCard = ({ item }: { item: Service }) => {
   const variant =
     statusVariants[item.status as keyof typeof statusVariants] || 'default'
 
-  // Format availability as a comma-separated string
-  const formatAvailability = (
-    availability?: Service['serviceAvailability'],
-  ) => {
-    if (!availability || availability.length === 0) return 'Not available'
-    return availability.map((avail) => avail.weekDay).join(', ')
-  }
-
   return (
     <div className="w-full flex flex-col items-stretch bg-white rounded-[10px] border-[1px] border-[#DCE9F9] gap-4">
-      <div className="flex flex-col px-6 pt-6 gap-5">
+      <div className="flex flex-col px-4 pt-4 gap-5">
         {/* Header: Name */}
-        <div className="flex flex-col gap-3">
-          <div className="flex gap-2 items-center">
-            <div
-              className="h-full w-10 p-1.5 font-semibold text-white flex items-center justify-center rounded-[8px]"
-              style={{ backgroundColor: item.color || getRandomColor() }}
-            >
-              <div className="text-lg leading-[71.694%]">
-                {getInitials(item.title)}
-              </div>
-            </div>
-            <div className="h-full flex flex-col">
-              <div className="text-[16px] font-medium text-[#111827]">
-                {item.title || 'Dental Examination'}
-              </div>
-              <div className="flex gap-2 text-xs font-normal">
-                <div className="text-[#78818C]">
-                  {item.description ||
-                    'Comprehensive tooth checkup and oral health assessment.'}
-                </div>
-              </div>
-            </div>
+        <div className="flex flex-col gap-2">
+          <div className="relative w-full h-38">
+            {/* Set explicit height for the container */}
+            <Image
+              src="https://plus.unsplash.com/premium_photo-1681966962522-546f370bc98e?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Service Image"
+              fill // Use fill to take full container size
+              className="object-cover rounded-md rounded-b-none" // Ensure image covers container
+            />
           </div>
-          <Pill variant={variant} withDot>
-            {item.status || 'ACTIVE'}
-          </Pill>
         </div>
+        <div className="h-full flex flex-col">
+          <div className="w-full flex items-center justify-between">
+            <span className="text-lg font-medium text-[#111827]">
+              {item.title || 'Dental Examination'}
+            </span>
+            <Pill variant={variant} withDot>
+              {item.status || 'ACTIVE'}
+            </Pill>
+          </div>
+          <div className="flex gap-2 text-xs font-normal">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="text-[#6B7280] text-sm font-normal leading-[100%] cursor-pointer">
+                    {truncateDescription(item.description)}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="bg-blue-200 text-blue-900 text-sm rounded-md p-2 max-w-xs">
+                  <p>{item.description}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </div>
+
         {/* Duration and Availability */}
         <div className="flex flex-col gap-1.5 text-xs font-medium text-[#111827]">
-          <div className="flex gap-2">
-            <div className="flex items-center justify-center">
-              <Clock
-                className="h-3.5 w-3.5"
-                strokeWidth={2.5}
-                color="#92AAF3"
-              />
-            </div>
-            <div>
-              {item.estimatedDuration
-                ? `${item.estimatedDuration} minutes`
-                : '30 minutes'}
-            </div>
-          </div>
+          {/* Availability: Monday, Wednesday */}
           <div className="flex gap-2">
             <div className="flex items-center justify-center">
               <Calendar
@@ -86,6 +83,21 @@ const ServiceCard = ({ item }: { item: Service }) => {
             <div>
               {formatAvailability(item.serviceAvailability) ||
                 'Monday, Wednesday'}
+            </div>
+          </div>
+          {/* Duration */}
+          <div className="flex gap-2">
+            <div className="flex items-center justify-center">
+              <Clock
+                className="h-3.5 w-3.5"
+                strokeWidth={2.5}
+                color="#92AAF3"
+              />
+            </div>
+            <div className="font-semibold">
+              {item.estimatedDuration
+                ? `${item.estimatedDuration}min`
+                : '30 min'}
             </div>
           </div>
         </div>

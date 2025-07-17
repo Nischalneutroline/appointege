@@ -26,6 +26,7 @@ import {
   setActiveFilter,
   setActiveFilters,
 } from '@/store/slices/serviceslice'
+import ServiceItem from './_components/service-item'
 
 // Memoize columns outside the component to avoid recalculation
 const memoizedColumns = serviceColumns
@@ -35,6 +36,7 @@ const Page = () => {
     isLoading,
     isRefreshing,
     filteredServices,
+
     filterOptions,
     counts,
     hasFetched,
@@ -172,9 +174,7 @@ const Page = () => {
               )}
               onClick={handleRefresh}
               aria-label={
-                isRefreshing
-                  ? 'Refreshing appointments'
-                  : 'Refresh appointments'
+                isRefreshing ? 'Refreshing services' : 'Refresh services'
               }
               aria-busy={isRefreshing}
             >
@@ -187,19 +187,28 @@ const Page = () => {
       <div className="flex-1 h-full min-h-0 rounded-lg overflow-y-auto">
         {isLoading && !hasFetched ? (
           <div className="text-center py-8 text-sm text-gray-500 italic">
-            Loading appointments...
+            Loading services...
           </div>
         ) : searchedService.length > 0 ? (
           <>
             {viewMode === 'list' && (
               <div className="w-full overflow-x-auto">
-                <div className="min-w-[800px]">
+                <div className="space-y-3">
+                  {searchedService.map((item) => (
+                    <ServiceItem
+                      key={item.id}
+                      item={item}
+                      // onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+                {/* <div className="min-w-[800px]">
                   <DataTable
                     columns={memoizedColumns}
                     data={searchedService}
                     rowKey="id"
                   />
-                </div>
+                </div> */}
               </div>
             )}
             {viewMode === 'card' && (
@@ -220,28 +229,28 @@ const Page = () => {
             <div className="flex flex-col items-center gap-2">
               <Image
                 src="/assets/ecommerce.svg"
-                alt="No appointments"
+                alt="No services"
                 width={140}
                 height={140}
               />
               <div className="text-2xl text-[#4F7CFF] font-semibold">
-                No Appointments Found
+                No services Found
               </div>
               <div className="text-[#9F9C9C] text-sm font-medium">
                 {searchQuery ? (
                   <>
-                    No appointments match your search query "{searchQuery}" for{' '}
+                    No services match your search query "{searchQuery}" for{' '}
                     {activeFilter === 'all'
-                      ? 'all appointments'
-                      : `${activeFilter} appointments`}
+                      ? 'all services'
+                      : `${activeFilter} services`}
                     .
                   </>
                 ) : (
                   <>
-                    No appointments found for{' '}
+                    No services found for{' '}
                     {activeFilter === 'all'
-                      ? 'all appointments'
-                      : `${activeFilter} appointments`}
+                      ? 'all services'
+                      : `${activeFilter} services`}
                     .
                   </>
                 )}
@@ -249,10 +258,10 @@ const Page = () => {
                   className="p-1 ml-1 text-blue-600 hover:underline disabled:opacity-50"
                   onClick={handleRefresh}
                   disabled={isRefreshing || isLoading}
-                  aria-label="Retry fetching appointments"
+                  aria-label="Retry fetching services"
                 >
                   Try refreshing
-                </button>{' '}
+                </button>
                 or creating a new appointment.
               </div>
             </div>

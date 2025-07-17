@@ -524,6 +524,7 @@ import {
   setActiveFilter,
   setActiveFilters,
 } from '@/store/slices/customerSlice'
+import CustomerItem from './_component/customer-item'
 import CustomerCard from './_component/customer-card'
 
 // Memoize columns outside the component to avoid recalculation
@@ -692,12 +693,20 @@ const Page = () => {
           <>
             {viewMode === 'list' && (
               <div className="w-full overflow-x-auto">
-                <div className="min-w-[800px]">
+                {/* <div className="min-w-[800px]">
                   <DataTable
                     columns={memoizedColumns}
                     data={searchedCustomers}
                     rowKey="id"
-                  />
+                  /> */}
+                <div className="space-y-3">
+                  {searchedCustomers.map((item) => (
+                    <CustomerItem
+                      key={item.id}
+                      item={item}
+                      // onDelete={handleDelete}
+                    />
+                  ))}
                 </div>
               </div>
             )}

@@ -384,14 +384,14 @@ const FilterDropdown = <T extends string>({
         <Button
           variant="outline"
           className={cn(
-            'h-10 w-[160px] justify-between text-sm font-normal text-gray-500',
+            'h-10 w-auto justify-between text-sm font-normal text-gray-500',
             {
               'text-muted-foreground': activeFilters.length === 0,
             },
           )}
         >
           <Funnel strokeWidth={2.5} size={14} className="text-[#4F7CFF]" />
-          <div className="text-sm font-normal">Select Filters</div>
+          <div className="text-sm font-normal">Filters</div>
           <ChevronDown strokeWidth={2.5} size={14} />
         </Button>
       </DropdownMenuTrigger>

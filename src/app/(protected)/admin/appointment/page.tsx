@@ -928,10 +928,8 @@
 import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import SearchBar from '@/components/shared/layout/search-bar'
 import { RefreshCcw } from 'lucide-react'
-import DataTable from '@/components/table/data-table'
 import { appointmentColumns } from './_data/column'
 import FilterTabs from '@/components/shared/layout/filter-tabs'
-import AppointmentGrid from './_component/appointment-grid'
 import Image from 'next/image'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
@@ -948,11 +946,22 @@ import {
 } from '@/app/(protected)/admin/appointment/_types/appointment'
 import FilterDropdown from '@/components/shared/layout/filter-dropdown'
 import { AppointmentFilterValue } from './_data/data'
+import AppointmentItem from './_component/appointment-item'
+import AppointmentCard from './_component/appointment-card'
 
 // Memoize columns outside the component to avoid recalculation
 const memoizedColumns = appointmentColumns
 
-const Page = () => {
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Page
+ *
+ * Appointment listing page, allowing users to view, filter, search, and refresh
+ * appointments.
+ *
+ * @returns Appointment listing page
+ */
+/*******  aa6d1f39-0d0f-4e7e-9f72-42ce65e813de  *******/ const Page = () => {
   const {
     isLoading,
     isRefreshing,
@@ -1115,13 +1124,21 @@ const Page = () => {
           <>
             {viewMode === 'list' && (
               <div className="w-full overflow-x-auto">
-                <div className="min-w-[800px]">
-                  <DataTable
+                <div className="space-y-3">
+                  {searchedAppointments.map((item) => (
+                    <AppointmentItem
+                      key={item.id}
+                      item={item}
+                      // onDelete={handleDelete}
+                    />
+                  ))}
+                </div>
+                {/* <DataTable
                     columns={memoizedColumns}
                     data={searchedAppointments}
                     rowKey="id"
-                  />
-                </div>
+                  /> */}
+                {/* </div> */}
               </div>
             )}
             {viewMode === 'card' && (
@@ -1132,7 +1149,7 @@ const Page = () => {
                 )}
               >
                 {searchedAppointments.map((item) => (
-                  <AppointmentGrid key={item.id} item={item} />
+                  <AppointmentCard key={item.id} item={item} />
                 ))}
               </div>
             )}

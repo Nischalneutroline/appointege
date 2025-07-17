@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Pill } from '@/components/ui/pill'
 
-import { Button } from '@/components/ui/button'
 import {
   Tooltip,
   TooltipContent,
