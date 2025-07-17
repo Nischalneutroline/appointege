@@ -63,46 +63,46 @@ const formatTime = (dateStr: string): string => {
 }
 
 // --- Transform API response to form values ---
-export const transformBusinessAvailability = (
-  apiData: ApiBusinessData,
-): FormBusinessAvailability => {
-  const businessHours = structuredClone(emptySchedule)
-  const breakHours = structuredClone(emptySchedule)
+  export const transformBusinessAvailability = (
+    apiData: ApiBusinessData,
+  ): FormBusinessAvailability => {
+    const businessHours = structuredClone(emptySchedule)
+    const breakHours = structuredClone(emptySchedule)
 
-  apiData?.businessAvailability?.forEach(({ weekDay, timeSlots }) => {
-    const day = weekDay.toLowerCase()
-    if (!daysOfWeek.includes(day as any)) return
+    apiData?.businessAvailability?.forEach(({ weekDay, timeSlots }) => {
+      const day = weekDay.toLowerCase()
+      if (!daysOfWeek.includes(day as any)) return
 
-    timeSlots.forEach(({ type, startTime, endTime }) => {
-      const slot = { open: formatTime(startTime), close: formatTime(endTime) }
-      if (type === 'WORK') businessHours[day].push(slot)
-      else if (type === 'BREAK') breakHours[day].push(slot)
+      timeSlots.forEach(({ type, startTime, endTime }) => {
+        const slot = { open: formatTime(startTime), close: formatTime(endTime) }
+        if (type === 'WORK') businessHours[day].push(slot)
+        else if (type === 'BREAK') breakHours[day].push(slot)
+      })
     })
-  })
 
-  const selectedDays = daysOfWeek.filter((day) => businessHours[day].length)
-  const businessDays: { from: string; to: string }[] = []
-  let start = selectedDays[0]
-  for (let i = 1; i <= selectedDays.length; i++) {
-    const current = selectedDays[i]
-    const prev = selectedDays[i - 1]
-    const isSequential =
-      daysOfWeek.indexOf(current as any) === daysOfWeek.indexOf(prev) + 1
-    if (!isSequential || !current) {
-      businessDays.push({ from: start, to: prev })
-      start = current
+    const selectedDays = daysOfWeek.filter((day) => businessHours[day].length)
+    const businessDays: { from: string; to: string }[] = []
+    let start = selectedDays[0]
+    for (let i = 1; i <= selectedDays.length; i++) {
+      const current = selectedDays[i]
+      const prev = selectedDays[i - 1]
+      const isSequential =
+        daysOfWeek.indexOf(current as any) === daysOfWeek.indexOf(prev) + 1
+      if (!isSequential || !current) {
+        businessDays.push({ from: start, to: prev })
+        start = current
+      }
+    }
+
+    return {
+      timezone: apiData.timeZone || 'UTC',
+      businessDays: businessDays.length
+        ? businessDays
+        : [{ from: 'monday', to: 'friday' }],
+      businessHours,
+      breakHours,
     }
   }
-
-  return {
-    timezone: apiData.timeZone || 'UTC',
-    businessDays: businessDays.length
-      ? businessDays
-      : [{ from: 'monday', to: 'friday' }],
-    businessHours,
-    breakHours,
-  }
-}
 
 // --- Transform form values to API format ---
 export const transformToBusinessAvailability = (

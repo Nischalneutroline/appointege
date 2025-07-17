@@ -52,6 +52,7 @@ interface BusinessDaysSelectorProps {
   isDefaultMode: boolean
   selectedDays: string[]
   setSelectedDays: (days: string[] | ((prev: string[]) => string[])) => void
+  onCustomModeActivate?: () => void
   manuallySelectedDays?: string | null
   setManuallySelectedDays?: React.Dispatch<React.SetStateAction<string | null>>
 }
@@ -70,6 +71,7 @@ const BusinessDaysSelector = ({
   isDefaultMode,
   selectedDays,
   setSelectedDays,
+  onCustomModeActivate,
   manuallySelectedDays,
   setManuallySelectedDays,
 }: BusinessDaysSelectorProps) => {
@@ -324,6 +326,7 @@ const BusinessDaysSelector = ({
                 setManuallySelectedDays?.(
                   day.value === manuallySelectedDays ? null : day.value,
                 )
+                onCustomModeActivate?.()
               }}
               className={cn(
                 'px-3 py-1.5 rounded-[8px] text-sm font-medium w-16 text-center shadow-sm',

@@ -17,8 +17,12 @@ import {
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DaySchedule } from '@/lib/businessSchema'
-import { transformBusinessToServiceSettings } from '@/lib/business-availability'
+import {
+  transformBusinessAvailability,
+  transformBusinessToServiceSettings,
+} from '@/lib/business-availability'
 import { toast } from 'sonner'
+import ServiceHours from './service-hours'
 
 export interface ServiceFormValues {
   serviceDays: { from: string; to: string }[]
@@ -72,23 +76,25 @@ export const ServiceAvailabilityForm: React.FC<
   const [isLoading, setIsLoading] = useState(false)
 
   // Get business availability time constraints
+  const availability =
+    businessDetail?.businessAvailability ?? businessAvailability ?? []
 
+  const { serviceDays, serviceHours } =
+    transformBusinessToServiceSettings(availability)
+  const { businessHours, breakHours } = transformBusinessAvailability({
+    businessAvailability: businessAvailability || [],
+    timeZone: businessDetail?.timeZone || 'UTC',
+  })
   const form = useForm<ServiceFormValues>({
     defaultValues: {
-      serviceDays: [{ from: 'monday', to: 'friday' }],
-      serviceHours: {},
+      serviceDays: serviceDays,
+      serviceHours: serviceHours,
       isServiceVisible: true,
       isPricingEnabled: false,
       serviceType: 'PHYSICAL',
       ...propDefaultValues,
     },
   })
-
-  const availability =
-    businessDetail?.businessAvailability ?? businessAvailability ?? []
-
-  const { serviceDays, serviceHours } =
-    transformBusinessToServiceSettings(availability)
 
   // Get business days from business availability form
   //   const getBusinessDays = () => {
@@ -232,30 +238,34 @@ export const ServiceAvailabilityForm: React.FC<
       console.log(finalData, 'finalData')
 
       // )
-      if (businessDetail) {
-        dispatch(
-          updateBusinessDetail({
-            id: businessDetail?.id as string,
-            data: finalData,
-          }),
-        )
-      } else {
-        dispatch(
-          createBusinessDetail({
-            data: {
-              ...businessDetailForm,
-              businessAvailability: businessAvailability,
-              serviceAvailability,
-            },
-          }),
-        )
+      try {
+        if (businessDetail) {
+          dispatch(
+            updateBusinessDetail({
+              id: businessDetail?.id as string,
+              data: finalData,
+            }),
+          )
+        } else {
+          dispatch(
+            createBusinessDetail({
+              data: {
+                ...businessDetailForm,
+                businessAvailability: businessAvailability,
+                serviceAvailability,
+              },
+            }),
+          )
+        }
+      } catch (error) {
+        console.error('Failed to save service settings:', error)
+        toast.error('Failed to save service settings')
+      } finally {
+        onSubmitSuccess?.()
       }
-      onSubmitSuccess?.()
     } catch (error) {
       console.error('Failed to save service settings:', error)
       toast.error('Failed to save service settings')
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -305,10 +315,11 @@ export const ServiceAvailabilityForm: React.FC<
                 selectedDays={selectedDays}
                 setSelectedDays={setSelectedDays}
                 manuallySelectedDays={manuallySelectedDay}
+                onCustomModeActivate={() => setCurrentMode('custom')}
                 setManuallySelectedDays={setManuallySelectedDay}
               />
 
-              <BusinessHours
+              <ServiceHours
                 key={`service-${manuallySelectedDay || 'default'}`}
                 name={
                   manuallySelectedDay
@@ -320,7 +331,11 @@ export const ServiceAvailabilityForm: React.FC<
                 endLabel="Close Time"
                 isDefaultMode={currentMode === 'default'}
                 isEditMode={true}
-                manuallySelectedDay={manuallySelectedDay}
+                manuallySelectedDay={manuallySelectedDay || ''}
+                serviceHours={form.getValues('serviceHours')}
+                businessHours={businessHours}
+                breakHours={breakHours}
+                onCustomModeActivate={() => setCurrentMode('custom')}
               />
             </div>
           </div>

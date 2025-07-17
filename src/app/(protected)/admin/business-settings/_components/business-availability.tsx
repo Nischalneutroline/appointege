@@ -186,6 +186,7 @@ const BusinessAvailabilityForm = ({
           selectedDays={selectedDay}
           setSelectedDays={setSelectedDay}
           manuallySelectedDays={manuallySelectedDay}
+          onCustomModeActivate={() => setCurrentMode('custom')}
           setManuallySelectedDays={setManuallySelectedDay}
         />
 

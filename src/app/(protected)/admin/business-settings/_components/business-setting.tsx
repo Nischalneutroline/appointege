@@ -24,7 +24,7 @@ const BusinessSetting = () => {
   const [data1, setData1] = useState<string | null>(null)
   const [data2, setData2] = useState<string | null>(null)
   const [currentMode, setCurrentMode] = useState('business-details')
-  const { businessDetail, isLoading, activeStep } = useSelector(
+  const { businessDetail, isLoading, activeStep, isSaving } = useSelector(
     (state: RootState) => state.business,
   )
 
@@ -137,12 +137,13 @@ const BusinessSetting = () => {
           </button>
         </div>
         <div className="flex flex-col gap-4 overflow-y-auto h-[calc(100vh-260px)]">
-          {currentMode === 'business-details' && isLoading && (
-            <div className="flex justify-center items-center py-10 sm:py-20 text-muted-foreground text-sm">
-              Loading Business Details...
-            </div>
-          )}
-          {currentMode === 'business-details' && !isLoading && (
+          {(currentMode === 'business-details' && isLoading) ||
+            (isSaving && (
+              <div className="flex justify-center items-center py-10 sm:py-20 text-muted-foreground text-sm">
+                Loading Business Details...
+              </div>
+            ))}
+          {currentMode === 'business-details' && !isLoading && !isSaving && (
             <BusinessDetail
               setTab={(tab) => setCurrentMode(tab)}
               data={businessDetail || {}}
@@ -155,20 +156,24 @@ const BusinessSetting = () => {
               Loading Business Availability...
             </div>
           )}
-          {currentMode === 'business-availability' && !isLoading && (
-            <BusinessAvailabilityForm
-              setTab={(tab: string) => setCurrentMode(tab)}
-              data={businessDetail || {}}
-              onBack={handleBack}
-              onSubmitSuccess={handleBusinessAvailabilitySubmitSuccess}
-            />
-          )}
-          {currentMode === 'service-availability' && !isLoading && (
-            <ServiceAvailabilityForm
-              onBack={handleBack}
-              onSubmitSuccess={handleServiceAvailabilitySubmitSuccess}
-            />
-          )}
+          {currentMode === 'business-availability' &&
+            !isLoading &&
+            !isSaving && (
+              <BusinessAvailabilityForm
+                setTab={(tab: string) => setCurrentMode(tab)}
+                data={businessDetail || {}}
+                onBack={handleBack}
+                onSubmitSuccess={handleBusinessAvailabilitySubmitSuccess}
+              />
+            )}
+          {currentMode === 'service-availability' &&
+            !isLoading &&
+            !isSaving && (
+              <ServiceAvailabilityForm
+                onBack={handleBack}
+                onSubmitSuccess={handleServiceAvailabilitySubmitSuccess}
+              />
+            )}
         </div>
       </div>
     </div>
