@@ -3,7 +3,7 @@ import { ZodError } from 'zod'
 
 import { prisma } from '@/lib/prisma'
 import { getBusinessDetailById } from '@/db/businessDetail'
-import { businessDetailSchema } from '@/app/(protected)/admin/business-setting/_schema/schema'
+import { businessDetailSchema } from '@/app/(protected)/admin/business-settings/_schema/schema'
 
 // Create a new business detail
 export async function POST(req: NextRequest) {

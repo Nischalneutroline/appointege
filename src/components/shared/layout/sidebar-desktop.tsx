@@ -449,7 +449,11 @@ export const navLinks = [
   { name: 'Appointments', path: '/admin/appointment', icon: <Calendar /> },
   { name: 'Customers', path: '/admin/customer', icon: <UsersRound /> },
   { name: 'Services', path: '/admin/service', icon: <Wrench /> },
-  { name: 'Business Settings', path: '/admin/settings', icon: <Settings /> },
+  {
+    name: 'Business Settings',
+    path: '/admin/business-settings',
+    icon: <Settings />,
+  },
   { name: 'Supports', path: '/admin/support', icon: <CircleHelp /> },
   { name: 'Reminders', path: '/admin/reminders', icon: <Bell /> },
 ]
