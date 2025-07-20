@@ -54,7 +54,7 @@ const InputField = ({
                 'w-full placeholder:text-sm text-sm rounded-sm ',
                 className,
               )}
-              value={value !== undefined ? value : field.value}
+              value={value ?? field.value ?? ''}
               onChange={onChange || field.onChange}
               {...rest}
             />

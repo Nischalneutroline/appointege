@@ -19,8 +19,9 @@ const STORAGE_KEY1 = 'business-detail-form'
 const STORAGE_KEY2 = 'business-availability-form'
 
 const BusinessSetting = () => {
-  const businessId = 'cmd1knwcn0004msbwkogvbvx6'
   const dispatch = useDispatch<AppDispatch>()
+  const businessId = 'cmd1knwcn0004msbwkogvbvx6'
+
   const [data1, setData1] = useState<string | null>(null)
   const [data2, setData2] = useState<string | null>(null)
   const [currentMode, setCurrentMode] = useState('business-details')
@@ -29,6 +30,8 @@ const BusinessSetting = () => {
   )
 
   useEffect(() => {
+    dispatch(fetchBusinessDetail(businessId))
+
     if (typeof window !== 'undefined') {
       const stored1 = localStorage.getItem(STORAGE_KEY1)
       const stored2 = localStorage.getItem(STORAGE_KEY2)
@@ -37,11 +40,6 @@ const BusinessSetting = () => {
     }
   }, [])
 
-  useEffect(() => {
-    if (businessId) {
-      dispatch(fetchBusinessDetail(businessId))
-    }
-  }, [dispatch])
   const handleBack = useCallback(() => {
     dispatch(setActiveStep('business-settings'))
   }, [dispatch])

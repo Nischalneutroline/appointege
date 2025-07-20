@@ -52,7 +52,7 @@ const BusinessAvailabilityForm = ({
   )
   const [selectedDay, setSelectedDay] = useState<string[]>(['monday'])
   const [manuallySelectedDay, setManuallySelectedDay] = useState<string | null>(
-    null,
+    'monday',
   )
 
   const defaultValues = {
@@ -91,10 +91,17 @@ const BusinessAvailabilityForm = ({
 
   // Load data from API or fallback to default values
   useEffect(() => {
-    const transformedData = transformBusinessAvailability(data)
-    console.log(transformedData, 'transformedData')
-    const formData = data ? transformedData : defaultValues
-    form.reset(formData)
+    if (data && Object.keys(data).length > 0) {
+      const transformedData = transformBusinessAvailability(data)
+      console.log(transformedData, 'transformedData')
+
+      // Ensure fallback if transformation fails
+      const formData = transformedData || defaultValues
+      form.reset(formData)
+    } else {
+      // No data or empty data; fall back to defaults
+      form.reset(defaultValues)
+    }
   }, [data, form])
 
   // Handle form submit

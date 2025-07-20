@@ -8,6 +8,7 @@ import {
   BusinessTime,
   HolidayType,
 } from '@/app/(protected)/admin/business-settings/_types/types'
+import { SupportBusinessDetail } from '@prisma/client'
 
 // --- Types ---
 // ApiTimeSlot is now just an alias for BusinessTime
@@ -19,6 +20,9 @@ type ApiBusinessAvailability = BusinessAvailability
 interface ApiBusinessData {
   businessAvailability?: ApiBusinessAvailability[]
   timeZone?: string
+}
+interface ApiServiceData {
+  businessAvailability?: ApiBusinessAvailability[]
 }
 
 interface FormTimeSlot {
@@ -32,6 +36,11 @@ export interface DaySchedule {
 
 interface FormBusinessAvailability {
   timezone: string
+  businessDays: { from: string; to: string }[]
+  businessHours: DaySchedule
+  breakHours: DaySchedule
+}
+interface FormServiceAvailability {
   businessDays: { from: string; to: string }[]
   businessHours: DaySchedule
   breakHours: DaySchedule
@@ -63,46 +72,46 @@ const formatTime = (dateStr: string): string => {
 }
 
 // --- Transform API response to form values ---
-  export const transformBusinessAvailability = (
-    apiData: ApiBusinessData,
-  ): FormBusinessAvailability => {
-    const businessHours = structuredClone(emptySchedule)
-    const breakHours = structuredClone(emptySchedule)
+export const transformBusinessAvailability = (
+  apiData: ApiBusinessData,
+): FormBusinessAvailability => {
+  const businessHours = structuredClone(emptySchedule)
+  const breakHours = structuredClone(emptySchedule)
 
-    apiData?.businessAvailability?.forEach(({ weekDay, timeSlots }) => {
-      const day = weekDay.toLowerCase()
-      if (!daysOfWeek.includes(day as any)) return
+  apiData?.businessAvailability?.forEach(({ weekDay, timeSlots }) => {
+    const day = weekDay.toLowerCase()
+    if (!daysOfWeek.includes(day as any)) return
 
-      timeSlots.forEach(({ type, startTime, endTime }) => {
-        const slot = { open: formatTime(startTime), close: formatTime(endTime) }
-        if (type === 'WORK') businessHours[day].push(slot)
-        else if (type === 'BREAK') breakHours[day].push(slot)
-      })
+    timeSlots.forEach(({ type, startTime, endTime }) => {
+      const slot = { open: formatTime(startTime), close: formatTime(endTime) }
+      if (type === 'WORK') businessHours[day].push(slot)
+      else if (type === 'BREAK') breakHours[day].push(slot)
     })
+  })
 
-    const selectedDays = daysOfWeek.filter((day) => businessHours[day].length)
-    const businessDays: { from: string; to: string }[] = []
-    let start = selectedDays[0]
-    for (let i = 1; i <= selectedDays.length; i++) {
-      const current = selectedDays[i]
-      const prev = selectedDays[i - 1]
-      const isSequential =
-        daysOfWeek.indexOf(current as any) === daysOfWeek.indexOf(prev) + 1
-      if (!isSequential || !current) {
-        businessDays.push({ from: start, to: prev })
-        start = current
-      }
-    }
-
-    return {
-      timezone: apiData.timeZone || 'UTC',
-      businessDays: businessDays.length
-        ? businessDays
-        : [{ from: 'monday', to: 'friday' }],
-      businessHours,
-      breakHours,
+  const selectedDays = daysOfWeek.filter((day) => businessHours[day].length)
+  const businessDays: { from: string; to: string }[] = []
+  let start = selectedDays[0]
+  for (let i = 1; i <= selectedDays.length; i++) {
+    const current = selectedDays[i]
+    const prev = selectedDays[i - 1]
+    const isSequential =
+      daysOfWeek.indexOf(current as any) === daysOfWeek.indexOf(prev) + 1
+    if (!isSequential || !current) {
+      businessDays.push({ from: start, to: prev })
+      start = current
     }
   }
+
+  return {
+    timezone: apiData.timeZone || 'UTC',
+    businessDays: businessDays.length
+      ? businessDays
+      : [{ from: 'monday', to: 'friday' }],
+    businessHours,
+    breakHours,
+  }
+}
 
 // --- Transform form values to API format ---
 export const transformToBusinessAvailability = (
@@ -289,5 +298,131 @@ export const transformServiceSettingsToApi = (formData: {
     serviceType: formData.serviceType,
     isServiceVisible: formData.isServiceVisible,
     isPricingEnabled: formData.isPricingEnabled,
+  }
+}
+
+export const transformServiceAvailability = (
+  apiData: ApiServiceData,
+): FormServiceAvailability => {
+  const businessHours = structuredClone(emptySchedule)
+  const breakHours = structuredClone(emptySchedule)
+
+  apiData?.businessAvailability?.forEach(({ weekDay, timeSlots }) => {
+    const day = weekDay.toLowerCase()
+    if (!daysOfWeek.includes(day as any)) return
+
+    timeSlots.forEach(({ type, startTime, endTime }) => {
+      const slot = { open: formatTime(startTime), close: formatTime(endTime) }
+      if (type === 'WORK') businessHours[day].push(slot)
+      else if (type === 'BREAK') breakHours[day].push(slot)
+    })
+  })
+
+  const selectedDays = daysOfWeek.filter((day) => businessHours[day].length)
+  const businessDays: { from: string; to: string }[] = []
+  let start = selectedDays[0]
+  for (let i = 1; i <= selectedDays.length; i++) {
+    const current = selectedDays[i]
+    const prev = selectedDays[i - 1]
+    const isSequential =
+      daysOfWeek.indexOf(current as any) === daysOfWeek.indexOf(prev) + 1
+    if (!isSequential || !current) {
+      businessDays.push({ from: start, to: prev })
+      start = current
+    }
+  }
+
+  return {
+    businessDays: businessDays.length
+      ? businessDays
+      : [{ from: 'monday', to: 'friday' }],
+    businessHours,
+    breakHours,
+  }
+}
+
+function generateSupportHolidaysFromServiceDays(serviceDays: string[]) {
+  const allWeekDays = Object.values(WeekDays)
+
+  // Filter days not in serviceDays → holidays
+  const holidays = allWeekDays
+    .filter((day) => !serviceDays.includes(day))
+    .map((day) => ({
+      holiday: day as WeekDays,
+      type: HolidayType.SUPPORT,
+      // no date
+    }))
+
+  return holidays
+}
+
+interface Slot {
+  open: string
+  close: string
+}
+
+export function transformFormToSupportBusinessDetailAPI(
+  formData: any,
+  businessId: string,
+) {
+  const supportAvailability: BusinessAvailability[] = []
+
+  const businessHours = formData?.  businessHours || {}
+  const breakHours = formData?.breakHours || {}
+  const serviceDays: string[] = formData?.serviceDays || []
+
+  const allDays = Object.keys(businessHours)
+
+  allDays.forEach((day) => {
+    // Create WORK timeSlots from businessHours
+    const workSlots = (businessHours[day] || []).map((slot: Slot) => ({
+      startTime: `2000-01-01T${slot.open}:00`,
+      endTime: `2000-01-01T${slot.close}:00`,
+      type: 'WORK',
+    }))
+
+    // Create BREAK timeSlots from breakHours
+    const breakSlots = (breakHours[day] || []).map((slot: Slot) => ({
+      startTime: `2000-01-01T${slot.open}:00`,
+      endTime: `2000-01-01T${slot.close}:00`,
+      type: 'BREAK',
+    }))
+
+    const allSlots = [...workSlots, ...breakSlots]
+
+    if (allSlots.length > 0) {
+      supportAvailability.push({
+        weekDay: WeekDays[day.toUpperCase() as keyof typeof WeekDays],
+        type: AvailabilityType.SUPPORT,
+        timeSlots: allSlots,
+      })
+    }
+  })
+
+  // Derive holidays from days NOT in serviceDays
+  const allWeekDays = Object.values(WeekDays)
+  const derivedHolidays = allWeekDays
+    .filter((day) => !serviceDays.includes(day))
+    .map((holidayDay) => ({
+      holiday: holidayDay,
+      type: HolidayType.SUPPORT,
+    }))
+
+  // Combine with existing holidays from formData, removing any 'id'
+  const existingHolidays = (formData.supportHoliday || []).map(
+    ({ id, ...rest }: any) => rest,
+  )
+
+  const supportHoliday = [...derivedHolidays, ...existingHolidays]
+
+  return {
+    supportBusinessName: formData.supportTeamName,
+    supportEmail: formData.supportEmail,
+    supportPhone: formData.supportNumber,
+    businessId,
+    supportAddress: formData.physicalAddress,
+    supportGoogleMap: formData.googleMap,
+    supportAvailability,
+    supportHoliday,
   }
 }

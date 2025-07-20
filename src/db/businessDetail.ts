@@ -15,6 +15,15 @@ async function getBusinessDetailById(id: string) {
         },
       },
       serviceAvailability: { include: { timeSlots: true } },
+      supportBusinessDetail: {
+        include: {
+          supportAvailability: {
+            include: {
+              timeSlots: true,
+            },
+          },
+        },
+      },
     },
   })
 }

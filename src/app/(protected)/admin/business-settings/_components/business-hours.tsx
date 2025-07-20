@@ -110,7 +110,9 @@ const BusinessHours = ({
 
   const breakData = form.getValues('breakHours')
 
-  const getMinutes = (time: string) => {
+  const getMinutes = (time?: string) => {
+    if (!time || typeof time !== 'string' || !time.includes(':')) return 0
+
     const [hours, minutes] = time.split(':').map(Number)
     return hours * 60 + minutes
   }
@@ -156,37 +158,77 @@ const BusinessHours = ({
     append({ open: defaultOpen, close: defaultClose })
   }
 
+  // useEffect(() => {
+  //   if (manuallySelectedDay) {
+  //     const existingSlots = watchedData?.[manuallySelectedDay] ?? []
+
+  //     if (existingSlots.length > 0) {
+  //       const updated = existingSlots.map((slot: any) => ({
+  //         id: Math.random().toString(),
+  //         ...slot,
+  //       }))
+  //       setValue(`${baseKey}.${manuallySelectedDay}`, updated, {
+  //         shouldDirty: false,
+  //         shouldTouch: false,
+  //         shouldValidate: false,
+  //       })
+  //       replace(updated)
+  //     }
+  //   }
+
+  //   if (watchedData?.default?.length > 0) {
+  //     const updated = watchedData.default.map((slot: any) => ({
+  //       id: Math.random().toString(),
+  //       ...slot,
+  //     }))
+  //     setValue(`${baseKey}.default`, updated, {
+  //       shouldDirty: false,
+  //       shouldTouch: false,
+  //       shouldValidate: false,
+  //     })
+  //     replace(updated)
+  //   }
+  // }, [manuallySelectedDay, isDefaultMode])
   useEffect(() => {
-    if (manuallySelectedDay) {
-      const existingSlots = watchedData?.[manuallySelectedDay] ?? []
+    if (isDefaultMode) {
+      const defaultSlots = watchedData?.default ?? []
+      const updated =
+        defaultSlots.length > 0
+          ? defaultSlots.map((slot: any) => ({
+              id: Math.random().toString(),
+              ...slot,
+            }))
+          : [
+              {
+                id: Math.random().toString(),
+                open: '09:00',
+                close: '17:00',
+              },
+            ]
 
-      if (existingSlots.length > 0) {
-        const updated = existingSlots.map((slot: any) => ({
-          id: Math.random().toString(),
-          ...slot,
-        }))
-        setValue(`${baseKey}.${manuallySelectedDay}`, updated, {
-          shouldDirty: false,
-          shouldTouch: false,
-          shouldValidate: false,
-        })
-        replace(updated)
-      }
-    }
-
-    if (watchedData?.default?.length > 0) {
-      const updated = watchedData.default.map((slot: any) => ({
-        id: Math.random().toString(),
-        ...slot,
-      }))
       setValue(`${baseKey}.default`, updated, {
         shouldDirty: false,
         shouldTouch: false,
         shouldValidate: false,
       })
+
+      replace(updated)
+    } else if (manuallySelectedDay && watchedData?.[manuallySelectedDay]) {
+      const slots = watchedData[manuallySelectedDay]
+      const updated = slots.map((slot: any) => ({
+        id: Math.random().toString(),
+        ...slot,
+      }))
+
+      setValue(`${baseKey}.${manuallySelectedDay}`, updated, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: false,
+      })
+
       replace(updated)
     }
-  }, [manuallySelectedDay, isDefaultMode])
+  }, [isDefaultMode, manuallySelectedDay])
 
   const handleRemoveTimeSlot = (index: number) => {
     if (isDefaultMode && manuallySelectedDay) {
@@ -295,7 +337,7 @@ const BusinessHours = ({
                 {openLabel} <AlarmClock className="w-4 h-4 text-[#6AA9FF]" />
               </span>
               <Controller
-                name={`${name}.${index}.open`}
+                name={`${fieldArrayName}.${index}.open`}
                 control={control}
                 render={({ field: { onChange, value } }) => (
                   <Select
@@ -338,11 +380,11 @@ const BusinessHours = ({
                 {endLabel} <AlarmClock className="w-4 h-4 text-[#6AA9FF]" />
               </span>
               <Controller
-                name={`${name}.${index}.close`}
+                name={`${fieldArrayName}.${index}.close`}
                 control={control}
                 render={({ field: { onChange, value } }) => (
                   <Select
-                    value={value}
+                    value={value || `${baseKey}.${manuallySelectedDay}.close`}
                     onValueChange={(val) => {
                       onChange(val)
                       if (isDefaultMode && manuallySelectedDay) {

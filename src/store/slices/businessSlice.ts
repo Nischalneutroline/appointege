@@ -121,6 +121,23 @@ export interface Holiday {
   supportBusinessDetailId?: string
 }
 
+interface SupportBusinessDetail {
+  id: string
+  supportBusinessName: string
+  supportEmail: string
+  supportPhone: string
+  supportGoogleMap?: string
+  supportAddress: string
+  supportAvailability: BusinessAvailability[]
+  supportHoliday: Holiday[]
+  businessId: string
+  isLoading: false
+  isSaving: false
+  error: null
+  message: null
+  success: false
+}
+
 export interface BusinessDetail {
   id?: string
   name: string
@@ -135,6 +152,7 @@ export interface BusinessDetail {
   address: BusinessAddress[]
   businessAvailability: BusinessAvailability[]
   serviceAvailability: ServiceAvailability[]
+  supportBusinessDetail?: SupportBusinessDetail
   holiday: Holiday[]
   createdAt?: string
   updatedAt?: string
@@ -248,6 +266,7 @@ const transformBusinessDetail = (data: any): BusinessDetail => ({
   address: data.address || [],
   businessAvailability: data.businessAvailability || [],
   holiday: data.holiday || [],
+  supportBusinessDetail: data.supportBusinessDetail || [],
   createdAt: data.createdAt,
   updatedAt: data.updatedAt,
   businessOwner: data.businessOwner,
@@ -258,7 +277,7 @@ const transformBusinessDetail = (data: any): BusinessDetail => ({
 // Async Thunks
 export const fetchBusinessDetail = createAsyncThunk<
   BusinessDetail,
-  string | undefined,
+  string,
   { rejectValue: { error: string; message: string } }
 >('businessSettings/fetch', async (businessId, { rejectWithValue }) => {
   try {
@@ -317,6 +336,57 @@ export const updateBusinessDetail = createAsyncThunk<
     )
     return rejectWithValue({
       error: 'Failed to update business details',
+      message: err.response?.data?.message || 'An error occurred',
+    })
+  }
+})
+
+// Support Business Detail Thunk
+export const updateSupportBusinessDetail = createAsyncThunk<
+  SupportBusinessDetail,
+  { id: string; data: Partial<SupportBusinessDetail> },
+  { rejectValue: { error: string; message: string } }
+>('supportBusiness/update', async ({ id, data }, { rejectWithValue }) => {
+  try {
+    const response = await axiosApi.put<{ data: SupportBusinessDetail }>(
+      `/api/supportBusinessDetail/${id}`,
+      data,
+    )
+    toast.success('Support business details updated successfully')
+    return response.data.data
+  } catch (error) {
+    const err = error as AxiosError<{ error: string; message: string }>
+    toast.error(
+      err.response?.data?.message ||
+        'Failed to update support business details',
+    )
+    return rejectWithValue({
+      error: 'Failed to update support business details',
+      message: err.response?.data?.message || 'An error occurred',
+    })
+  }
+})
+
+export const createSupportBusinessDetail = createAsyncThunk<
+  SupportBusinessDetail,
+  { data: Partial<SupportBusinessDetail> },
+  { rejectValue: { error: string; message: string } }
+>('supportBusiness/create', async ({ data }, { rejectWithValue }) => {
+  try {
+    const response = await axiosApi.post<{ data: SupportBusinessDetail }>(
+      `/api/supportBusinessDetail`,
+      data,
+    )
+    toast.success('Support business details created successfully')
+    return response.data.data
+  } catch (error) {
+    const err = error as AxiosError<{ error: string; message: string }>
+    toast.error(
+      err.response?.data?.message ||
+        'Failed to create support business details',
+    )
+    return rejectWithValue({
+      error: 'Failed to create support business details',
       message: err.response?.data?.message || 'An error occurred',
     })
   }
@@ -458,6 +528,51 @@ const businessDetailSlice = createSlice({
     builder.addCase(updateBusinessDetail.rejected, (state, action) => {
       state.isSaving = false
       state.error = action.payload?.error || 'Failed to update business details'
+      state.message = action.payload?.message || null
+      state.success = false
+    })
+    // Update Support Business Detail
+    builder.addCase(updateSupportBusinessDetail.pending, (state) => {
+      state.isSaving = true
+      state.error = null
+    })
+    builder.addCase(updateSupportBusinessDetail.fulfilled, (state, action) => {
+      if (state.businessDetail) {
+        state.isSaving = false
+        state.businessDetail.supportBusinessDetail = action.payload
+        state.success = true
+      }
+    })
+    builder.addCase(updateSupportBusinessDetail.rejected, (state, action) => {
+      state.isSaving = false
+      state.error =
+        action.payload?.error || 'Failed to update support business details'
+      state.message = action.payload?.message || null
+      state.success = false
+    })
+    // Create Support Business Detail
+    builder.addCase(createSupportBusinessDetail.pending, (state) => {
+      state.isSaving = true
+      state.error = null
+      state.message = null
+    })
+    builder.addCase(createSupportBusinessDetail.fulfilled, (state, action) => {
+      if (state.businessDetail) {
+        state.isSaving = false
+        state.businessDetail.supportBusinessDetail = action.payload
+        state.success = true
+      } else {
+        state.isSaving = false
+        state.error =
+          action.payload?.error || 'Failed to create support business details'
+        state.message = action.payload?.message || null
+        state.success = false
+      }
+    })
+    builder.addCase(createSupportBusinessDetail.rejected, (state, action) => {
+      state.isSaving = false
+      state.error =
+        action.payload?.error || 'Failed to create support business details'
       state.message = action.payload?.message || null
       state.success = false
     })

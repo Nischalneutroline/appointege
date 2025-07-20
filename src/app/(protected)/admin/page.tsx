@@ -1,6 +1,7 @@
 'use client'
 
 import { fetchAppointments } from '@/store/slices/appointmentSlice'
+import { fetchBusinessDetail } from '@/store/slices/businessSlice'
 import { fetchCustomers } from '@/store/slices/customerSlice'
 import { fetchServices } from '@/store/slices/serviceslice'
 import { AppDispatch } from '@/store/store'

@@ -687,26 +687,35 @@ const PhoneField = ({
         const country = countryOptions.find((c) => c.dialCode === dialCode)
         if (country) {
           setSelectedCountry(country)
-          setPhoneNumber(input) // Keep space separator
+          setPhoneNumber(input)
           return
         }
       }
-      // Fallback to parsing with libphonenumber-js
-      try {
-        const parsed = parsePhoneNumber(input)
-        if (parsed && parsed.country) {
-          const country = countryOptions.find((c) => c.code === parsed.country)
-          if (country) {
-            setSelectedCountry(country)
-            setPhoneNumber(`${country.dialCode} ${parsed.nationalNumber}`)
-            return
+
+      // Only parse if input length is reasonable (e.g. > 3 characters)
+      if (input.length > 3) {
+        try {
+          const parsed = parsePhoneNumber(input)
+          if (parsed && parsed.country) {
+            const country = countryOptions.find(
+              (c) => c.code === parsed.country,
+            )
+            if (country) {
+              setSelectedCountry(country)
+              setPhoneNumber(`${country.dialCode} ${parsed.nationalNumber}`)
+              return
+            }
           }
+        } catch (err: any) {
+          if (err.name !== 'ParseError') {
+            console.error('Phone number parsing error:', err)
+          }
+          // Ignore ParseError: TOO_SHORT
         }
-      } catch (err) {
-        console.error('Phone number parsing error:', err)
       }
     }
-    // Set default country (Nepal) if no value
+
+    // Default country fallback
     if (!selectedCountry && !value) {
       const defaultCountry = countryOptions.find((c) => c.code === 'NP')
       if (defaultCountry) {

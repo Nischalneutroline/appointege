@@ -65,6 +65,11 @@ const ServiceHours = ({
 }: ServiceHoursProps) => {
   const form = useFormContext()
   const { control, setValue } = form
+  const watchedValues = useWatch({
+    control,
+    name: name, // e.g., 'serviceHours.monday'
+    defaultValue: [],
+  })
   const baseKey = name.split('.')[0] // serviceHours or breakHours
 
   const fieldArrayName = isDefaultMode

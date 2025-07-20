@@ -11,10 +11,13 @@ import {
   List,
   ShieldUser,
 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Form, FormProvider, useForm } from 'react-hook-form'
 import CustomerInformation from './_components/customer-info'
 import FaqSection from './_components/faqs'
+import { useDispatch } from 'react-redux'
+import { fetchBusinessDetail } from '@/store/slices/businessSlice'
+import { AppDispatch } from '@/store/store'
 
 const TabInfo = [
   {
@@ -122,6 +125,12 @@ const TabButton = ({
 
 const Page = () => {
   const [selectedTab, setSelectedTab] = useState('contact-info')
+  const businessId = 'cmd5ezcj90000ur0dg4km9om0'
+  const dispatch = useDispatch<AppDispatch>()
+
+  useEffect(() => {
+    dispatch(fetchBusinessDetail(businessId))
+  }, [dispatch, businessId])
 
   return (
     <div className="flex flex-col w-full gap-4">

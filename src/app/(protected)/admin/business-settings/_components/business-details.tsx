@@ -104,6 +104,8 @@ const BusinessDetail = ({
   onSubmitSuccess?: () => void
 }) => {
   const dispatch = useDispatch<AppDispatch>()
+
+
   const defaultValues = {
     businessName: data?.name || '',
     industry: data?.industry || '',
@@ -141,12 +143,12 @@ const BusinessDetail = ({
         phone: data.phone || '',
         businessType: data.businessType || '',
         website: data.website || '',
-        city: address.city || '',
-        street: address.street || '',
-        state: address.state || '',
-        zipCode: address.zipCode || '',
-        country: address.country || '',
-        googleMap: address.googleMap || '',
+        city: data.address?.city || '',
+        street: data.address?.street || '',
+        state: data.address?.state || '',
+        zipCode: data.address?.zipCode || '',
+        country: data.address?.country || '',
+        googleMap: data.address?.googleMap || '',
         registrationNumber:
           data.businessRegistrationNumber || data.registrationNumber || '',
         taxId: data.taxId || '',

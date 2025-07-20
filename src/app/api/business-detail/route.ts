@@ -145,6 +145,7 @@ export async function GET() {
         },
         serviceAvailability: { include: { timeSlots: true } },
         holiday: true,
+        supportBusinessDetail: true,
       },
     })
 
