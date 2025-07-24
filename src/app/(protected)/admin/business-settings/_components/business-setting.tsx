@@ -24,7 +24,7 @@ const STORAGE_KEY2 = 'business-availability-form'
 
 const BusinessSetting = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const businessId = 'cmdh0t98t0001ur35fehpq4ej'
+  const businessId = 'cmdh0t98t0001ur35fehpq4ej0'
   // Create React state to hold the live form data
 
   const [data1, setData1] = useState<string | null>(null)
@@ -134,7 +134,7 @@ const BusinessSetting = () => {
                 ? 'text-blue-600'
                 : 'text-gray-600 cursor-not-allowed',
             )}
-            onClick={() => setCurrentMode('service-availability')}
+            // onClick={() => setCurrentMode('service-availability')}
           >
             Service Availability
           </button>

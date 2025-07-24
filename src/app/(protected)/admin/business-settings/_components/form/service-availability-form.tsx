@@ -131,14 +131,14 @@ const ServiceAvailabilityForm = ({
     }
     // 2. Use businessAvailabilityForm from Redux if available
     else if (businessAvailabilityForm) {
-      defaults.serviceAvailability = (businessAvailabilityValues ?? []).map(
-        (d: string) => toWeekDay(d as WeekDays),
-      )
+      defaults.serviceAvailability = businessAvailabilityValues ?? []
 
       weekDays.forEach((day) => {
         defaults.serviceDays[day] = businessHours?.[day] ?? []
         defaults.breakHours[day] = breakHours?.[day] ?? []
       })
+      console.log(defaults, 'defa')
+      return defaults
     }
     // 3. Fallback: hardcoded defaults (Mon-Fri, 9-5)
     else {
