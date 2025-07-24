@@ -3,6 +3,8 @@ import { ZodError } from 'zod'
 
 import { prisma } from '@/lib/prisma'
 import { getBusinessDetailById } from '@/db/businessDetail'
+
+import { Prisma, WeekDays } from '@prisma/client'
 import { businessDetailSchema } from '@/app/(protected)/admin/business-settings/_schema/schema'
 
 // Create a new business detail
@@ -19,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     if (existingBusiness) {
       return NextResponse.json(
-        { error: 'Business with this email already exists!' },
+        { message: 'Business with this email already exists!', success: false },
         { status: 400 },
       )
     }
@@ -33,6 +35,8 @@ export async function POST(req: NextRequest) {
         website: parsedData.website,
         businessRegistrationNumber: parsedData.businessRegistrationNumber,
         status: parsedData.status,
+        businessOwner: parsedData.businessOwner,
+        timeZone: parsedData.timeZone,
         address: {
           create: parsedData.address.map((address) => ({
             street: address.street,
@@ -55,6 +59,17 @@ export async function POST(req: NextRequest) {
             },
           })),
         },
+        serviceAvailability: {
+          create: parsedData.serviceAvailability?.map((availability) => ({
+            weekDay: availability.weekDay as WeekDays,
+            timeSlots: {
+              create: availability.timeSlots.map((slot) => ({
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+              })),
+            },
+          })),
+        },
         holiday: {
           create: parsedData.holiday?.map((holiday) => ({
             holiday: holiday.holiday,
@@ -70,30 +85,48 @@ export async function POST(req: NextRequest) {
             timeSlots: true,
           },
         },
+        serviceAvailability: { include: { timeSlots: true } },
         holiday: true,
       },
     })
 
     if (!newBusiness) {
       return NextResponse.json(
-        { error: 'Failed to create business' },
+        { message: 'Failed to create business!', success: false },
         { status: 500 },
       )
     }
 
     return NextResponse.json(
-      { message: 'Business created successfully!', business: newBusiness },
+      {
+        data: newBusiness,
+        success: true,
+        message: 'Business created successfully!',
+      },
       { status: 201 },
     )
   } catch (error) {
+    console.log(' error:', error)
+    if (error instanceof Prisma.PrismaClientValidationError) {
+      console.log('Validation error:', error)
+      // Handle the validation error specifically
+      return {
+        error: 'Validation failed',
+        details: error, // or use error.stack for full stack trace
+      }
+    }
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors[0].message },
+        {
+          message: 'Validation failed!',
+          error: error,
+          success: false,
+        },
         { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: 'Internal server error', detail: error },
+      { message: 'Failed to create business!', success: false, error: error },
       { status: 500 },
     )
   }
@@ -110,22 +143,50 @@ export async function GET() {
             timeSlots: true,
           },
         },
+        serviceAvailability: { include: { timeSlots: true } },
         holiday: true,
+        services: {
+          include: {
+            serviceAvailability: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
       },
     })
 
     if (businessDetails.length === 0) {
       return NextResponse.json(
-        { error: 'No business details found' },
+        { message: 'No business details found!', success: false },
         { status: 404 },
       )
     }
-
-    return NextResponse.json(businessDetails, { status: 200 })
-  } catch (error) {
-    console.error('Error fetching business details:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch business details', details: error },
+      {
+        data: businessDetails,
+        success: true,
+        message: 'Business fetched successfully!',
+      },
+      { status: 200 },
+    )
+  } catch (error) {
+    console.log(' error:', error)
+    if (error instanceof Prisma.PrismaClientValidationError) {
+      console.log('Validation error:', error)
+      // Handle the validation error specifically
+      return {
+        error: 'Validation failed',
+        details: error, // or use error.stack for full stack trace
+      }
+    }
+    return NextResponse.json(
+      {
+        message: 'Failed to fetch business details!',
+        success: false,
+        error: error,
+      },
       { status: 500 },
     )
   }

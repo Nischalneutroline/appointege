@@ -21,7 +21,7 @@ import React from 'react'
 
 interface SelectFieldProps {
   name: string
-  label: string
+  label?: string
   placeholder?: string
   options: { value: string; label: string }[]
   className?: string

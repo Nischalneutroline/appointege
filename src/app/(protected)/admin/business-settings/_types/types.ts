@@ -37,7 +37,7 @@ export enum BusinessTimeType {
 }
 // Interface for BusinessTime (Working hours)
 export interface BusinessTime {
-  id: string
+  id?: string
   type: BusinessTimeType
   startTime: string // ISO string for start time
   endTime: string // ISO string for end time

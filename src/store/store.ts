@@ -6,6 +6,7 @@ import viewReducer from './slices/viewSlice'
 import appointmentReducer from './slices/appointmentSlice'
 import serviceReducer from './slices/serviceslice'
 import customerReducer from './slices/customerSlice'
+import businessReducer from './slices/businessSlice'
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     appointment: appointmentReducer,
     service: serviceReducer,
     customer: customerReducer,
+    business: businessReducer,
   },
 })
 
