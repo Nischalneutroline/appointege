@@ -31,12 +31,13 @@ model User {
   FAQ            FAQ[]
   Ticket         Ticket[]
   individual     Individual?
-  events         Event[]
   businessAdmins BusinessAdmin[] // Admins for businesses
   lastActive     DateTime         @default(now())
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
   BusinessDetail BusinessDetail[]
+    ratings       Rating[]  @relation("UserRatings") // Ratings given by this user for services.
+    @@index([name])
 }
 
 model Account {
@@ -91,14 +92,18 @@ model Address {
   zipCode String
   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId  String @unique
+  individualId String?     @unique
+  individual   Individual? @relation(fields: [individualId], references: [id])
 }
 
 model Service {
   id                  String                @id @default(cuid())
   title               String
   description         String
+   imageUrl            String?
+  imageUrlFileId      String?
   createdAt           DateTime              @default(now())
-  status              Status                @default(ACTIVE)
+  status              Status                 @default(ACTIVE)
   estimatedDuration   Int
   serviceAvailability ServiceAvailability[]
   appointments        Appointment[]
@@ -107,7 +112,13 @@ model Service {
   updatedAt           DateTime              @updatedAt
   businessDetail      BusinessDetail?       @relation(fields: [businessDetailId], references: [id])
   businessDetailId    String?
-  documents           Document[] // Added for RAG
+   individual           Individual? @relation(fields: [individualId], references: [id])       
+  individualId        String?              
+  isMultiResource     Boolean               @default(false) // True if multiple resources can handle the service simultaneously.
+  shareableLinks      ShareableLink[] // Links for sharing specific or all time slots.
+  ratings             Rating[] // Customer ratings for this service.
+   meetings           Meeting[]
+   documents          Document[]
 }
 
 model ServiceAvailability {
@@ -124,6 +135,7 @@ model ServiceTime {
   serviceAvailabilityId String
   startTime             String
   endTime               String
+  shareableLinks        ShareableLink[] // Links for sharing this specific time slot.
 }
 
 enum Status {
@@ -224,7 +236,9 @@ model Appointment {
   Resource        Resource?                   @relation(fields: [resourceId], references: [id])
   resourceId      String?
   reminderOffsets AppointmentReminderOffset[]
-  documents       Document[] // Added for RAG
+    meeting        Meeting[]
+  shareableLinks  ShareableLink[] // Links for sharing this appointment's time slot.
+  documents        Document[] // Link to indexed documents
 }
 
 enum AppointmentStatus {
@@ -449,70 +463,139 @@ model Resource {
   business     BusinessDetail @relation(fields: [businessId], references: [id], onDelete: Cascade)
   services     Service[]
   appointments Appointment[]
+  shareableLinks ShareableLink[] // Links for sharing this resource's time slots.
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
 
+// -------- Individual
+
 model Individual {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  bio             String?
-  position        String
-  profileImage    String?
-  country         String
-  zoomAccessToken String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id])
-  events          Event[]
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  bio            String?
+  position       String     // e.g. "Product Designer", "Marketing Coach"
+  profileImage   String?
+  imageFileId    String?
+  country        String 
+  timezone      String  @default("UTC")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
+  services        Service[]  
+  videoIntegrations VideoIntegration[]
+  company        String?  // Organization they work for
+  website        String?  // Personal/company website
+  linkedinUrl   String?
+  address         Address?  
+  addressId       Int?       @unique // Address ID.
+  experiences     Experience[] // Past experiences or certifications for credibility.
 }
 
+// Stores past experiences or certifications for an individual.
+model Experience {
+  id            String     @id @default(cuid()) // Unique ID for the experience.
+  individualId  String // Individual ID.
+  individual    Individual @relation(fields: [individualId], references: [id], onDelete: Cascade) // Links to the individual.
+  company       String? // Optional company name (e.g., "Freelance" or "Google").
+  role          String // Role (e.g., "Senior Consultant").
+  description   String? // Optional description of responsibilities or achievements.
+  startDate     String? // Optional start date.
+  endDate       String? // Optional end date, null if ongoing.
+  isCertification Boolean  @default(false) // True if this is a certification (e.g., "Certified Scrum Master").
+  createdAt     DateTime @default(now()) // Creation timestamp.
+  updatedAt     DateTime @updatedAt // Last updated timestamp.
+}
+
+
 enum VideoProvider {
-   ZOOM
+  ZOOM
   GOOGLE_MEET
   MICROSOFT_TEAMS
   WEBEX
   GOTO_MEETING
 }
 
+model VideoIntegration {
+  id                  String        @id @default(cuid())
+  individualId        String
+  provider            VideoProvider
+  accessToken         String
+  refreshToken        String?
+  expiresAt           DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  individual          Individual    @relation(fields: [individualId], references: [id])
+  
+  @@unique([individualId, provider])
+}
+
+enum EventType {
+  ONE_TO_ONE
+  GENERAL
+}
+
+
+// Represents a shareable link for booking time slots or viewing availability.
+model ShareableLink {
+  id              String        @id @default(cuid()) // Unique ID for the link.
+  location        String       // e.g. Zoom, Google Meet
+  slug            String        @unique // Unique URL slug (e.g., "/link/abc123").
+  type           EventType       
+  appointmentId   String? // Appointment ID, if linked to a specific appointment.
+  appointment     Appointment?  @relation(fields: [appointmentId], references: [id], onDelete: Cascade) // Links to the appointment.
+  serviceId       String? // Service ID.
+  service         Service?      @relation(fields: [serviceId], references: [id], onDelete: Cascade) // Links to the service.
+  resourceId      String? // Resource ID, for multi-resource services.
+  resource        Resource?     @relation(fields: [resourceId], references: [id], onDelete: Cascade) // Links to the resource.
+  serviceTimeId   String? // Time slot ID, for single-slot links.
+  serviceTime     ServiceTime?  @relation(fields: [serviceTimeId], references: [id], onDelete: Cascade) // Links to the time slot.
+  date            DateTime? // Specific date for the link (e.g., for DAILY_SLOTS).
+  dateRangeEnd    DateTime? // End date for multi-day links (e.g., for MULTI_DAY_SLOTS).
+  linkType        LinkType      @default(SINGLE_SLOT) // Type of link (SINGLE_SLOT, DAILY_SLOTS, MULTI_DAY_SLOTS).
+  metaTitle       String? // SEO title for the link (e.g., "Book a Coaching Session").
+  metaDescription String? // SEO description for the link.
+  createdAt       DateTime      @default(now()) // Creation timestamp.
+  expiresAt       DateTime? // Optional expiration date for the link.
+  videoUrl        String?       // For one-to-one direct link
+}
+
+// Type of shareable link.
+enum LinkType {
+  SINGLE_SLOT // Link for a single time slot (e.g., "May 28, 2025, 10:00 AM").
+  DAILY_SLOTS // Link for all time slots on a specific day (e.g., "All slots on May 28").
+  MULTI_DAY_SLOTS // Link for all time slots across multiple days (e.g., "Next 7 days").
+}
+
 model Meeting {
-  id            String         @id @default(cuid())
-  eventId       String
-  timeSlot      DateTime
-  bookedByName  String
-  bookedByEmail String
-  customAnswers Json?
-  videoUrl      String?
-  videoProvider VideoProvider?
-  slug          String?        @unique
-  event         Event          @relation(fields: [eventId], references: [id])
+  id             String   @id @default(cuid())
+  serviceId    String
+  startTime      DateTime @default(now()) // Default to current time
+  endTime DateTime @default(dbgenerated("NOW() + interval '1 hour'")) // When the meeting ends
+  bookedByName   String
+  bookedByEmail  String
+  bookerTimezone String?        // Store the timezone of the person booking
+  comment        String?
+  videoUrl       String?
+  videoProvider  VideoProvider?
+  slug           String? @unique
+ service       Service?       @relation(fields: [serviceId], references: [id]) // Links to the service.
+  appointment   Appointment @relation(fields: [appointmentId], references: [id])
+  appointmentId String
 }
 
-model Availability {
-  id        String @id @default(cuid())
-  eventId   String
-  dayOfWeek Int
-  startTime String
-  endTime   String
-  duration  Int
-  event     Event  @relation(fields: [eventId], references: [id])
+// Stores customer ratings for services.
+model Rating {
+  id        String    @id @default(cuid()) // Unique ID for the rating.
+  serviceId String // Service ID.
+  service   Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade) // Links to the service.
+  userId    String // User ID.
+  user      User      @relation("UserRatings", fields: [userId], references: [id]) // Links to the user.
+  score     Int // Rating score (1-5 stars).
+  review    String? // Optional review text.
+  createdAt DateTime  @default(now()) // Creation timestamp.
+  updatedAt DateTime  @updatedAt // Last updated timestamp.
 }
-
-model Event {
-  id           String         @id @default(cuid())
-  title        String
-  description  String?
-  location     String
-  slug         String         @unique
-  userId       String
-  user         User           @relation(fields: [userId], references: [id])
-  createdAt    DateTime       @default(now())
-  individualId String
-  individual   Individual     @relation(fields: [individualId], references: [id])
-  availability Availability[]
-  meetings     Meeting[]
-}
-
 model Document {
   id        String   @id @default(uuid())
   content   String // Text to be indexed (e.g., "Appointment for haircut at 10 AM")
@@ -525,6 +608,7 @@ model Document {
   service      Service?     @relation(fields: [serviceId], references: [id])
    businessId    String?
   business      BusinessDetail? @relation(fields: [businessId], references: [id])
+   metadata     Json? 
 }
 
 model ConversationState {

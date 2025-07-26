@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
+import { embedAndIndexAppointment } from '@/lib/embed-and-index'
 import { ZodError } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { getAppointmentById } from '@/db/appointment'
@@ -39,17 +39,34 @@ export async function POST(
       resourceId: parsedData.resourceId,
     })
 
-    // Return a success response
-    return NextResponse.json(
-      {
-        data: newAppointment,
-        status: 201,
-        success: true,
-        message: 'Appointment booked successfully!',
-        errorDetail: null,
-      },
-      { status: 201 },
-    )
+    // Embed & index appointment AFTER creation
+    try {
+      await embedAndIndexAppointment(newAppointment)
+      // If successful, standard success response
+      return NextResponse.json(
+        {
+          data: newAppointment,
+          status: 201,
+          success: true,
+          message: 'Appointment booked successfully!',
+          errorDetail: null,
+        },
+        { status: 201 },
+      )
+    } catch (embedError) {
+      // If embedding fails, return a specific message
+      return NextResponse.json(
+        {
+          data: newAppointment,
+          status: 201,
+          success: true,
+          message: 'Appointment booked, but embedding/indexing failed.',
+          errorDetail:
+            embedError instanceof Error ? embedError.message : embedError,
+        },
+        { status: 201 },
+      )
+    }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientValidationError) {
       // Handle the validation error specifically
@@ -78,6 +95,7 @@ export async function POST(
         { status: 400 },
       )
     }
+
     // Handle other errors
     return NextResponse.json(
       {

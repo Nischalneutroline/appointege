@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { ZodError } from 'zod'
 import { ReturnType } from '@/features/shared/api-route-types'
 import { Prisma } from '@prisma/client'
+import { embedAndIndexAppointment } from '@/lib/embed-and-index'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
@@ -31,6 +32,7 @@ export async function GET(
         { status: 404 },
       )
     }
+
     return NextResponse.json(
       {
         message: 'Appointment fetched successfully',
@@ -132,16 +134,34 @@ export async function PUT(
       )
     }
 
-    return NextResponse.json(
-      {
-        message: 'Appointment updated successfully',
-        data: updatedService,
-        status: 200,
-        success: true,
-        errorDetail: null,
-      },
-      { status: 200 },
-    )
+    // Re-embed and update indexed Document for the appointment
+    try {
+      await embedAndIndexAppointment(updatedService)
+
+      return NextResponse.json(
+        {
+          message: 'Appointment updated successfully',
+          data: updatedService,
+          status: 200,
+          success: true,
+          errorDetail: null,
+        },
+        { status: 200 },
+      )
+    } catch (embedError) {
+      // If embedding fails, return a specific message
+      return NextResponse.json(
+        {
+          data: updatedService,
+          status: 201,
+          success: true,
+          message: 'Appointment updated, but embedding/indexing failed.',
+          errorDetail:
+            embedError instanceof Error ? embedError.message : embedError,
+        },
+        { status: 201 },
+      )
+    }
   } catch (error) {
     if (error instanceof Prisma.PrismaClientValidationError) {
       // Handle the validation error specifically
@@ -219,6 +239,11 @@ export async function DELETE(
 
     const deletedAppointment = await prisma.appointment.delete({
       where: { id },
+    })
+
+    // Remove corresponding indexed documents
+    await prisma.document.deleteMany({
+      where: { appointmentId: id, source: 'appointment' },
     })
 
     return NextResponse.json(

@@ -9,4 +9,15 @@ async function getAppointmentById(id: string) {
   });
 }
 
-export { getAppointmentById };
+// Fetch appointment ID by appointment name
+async function getAppointmentIdByEmail(
+  appointmentEmail: string
+): Promise<string | null> {
+  const appointment = await prisma.appointment.findFirst({
+    where: { email: appointmentEmail },
+    select: { id: true },
+  });
+  return appointment ? appointment.id : null;
+}
+
+export { getAppointmentById, getAppointmentIdByEmail };

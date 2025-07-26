@@ -7,6 +7,7 @@ import { z, ZodError } from 'zod'
 import { Prisma, Service } from '@prisma/client'
 import { serviceSchema } from '@/app/(protected)/admin/service/_schemas/service'
 import { ReturnType } from '@/features/shared/api-route-types'
+import { embedAndIndexService } from '@/lib/embed-and-index'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
@@ -130,6 +131,7 @@ export async function PUT(
           },
         },
       })
+      await embedAndIndexService(updatedService)
       if (updatedService) {
         return NextResponse.json(
           {
@@ -143,6 +145,7 @@ export async function PUT(
         )
       }
     }
+
     // update service
 
     // -------------------------_//
@@ -348,6 +351,11 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
         { status: 404 },
       )
     }
+
+    await prisma.document.deleteMany({
+      where: { serviceId: id, source: 'service' },
+    })
+
     return NextResponse.json(
       {
         data: deletedService,

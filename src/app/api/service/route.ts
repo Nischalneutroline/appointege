@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client'
 import { Service } from '@/app/(protected)/admin/service/_types/service'
 import { serviceSchema } from '@/app/(protected)/admin/service/_schemas/service'
 import { ReturnType } from '@/features/shared/api-route-types'
+import { embedAndIndexService } from '@/lib/embed-and-index'
 
 export async function POST(
   req: NextRequest,
@@ -20,7 +21,7 @@ export async function POST(
         title: parsedData.title,
         description: parsedData.description,
         estimatedDuration: parsedData.estimatedDuration,
-        status: parsedData.status || 'ACTIVE', // Fallback to default if undefined
+        status: parsedData.status,
         serviceAvailability: {
           create: parsedData.serviceAvailability?.map((availability) => ({
             weekDay: availability.weekDay,
@@ -48,6 +49,9 @@ export async function POST(
         { status: 500 },
       )
     }
+
+    // Embed & index service after creation
+    await embedAndIndexService(newService)
 
     return NextResponse.json(
       {

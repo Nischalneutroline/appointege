@@ -27,4 +27,14 @@ async function getServiceById(id: string) {
   })
 }
 
-export { getServiceById }
+// Fetch service ID by service name
+async function getServiceIdByName(serviceName: string): Promise<string | null> {
+  const service = await prisma.service.findFirst({
+    where: { title: serviceName },
+    select: { id: true },
+  });
+  console.log('service is',service)
+  return service ? service.id : null;
+}
+
+export { getServiceById, getServiceIdByName }

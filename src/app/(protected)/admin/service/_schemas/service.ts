@@ -11,7 +11,7 @@ export const serviceSchema = z.object({
   estimatedDuration: z
     .number()
     .min(1, 'Estimated duration must be a positive number'),
-  ServiceStatus: z
+  status: z
     .enum([ServiceStatus.ACTIVE, ServiceStatus.INACTIVE])
     .optional(),
   serviceAvailability: z.array(
