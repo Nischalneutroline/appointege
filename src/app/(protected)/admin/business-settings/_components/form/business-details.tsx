@@ -10,7 +10,7 @@ import {
   BusinessStatus,
   updateBusinessDetailForm,
 } from '@/store/slices/businessSlice'
-import { AppDispatch } from '@/store/store'
+import { AppDispatch, RootState } from '@/store/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 
@@ -22,39 +22,39 @@ import { useDispatch } from 'react-redux'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { businessDetailFormSchema, industryOptions } from '../../_schema/schema'
-
+import { useSelector } from 'react-redux'
 const serviceOptions = [
   { label: 'Physical', value: 'PHYSICAL' },
   { label: 'Virtual', value: 'VIRTUAL' },
   { label: 'All', value: 'ALL' },
 ]
 type BusinessDetailFrontFormValues = z.infer<typeof businessDetailFormSchema>
-const transformApiData = (apiData: any) => {
-  if (!apiData) return null
+// const transformApiData = (apiData: any) => {
+//   if (!apiData) return null
 
-  const address = Array.isArray(apiData.address)
-    ? apiData.address[0]
-    : apiData.address || {}
+//   const address = Array.isArray(apiData.address)
+//     ? apiData.address[0]
+//     : apiData.address || {}
 
-  return {
-    businessName: apiData.name || '',
-    industry: apiData.industry || '',
-    email: apiData.email || '',
-    phone: apiData.phone || '',
-    businessType: apiData.businessType || '',
-    website: apiData.website || '',
-    city: address.city || '',
-    street: address.street || '',
-    state: address.state || '',
-    zipCode: address.zipCode || '',
-    country: address.country || '',
-    googleMap: address.googleMap || '',
-    registrationNumber:
-      apiData.businessRegistrationNumber || apiData.registrationNumber || '',
-    taxId: apiData.taxId || '',
-    logo: apiData.logo || null,
-  }
-}
+//   return {
+//     businessName: apiData.name || '',
+//     industry: apiData.industry || '',
+//     email: apiData.email || '',
+//     phone: apiData.phone || '',
+//     businessType: apiData.businessType || '',
+//     website: apiData.website || '',
+//     city: address.city || '',
+//     street: address.street || '',
+//     state: address.state || '',
+//     zipCode: address.zipCode || '',
+//     country: address.country || '',
+//     googleMap: address.googleMap || '',
+//     registrationNumber:
+//       apiData.businessRegistrationNumber || apiData.registrationNumber || '',
+//     taxId: apiData.taxId || '',
+//     logo: apiData.logo || null,
+//   }
+// }
 
 // ---------------------------------Component starts here-----------------------------------------------------
 const BusinessDetail = ({
@@ -71,101 +71,151 @@ const BusinessDetail = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const [isInitialized, setIsInitialized] = useState(false)
-
+  const businessForm = useSelector(
+    (state: RootState) => state.business.businessDetailForm,
+  )
   const defaultValues = {
-    businessName: data?.name || '',
-    industry: data?.industry || '',
-    email: data?.email || '',
-    phone: data?.phone || '',
-    businessType: data?.businessType || '',
-    website: data?.website || '',
-    street: data?.address?.[0]?.street || '',
-    city: data?.address?.[0]?.city || '',
-    state: data?.address?.[0]?.state || '',
-    zipCode: data?.address?.[0]?.zipCode || '',
-    country: data?.address?.[0]?.country || '',
-    googleMap: data?.address?.[0]?.googleMap || '',
+    businessName: data?.name || 'Appointege',
+    industry: data?.industry || 'IT Services',
+    email: data?.email || 'appointege@gmail.com',
+    phone: data?.phone || '+1-9867373778',
+    businessType: data?.businessType || 'PHYSICAL',
+    website: data?.website || 'https://www.appointege.com',
+    street: data?.address?.[0]?.street || '123 Main St',
+    city: data?.address?.[0]?.city || 'New York',
+    state: data?.address?.[0]?.state || 'NY',
+    zipCode: data?.address?.[0]?.zipCode || '10001',
+    country: data?.address?.[0]?.country || 'USA',
+    googleMap: data?.address?.[0]?.googleMap || 'https://www.google.com/maps',
     registrationNumber:
-      data?.businessRegistrationNumber || data?.registrationNumber || '',
-    taxId: data?.taxId || '',
+      data?.businessRegistrationNumber ||
+      data?.registrationNumber ||
+      '1234567890',
+    taxId: data?.taxId || 'TX-1234567890',
     logo: data?.logo || null,
   }
   // const [isInitialized, setIsInitialized] = useState(false)
+  // const initialData =
+  //   businessForm && Object.keys(businessForm).length > 0
+  //     ? businessForm
+  //     : transformApiData(data) || {}
+
   const form = useForm<BusinessDetailFrontFormValues>({
     resolver: zodResolver(businessDetailFormSchema),
-    defaultValues,
+    defaultValues: defaultValues,
   })
-  console.log(data?.name, 'data')
-  // Handle form reset when data changes
-  useEffect(() => {
-    if (data) {
-      const address = Array.isArray(data.address)
-        ? data.address[0]
-        : data.address || {}
-      form.reset({
-        businessName: data?.name,
-        industry: data.industry || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        businessType: data.businessType || '',
-        website: data.website || '',
-        city: data.address?.city || '',
-        street: data.address?.street || '',
-        state: data.address?.state || '',
-        zipCode: data.address?.zipCode || '',
-        country: data.address?.country || '',
-        googleMap: data.address?.googleMap || '',
-        registrationNumber:
-          data.businessRegistrationNumber || data.registrationNumber || '',
-        taxId: data.taxId || '',
-        logo: data.logo || null,
-      })
-    }
-  }, [data, form])
-
-  const STORAGE_KEY = 'business-detail-form'
-
-  // Load data into form
+  // console.log(data?.name, 'data')
+  // // Handle form reset when data changes
   // useEffect(() => {
-
-  //   // Try to load from localStorage first
-
-  //   if (liveFormData) {
-  //     form.reset(liveFormData)
-  //   }
-
-  //   // Then update with API data if available
   //   if (data) {
-  //     const apiFormData = transformApiData(data)
-  //     if (apiFormData) {
-  //       console.log('Loading form data from API:', apiFormData)
-  //       form.reset(apiFormData)
-  //     }
+  //     form.reset({
+  //       businessName: data?.name,
+  //       industry: data.industry || '',
+  //       email: data.email || '',
+  //       phone: data.phone || '',
+  //       businessType: data.businessType || '',
+  //       website: data.website || '',
+  //       city: data.address?.city || '',
+  //       street: data.address?.street || '',
+  //       state: data.address?.state || '',
+  //       zipCode: data.address?.zipCode || '',
+  //       country: data.address?.country || '',
+  //       googleMap: data.address?.googleMap || '',
+  //       registrationNumber:
+  //         data.businessRegistrationNumber || data.registrationNumber || '',
+  //       taxId: data.taxId || '',
+  //       logo: data.logo || null,
+  //     })
   //   }
   // }, [data, form])
-  useEffect(() => {
-    if (!isInitialized && data) {
-      const apiFormData = transformApiData(data)
-      if (apiFormData) {
-        form.reset(apiFormData)
-        setIsInitialized(true) // ✅ ensures this runs only once
-      }
-    }
-  }, [data, form, isInitialized])
+
+  // useEffect(() => {
+  //   if (!isInitialized) {
+  //     if (businessForm && Object.keys(businessForm).length > 0) {
+  //       // Hydrate from Redux first if available
+  //       const transformedData: BusinessDetailFormValues = {
+  //         name: businessForm.name,
+  //         industry: businessForm.industry,
+  //         email: businessForm.email,
+  //         phone: businessForm.phone,
+  //         website: businessForm.website,
+  //         status: businessForm.status,
+  //         businessRegistrationNumber: businessForm.businessRegistrationNumber,
+  //         taxId: businessForm.taxId,
+  //         logo: businessForm.logo,
+  //         address: [
+  //           {
+  //             street: businessForm?.address?.[0]?.street || '',
+  //             city: businessForm?.address?.[0]?.city || '',
+  //             state: businessForm?.address?.[0]?.state || '',
+  //             zipCode: businessForm?.address?.[0]?.zipCode || '',
+  //             country: businessForm?.address?.[0]?.country || '',
+  //             googleMap: businessForm?.address?.[0]?.googleMap || '',
+  //           },
+  //         ],
+  //       }
+
+  //       form.reset(transformedData)
+  //       setIsInitialized(true)
+  //     } else if (data) {
+  //       const apiFormData = transformApiData(data)
+  //       if (apiFormData) {
+  //         form.reset(apiFormData)
+  //         setIsInitialized(true)
+  //       }
+  //     }
+  //   }
+  // }, [data, businessForm, isInitialized, form])
 
   // Use useWatch to get live updates of the form values
+  // const watchedFormData = useWatch({ control: form.control })
+
+  // useEffect(() => {
+  //   const timeout = setTimeout(() => {
+  //     dispatch(updateBusinessDetailForm(watchedFormData))
+  //   }, 300) // debounce 300ms
+
+  //   return () => clearTimeout(timeout)
+  // }, [watchedFormData])
 
   // Now liveFormData always holds the latest form values
   // You can use liveFormData anywhere inside your component!
+  // useEffect(() => {
+  //   if (
+  //     businessForm &&
+  //     Object.keys(businessForm).length > 0 &&
+  //     !isInitialized // ✅ prevents re-resetting
+  //   ) {
+  //     const transformedData: BusinessDetailFormValues = {
+  //       name: businessForm.name,
+  //       industry: businessForm.industry,
+  //       email: businessForm.email,
+  //       phone: businessForm.phone,
+  //       website: businessForm.website,
+  //       status: businessForm.status,
+  //       businessRegistrationNumber: businessForm.businessRegistrationNumber,
+  //       taxId: businessForm.taxId,
+  //       logo: businessForm.logo,
+  //       address: [
+  //         {
+  //           street: businessForm?.address?.[0]?.street || '',
+  //           city: businessForm?.address?.[0]?.city || '',
+  //           state: businessForm?.address?.[0]?.state || '',
+  //           zipCode: businessForm?.address?.[0]?.zipCode || '',
+  //           country: businessForm?.address?.[0]?.country || '',
+  //           googleMap: businessForm?.address?.[0]?.googleMap || '',
+  //         },
+  //       ],
+  //     }
+
+  //     form.reset(transformedData)
+  //     setIsInitialized(true) // ✅ set only once
+  //   }
+  // }, [businessForm, isInitialized, form])
 
   // Submit Handler
   const onSubmit = (formData: BusinessDetailFrontFormValues) => {
     // Save form data to localStorage
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
-    } catch (e) {
-      console.error('Failed to save form data to localStorage:', e)
-    }
 
     const updatedData = {
       name: formData.businessName,

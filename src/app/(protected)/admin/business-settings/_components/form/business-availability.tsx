@@ -36,28 +36,28 @@ export type BusinessAvailability = {
 
 // Default initial form values for the entire form
 const defaultValues: BusinessAvailabilityFormValues = {
-  timezone: '', // initially empty timezone
+  timezone: 'UTC', // initially empty timezone
   holidays: ['Sat', 'Sun'], // default holidays set to weekend
-  businessAvailability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+  businessAvailability: ['Mon', 'Tue', 'Wed', 'Thu'],
   businessDays: {
     // default working hours per day
     Mon: [['09:00 AM', '05:00 PM']],
     Tue: [['09:00 AM', '05:00 PM']],
     Wed: [['09:00 AM', '05:00 PM']],
     Thu: [['09:00 AM', '05:00 PM']],
-    Fri: [['09:00 AM', '05:00 PM']],
-    Sat: [['09:00 AM', '05:00 PM']],
-    Sun: [['09:00 AM', '05:00 PM']],
+    Fri: [],
+    Sat: [],
+    Sun: [],
   },
   breakHours: {
     // default break hours per day
     Mon: [['12:00 PM', '01:00 PM']],
-    Tue: [['02:00 PM', '04:00 PM']],
-    Wed: [['02:00 PM', '04:00 PM']],
-    Thu: [['02:00 PM', '04:00 PM']],
-    Fri: [['02:00 PM', '04:00 PM']],
-    Sat: [['02:00 PM', '04:00 PM']],
-    Sun: [['02:00 PM', '04:00 PM']],
+    Tue: [['12:00 PM', '01:00 PM']],
+    Wed: [['12:00 PM', '01:00 PM']],
+    Thu: [['12:00 PM', '01:00 PM']],
+    Fri: [],
+    Sat: [],
+    Sun: [],
   },
 }
 
@@ -73,19 +73,8 @@ export const normalizeWeekDays = (
   Sat: partial.Sat || [],
   Sun: partial.Sun || [],
 })
-// Utility function to convert short day names (e.g., "Mon") to full uppercase day names (e.g., "MONDAY")
-const toFullDay = (day: string): string => {
-  const map: Record<string, string> = {
-    Mon: 'MONDAY',
-    Tue: 'TUESDAY',
-    Wed: 'WEDNESDAY',
-    Thu: 'THURSDAY',
-    Fri: 'FRIDAY',
-    Sat: 'SATURDAY',
-    Sun: 'SUNDAY',
-  }
-  return map[day] ?? 'MONDAY'
-}
+// Local storage key for persisting form data
+const FORM_STORAGE_KEY = 'businessAvailabilityFormData'
 
 const BusinessAvailabilityForm = ({
   setTab,
@@ -103,63 +92,122 @@ const BusinessAvailabilityForm = ({
     'default',
   )
   const [activeDay, setActiveDay] = useState<WeekDay>('Mon')
-  // Initialize react-hook-form with default values and optional schema validation
+
+  // Load saved form data from localStorage if available
+  // const loadSavedFormData = () => {
+  //   if (typeof window === 'undefined') return defaultValues
+
+  //   try {
+  //     const savedData = localStorage.getItem(FORM_STORAGE_KEY)
+  //     if (savedData) {
+  //       const parsedData = JSON.parse(savedData)
+  //       // Validate the parsed data against our schema
+  //       const result = businessAvailabilityFormSchema.safeParse(parsedData)
+  //       if (result.success) {
+  //         return result.data
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to load saved form data:', error)
+  //   }
+
+  //   return defaultValues
+  // }
+
+  // Initialize react-hook-form with saved values or defaults
   const form = useForm<BusinessAvailabilityFormValues>({
-    resolver: zodResolver(businessAvailabilityFormSchema), // uncomment for validation
-    defaultValues: defaultValues,
+    resolver: zodResolver(businessAvailabilityFormSchema),
+    defaultValues,
   })
-  useEffect(() => {
-    if (data) {
-      const apidata = {
-        timeZone: data?.timeZone || '',
-        businessAvailability: data?.businessAvailability,
-        holiday: data?.holiday || [],
-      }
-      const dataToEdit = convertFromApiFormat(apidata)
-      console.log('Data from API to fit into defaultValue:', dataToEdit)
 
-      // Get all days of the week
-      const allDays: WeekDay[] = [
-        'Mon',
-        'Tue',
-        'Wed',
-        'Thu',
-        'Fri',
-        'Sat',
-        'Sun',
-      ]
+  // Watch all form values including nested fields
+  // const formValues = useWatch({
+  //   control: form.control,
+  //   defaultValue: defaultValues,
+  // })
 
-      // Get selected business days from the API data
-      const selectedDays = dataToEdit.businessAvailability as WeekDay[]
-      const selectedDaysSet = new Set(selectedDays)
+  // Save form data to localStorage whenever any value changes
+  // Sync Redux on form changes with debounce
+  // useEffect(() => {
+  //   const subscription = form.watch((value) => {
+  //     const handler = setTimeout(() => {
+  //       dispatch(updateBusinessAvailabilityForm(value))
+  //     }, 300)
 
-      // Calculate holidays as days not in selectedDays
-      const holidays = allDays.filter((day) => !selectedDaysSet.has(day))
+  //     return () => clearTimeout(handler)
+  //   })
 
-      const businessDays: Partial<Record<WeekDay, [string, string][]>> = {}
-      const breakHours: Partial<Record<WeekDay, [string, string][]>> = {}
+  //   return () => subscription.unsubscribe()
+  // }, [form, dispatch])
 
-      // Process business hours and break hours for selected days
-      selectedDays.forEach((day) => {
-        if (dataToEdit.businessHours[day]) {
-          businessDays[day] = dataToEdit.businessHours[day]
-        }
-        if (dataToEdit.breakHours[day]) {
-          breakHours[day] = dataToEdit.breakHours[day]
-        }
-      })
+  // Load API data: update Redux and reset form
+  // useEffect(() => {
+  //   if (data) {
+  //     const apiDataToForm = convertFromApiFormat({
+  //       timeZone: data?.timeZone || '',
+  //       businessAvailability: data?.businessAvailability,
+  //       holiday: data?.holiday || [],
+  //     })
 
-      // Reset the form with the processed data
-      form.reset({
-        ...dataToEdit,
-        timezone: dataToEdit.timeZone || '',
-        businessDays,
-        breakHours,
-        businessAvailability: selectedDays,
-        holidays: holidays, // Use the calculated holidays
-      })
-    }
-  }, [data, form])
+  //     dispatch(updateBusinessAvailabilityForm(apiDataToForm))
+  //     form.reset(apiDataToForm)
+  //   }
+  // }, [data, dispatch, form])
+  // useEffect(() => {
+  //   if (data) {
+  //     const apidata = {
+  //       timeZone: data?.timeZone || '',
+  //       businessAvailability: data?.businessAvailability,
+  //       holiday: data?.holiday || [],
+  //     }
+  //     const dataToEdit = convertFromApiFormat(apidata)
+  //     console.log('Data from API to fit into defaultValue:', dataToEdit)
+
+  //     // Get all days of the week
+  //     const allDays: WeekDay[] = [
+  //       'Mon',
+  //       'Tue',
+  //       'Wed',
+  //       'Thu',
+  //       'Fri',
+  //       'Sat',
+  //       'Sun',
+  //     ]
+
+  //     // Get selected business days from the API data
+  //     const selectedDays = dataToEdit.businessAvailability as WeekDay[]
+  //     const selectedDaysSet = new Set(selectedDays)
+
+  //     // Calculate holidays as days not in selectedDays
+  //     const holidays = allDays.filter((day) => !selectedDaysSet.has(day))
+
+  //     const businessDays: Partial<Record<WeekDay, [string, string][]>> = {}
+  //     const breakHours: Partial<Record<WeekDay, [string, string][]>> = {}
+
+  //     // Process business hours and break hours for selected days
+  //     selectedDays.forEach((day) => {
+  //       if (dataToEdit.businessHours[day]) {
+  //         businessDays[day] = dataToEdit.businessHours[day]
+  //       }
+  //       if (dataToEdit.breakHours[day]) {
+  //         breakHours[day] = dataToEdit.breakHours[day]
+  //       }
+  //     })
+
+  //     // Don't clear saved form data when loading from API
+  //     // This allows the form to maintain its state
+
+  //     // Reset the form with the processed data
+  //     form.reset({
+  //       ...dataToEdit,
+  //       timezone: dataToEdit.timeZone || '',
+  //       businessDays,
+  //       breakHours,
+  //       businessAvailability: selectedDays,
+  //       holidays: holidays, // Use the calculated holidays
+  //     })
+  //   }
+  // }, [data, form])
   // ---------------- BreakHours Listener ----------------
   // Watch the breakHours field dynamically so we get live updates of breaks as user edits them
   const breakHours = useWatch({
@@ -229,6 +277,16 @@ const BusinessAvailabilityForm = ({
     onSubmitSuccess()
   }
 
+  // Clear saved form data only when component unmounts
+  useEffect(() => {
+    return () => {
+      // Only clear if we're not in the middle of a form submission
+      if (!form.formState.isSubmitting) {
+        localStorage.removeItem(FORM_STORAGE_KEY)
+      }
+    }
+  }, [form.formState.isSubmitting])
+
   return (
     <FormProvider {...form}>
       {/* Form wrapper with submit handler */}
@@ -279,6 +337,8 @@ const BusinessAvailabilityForm = ({
             className=" border border-blue-200 rounded-[4px]"
             activeDay={activeDay}
             restrictToInitialHours={false}
+            isDefault={currentMode === 'default'}
+            setCustom={setCurrentMode}
           />
         </div>
         {/* BusinessDaySelector component shows business days and holidays selector UI */}
@@ -293,6 +353,8 @@ const BusinessAvailabilityForm = ({
             className=" border border-blue-200 rounded-[4px]"
             activeDay={activeDay}
             restrictToInitialHours={false}
+            setCustom={setCurrentMode}
+            isDefault={currentMode === 'default'}
           />
         </div>
         <WeeklyPreview

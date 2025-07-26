@@ -118,6 +118,13 @@ interface Props {
   label?: string
   activeDay: Day
   restrictToInitialHours: boolean
+  isDefault?: boolean
+  setCustom: (
+    value:
+      | 'custom'
+      | 'default'
+      | ((prev: 'custom' | 'default') => 'custom' | 'default'),
+  ) => void
 }
 
 export default function BusinessHourSelector({
@@ -129,6 +136,8 @@ export default function BusinessHourSelector({
   initialBusinessHours,
   activeDay,
   restrictToInitialHours = false,
+  isDefault,
+  setCustom,
 }: Props) {
   // Form context
   const { setValue, getValues } = useFormContext()
@@ -151,7 +160,6 @@ export default function BusinessHourSelector({
     ? watchedValue.filter((day): day is Day => typeof day === 'string')
     : [] // 🔄 convert to Day
   const serviceHours: Record<Day, Slot[]> = useWatch({ name }) || {}
-
 
   /* -------- UI state ---------- */
 
@@ -234,6 +242,11 @@ export default function BusinessHourSelector({
 
   // Update the time slot
   const update = (idx: number, pos: 0 | 1, val: string) => {
+    // Switch to custom mode when any input is touched
+    if (isDefault) {
+      setCustom('custom')
+    }
+    
     const updated = { ...serviceHours }
     const slots = [...(updated[activeDay] || [])]
     const slot = slots[idx] ? [...slots[idx]] : ['', '']
@@ -444,7 +457,7 @@ export default function BusinessHourSelector({
                     })}
                   </SelectContent>
                 </Select>
-                {idx === 0 && (
+                {idx === 0 && !isDefault && (
                   <div
                     className="absolute -right-6 top-9 text-xs border-blue-600 rounded-[4px] border-[1px]"
                     onClick={addSlot}

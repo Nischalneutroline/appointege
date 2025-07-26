@@ -24,7 +24,7 @@ const STORAGE_KEY2 = 'business-availability-form'
 
 const BusinessSetting = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const businessId = 'cmdh0t98t0001ur35fehpq4ej0'
+  const businessId = 'cmdh0t98t0001ur35fehpq4ej'
   // Create React state to hold the live form data
 
   const [data1, setData1] = useState<string | null>(null)
@@ -175,7 +175,7 @@ const BusinessSetting = () => {
               <ServiceAvailabilityForm
                 data={businessDetail?.serviceAvailability}
                 onBack={() => setCurrentMode('business-availability')}
-                onSubmitSuccess={handleServiceAvailabilitySubmitSuccess}
+                // onSubmitSuccess={handleServiceAvailabilitySubmitSuccess}
               />
             )}
         </div>
