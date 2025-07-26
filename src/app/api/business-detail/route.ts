@@ -6,13 +6,105 @@ import { getBusinessDetailById } from '@/db/businessDetail'
 import { businessDetailSchema } from '@/app/(protected)/admin/business-settings/_schema/schema'
 
 // Create a new business detail
+// export async function POST(req: NextRequest) {
+//   try {
+//     const body = await req.json()
+//     const parsedData = businessDetailSchema.parse(body)
+
+//     // create business in prisma
+
+//     const existingBusiness = await prisma.businessDetail.findUnique({
+//       where: { email: parsedData.email },
+//     })
+
+//     if (existingBusiness) {
+//       return NextResponse.json(
+//         { error: 'Business with this email already exists!' },
+//         { status: 400 },
+//       )
+//     }
+
+//     const newBusiness = await prisma.businessDetail.create({
+//       data: {
+//         name: parsedData.name,
+//         industry: parsedData.industry,
+//         email: parsedData.email,
+//         phone: parsedData.phone,
+//         website: parsedData.website,
+//         businessRegistrationNumber: parsedData.businessRegistrationNumber,
+//         businessOwner: parsedData.businessOwner,
+//         status: parsedData.status,
+//         address: {
+//           create: parsedData.address.map((address) => ({
+//             street: address.street,
+//             city: address.city,
+//             country: address.country,
+//             zipCode: address.zipCode,
+//             googleMap: address.googleMap || '',
+//           })),
+//         },
+//         businessAvailability: {
+//           create: parsedData.businessAvailability?.map((availability) => ({
+//             weekDay: availability.weekDay,
+//             type: availability.type,
+//             timeSlots: {
+//               create: availability.timeSlots.map((timeSlot) => ({
+//                 startTime: timeSlot.startTime,
+//                 endTime: timeSlot.endTime,
+//               })),
+//             },
+//           })),
+//         },
+//         holiday: {
+//           create: parsedData.holiday?.map((holiday) => ({
+//             holiday: holiday.holiday,
+//             type: holiday.type,
+//             date: holiday.date,
+//           })),
+//         },
+//       },
+//       include: {
+//         address: true,
+//         businessAvailability: {
+//           include: {
+//             timeSlots: true,
+//           },
+//         },
+//         holiday: true,
+//       },
+//     })
+
+//     if (!newBusiness) {
+//       return NextResponse.json(
+//         { error: 'Failed to create business' },
+//         { status: 500 },
+//       )
+//     }
+
+//     return NextResponse.json(
+//       { message: 'Business created successfully!', business: newBusiness },
+//       { status: 201 },
+//     )
+//   } catch (error) {
+//     if (error instanceof ZodError) {
+//       return NextResponse.json(
+//         { error: 'Validation failed', details: error.errors[0].message },
+//         { status: 400 },
+//       )
+//     }
+//     return NextResponse.json(
+//       { error: 'Internal server error', detail: error },
+//       { status: 500 },
+//     )
+//   }
+// }
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const parsedData = businessDetailSchema.parse(body)
 
-    // create business in prisma
-
+    // Check for existing business
     const existingBusiness = await prisma.businessDetail.findUnique({
       where: { email: parsedData.email },
     })
@@ -32,6 +124,7 @@ export async function POST(req: NextRequest) {
         phone: parsedData.phone,
         website: parsedData.website,
         businessRegistrationNumber: parsedData.businessRegistrationNumber,
+        businessOwner: parsedData.businessOwner,
         status: parsedData.status,
         address: {
           create: parsedData.address.map((address) => ({
@@ -48,7 +141,6 @@ export async function POST(req: NextRequest) {
             type: availability.type,
             timeSlots: {
               create: availability.timeSlots.map((timeSlot) => ({
-                type: timeSlot.type,
                 startTime: timeSlot.startTime,
                 endTime: timeSlot.endTime,
               })),
@@ -62,6 +154,18 @@ export async function POST(req: NextRequest) {
             date: holiday.date,
           })),
         },
+        serviceAvailability: {
+          create: parsedData.serviceAvailability?.map((availability) => ({
+            weekDay: availability.weekDay,
+            timeSlots: {
+              create: availability.timeSlots.map((timeSlot) => ({
+                startTime: timeSlot.startTime,
+                endTime: timeSlot.endTime,
+              })),
+            },
+            serviceId: availability.serviceId, // Optional serviceId
+          })),
+        },
       },
       include: {
         address: true,
@@ -71,6 +175,11 @@ export async function POST(req: NextRequest) {
           },
         },
         holiday: true,
+        serviceAvailability: {
+          include: {
+            timeSlots: true,
+          },
+        },
       },
     })
 
@@ -123,9 +232,8 @@ export async function GET() {
 
     return NextResponse.json(businessDetails, { status: 200 })
   } catch (error) {
-    console.error('Error fetching business details:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch business details', details: error },
+      { error: 'Failed to fetch business details' },
       { status: 500 },
     )
   }
