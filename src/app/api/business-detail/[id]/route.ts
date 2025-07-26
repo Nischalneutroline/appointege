@@ -4,7 +4,7 @@ import { getAppointmentById } from '@/db/appointment'
 import { getBusinessDetailById } from '@/db/businessDetail'
 import { prisma } from '@/lib/prisma'
 import { ZodError } from 'zod'
-import { businessDetailSchema } from '@/app/(protected)/admin/business-setting/_schema/schema'
+import { businessDetailSchema } from '@/app/(protected)/admin/business-settings/_schema/schema'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
@@ -82,7 +82,7 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
         // Handle business availability
         businessAvailability: {
-          upsert: parsedData.businessAvailability?.map((availability) => ({
+          upsert: parsedData.businessAvailability.map((availability) => ({
             where: { id: availability.id || '' },
             update: {
               weekDay: availability.weekDay,
