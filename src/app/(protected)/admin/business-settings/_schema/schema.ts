@@ -10,6 +10,7 @@ import { z } from 'zod'
 
 /* Zod schema for BusinessTime (Working hours) */
 const businessTimeSchema = z.object({
+  id: z.string().optional(),
   startTime: z.string(),
   endTime: z.string(),
   type: z.nativeEnum(BusinessTimeType),
@@ -17,13 +18,25 @@ const businessTimeSchema = z.object({
 
 // Zod schema for BusinessAvailability (Business availability)
 const businessAvailabilitySchema = z.object({
+  id: z.string().optional(),
   weekDay: z.nativeEnum(WeekDays),
   type: z.nativeEnum(AvailabilityType),
   timeSlots: z.array(businessTimeSchema),
 })
 
+// Zod schema for Business ServiceAvailability (Service availability)
+const serviceAvailabilitySchema = z.object({
+  id: z.string().optional(),
+  weekDay: z.nativeEnum(WeekDays),
+  timeSlots: z.array(businessTimeSchema),
+})
+export type BusinessServiceAvailability = z.infer<
+  typeof serviceAvailabilitySchema
+>
+
 // Zod schema for Holiday (Holidays for business)
 const holidaySchema = z.object({
+  id: z.string().optional(),
   holiday: z.nativeEnum(WeekDays),
   type: z.nativeEnum(HolidayType),
   date: z.string().optional(),
@@ -31,6 +44,7 @@ const holidaySchema = z.object({
 
 // Zod schema for BusinessAddress
 const businessAddressSchema = z.object({
+  id: z.string().optional(),
   street: z.string(),
   city: z.string(),
   country: z.string(),
@@ -58,19 +72,7 @@ export const businessDetailSchema = z.object({
       supportEmail: z.string().optional(),
     })
     .optional(),
-  serviceAvailability: z
-    .array(
-      z.object({
-        weekDay: z.string(),
-        timeSlots: z.array(
-          z.object({
-            startTime: z.string(),
-            endTime: z.string(),
-          }),
-        ),
-      }),
-    )
-    .optional(),
+  serviceAvailability: z.array(serviceAvailabilitySchema).optional(),
 })
 
 export const industryOptions = [

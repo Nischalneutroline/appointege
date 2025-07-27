@@ -246,7 +246,7 @@ export default function BusinessHourSelector({
     if (isDefault) {
       setCustom('custom')
     }
-    
+
     const updated = { ...serviceHours }
     const slots = [...(updated[activeDay] || [])]
     const slot = slots[idx] ? [...slots[idx]] : ['', '']

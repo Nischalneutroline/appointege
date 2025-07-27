@@ -1,7 +1,7 @@
 'use client'
 
 import { fetchAppointments } from '@/store/slices/appointmentSlice'
-import { fetchBusinessDetail } from '@/store/slices/businessSlice'
+import { fetchBusinessByOwnerId } from '@/store/slices/businessSlice'
 import { fetchCustomers } from '@/store/slices/customerSlice'
 import { fetchServices } from '@/store/slices/serviceslice'
 
@@ -12,10 +12,8 @@ import { useDispatch, useSelector } from 'react-redux'
 const AdminDashboard = () => {
   const dispatch = useDispatch<AppDispatch>()
   const user = useSelector((state: RootState) => state.auth.user)
-  const businessDetail = useSelector(
-    (state: RootState) => state.business.businessDetail,
-  )
-  const { isLoading, error } = useSelector((state: RootState) => state.business)
+
+  const { error } = useSelector((state: RootState) => state.business)
 
   useEffect(() => {
     const businessId = user?.ownedBusinesses?.[0]?.id
@@ -28,7 +26,7 @@ const AdminDashboard = () => {
           dispatch(fetchAppointments(false)),
           dispatch(fetchServices(false)),
           dispatch(fetchCustomers(false)),
-          dispatch(fetchBusinessDetail(businessId)),
+          dispatch(fetchBusinessByOwnerId(user.id)),
         ])
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
@@ -36,15 +34,9 @@ const AdminDashboard = () => {
     }
 
     fetchData()
-  }, [dispatch, user?.ownedBusinesses])
+  }, [dispatch, user?.ownedBusinesses, user?.id])
 
   // Log the business detail when it's loaded
-  useEffect(() => {
-    if (businessDetail && !isLoading) {
-      console.log('Business Detail:', businessDetail)
-      // You can now use businessDetail here
-    }
-  }, [businessDetail, isLoading])
 
   return <div>Dashboard</div>
 }

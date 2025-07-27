@@ -7,21 +7,8 @@ import { useEffect, useState } from 'react'
 // import StepTracker from './_components/step-tracker'
 import { toggleDesktopNav, toggleMobileNav } from '@/store/slices/navSlice'
 
-
-
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch()
-  const { desktopNavCollapse } = useSelector((state: RootState) => state.nav)
-  const [currentStep, setCurrentStep] = useState('services')
-  const [completedSteps, setCompletedSteps] = useState(
-    new Set(['business-setting']),
-  )
-
-  const { steps } = useSelector((state: RootState) => state.business)
-  useEffect(() => {
-    dispatch(toggleDesktopNav())
-    dispatch(toggleMobileNav())
-  }, [])
 
   return (
     <div className="flex gap-4 overflow-visible flex-row ">
