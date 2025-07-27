@@ -1,4 +1,4 @@
-import { prisma } from "../lib/prisma"
+import { prisma } from '../lib/prisma'
 
 // get service by id
 async function getBusinessDetailById(id: string) {
@@ -14,9 +14,14 @@ async function getBusinessDetailById(id: string) {
           timeSlots: true,
         },
       },
-      serviceAvailability: {
+      supportBusinessDetail: {
         include: {
-          timeSlots: true,
+          supportAvailability: {
+            include: {
+              timeSlots: true,
+            },
+          },
+          supportHoliday: true,
         },
       },
     },

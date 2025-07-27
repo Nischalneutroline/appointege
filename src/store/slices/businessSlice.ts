@@ -87,7 +87,7 @@ export interface Holiday {
   id?: string
   holiday: WeekDays
   type: HolidayType
-  date?: string
+  date: string
   businessId?: string
   supportBusinessDetailId?: string
 }
@@ -326,7 +326,7 @@ export const updateSupportBusinessDetail = createAsyncThunk<
 >('supportBusiness/update', async ({ id, data }, { rejectWithValue }) => {
   try {
     const response = await axiosApi.put<{ data: SupportBusinessDetail }>(
-      `/api/supportBusinessDetail/${id}`,
+      `/api/support-business-detail/${id}`,
       data,
     )
     toast.success('Support business details updated successfully')
@@ -350,21 +350,28 @@ export const createSupportBusinessDetail = createAsyncThunk<
   { rejectValue: { error: string; message: string } }
 >('supportBusiness/create', async ({ data }, { rejectWithValue }) => {
   try {
+    console.log('Sending data:', JSON.stringify(data, null, 2)) // Log the data being sent
     const response = await axiosApi.post<{ data: SupportBusinessDetail }>(
-      `/api/supportBusinessDetail`,
+      `/api/support-business-detail`,
       data,
     )
+    console.log('Response:', response.data) // Log the successful response
     toast.success('Support business details created successfully')
     return response.data.data
   } catch (error) {
+    console.error('Error details:', {
+      error,
+      response: (error as any).response?.data,
+      status: (error as any).response?.status,
+      headers: (error as any).response?.headers,
+    })
     const err = error as AxiosError<{ error: string; message: string }>
-    toast.error(
-      err.response?.data?.message ||
-        'Failed to create support business details',
-    )
+    const errorMessage =
+      err.response?.data?.message || 'Failed to create support business details'
+    toast.error(errorMessage)
     return rejectWithValue({
       error: 'Failed to create support business details',
-      message: err.response?.data?.message || 'An error occurred',
+      message: errorMessage,
     })
   }
 })

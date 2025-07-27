@@ -48,7 +48,7 @@ const SelectField = ({
         <FormItem className="flex flex-col gap-1">
           <div className="flex gap-2 items-center">
             {Icon && <Icon className="size-4 text-gray-500" />}
-            <FormLabel>{label}</FormLabel>
+            {label && <FormLabel className="h-5">{label}</FormLabel>}
           </div>
           <FormControl>
             <Select
