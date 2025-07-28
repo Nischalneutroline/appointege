@@ -691,19 +691,37 @@ const PhoneField = ({
           return
         }
       }
-      // Fallback to parsing with libphonenumber-js
+      // Handle phone number parsing with proper error handling
       try {
-        const parsed = parsePhoneNumber(input)
-        if (parsed && parsed.country) {
-          const country = countryOptions.find((c) => c.code === parsed.country)
-          if (country) {
-            setSelectedCountry(country)
-            setPhoneNumber(`${country.dialCode} ${parsed.nationalNumber}`)
-            return
+        // Only attempt to parse if we have sufficient input
+        if (input && input.replace(/\D/g, '').length >= 4) { // At least 4 digits
+          const parsed = parsePhoneNumber(input)
+          if (parsed?.country) {
+            const country = countryOptions.find(c => c.code === parsed.country)
+            if (country) {
+              setSelectedCountry(country)
+              // Only update if we have a valid national number
+              if (parsed.nationalNumber) {
+                setPhoneNumber(`${country.dialCode} ${parsed.nationalNumber}`)
+              } else {
+                // If no national number but country is detected, just set the dial code
+                setPhoneNumber(country.dialCode)
+              }
+              return
+            }
           }
         }
       } catch (err) {
-        console.error('Phone number parsing error:', err)
+        // Handle specific parsing errors
+        if (err instanceof Error) {
+          if (err.message.includes('TOO_SHORT')) {
+            // Skip logging for expected too-short numbers
+            return
+          }
+          console.warn('Phone number parsing warning:', err.message)
+        } else {
+          console.warn('Unexpected error parsing phone number:', err)
+        }
       }
     }
     // Set default country (Nepal) if no value

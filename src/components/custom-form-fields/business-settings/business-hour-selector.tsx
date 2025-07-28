@@ -11,10 +11,18 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
-import { CalendarDays, Hourglass, Plus, Trash2, Info } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import {
+  CalendarDays,
+  Hourglass,
+  Plus,
+  Trash2,
+  Info,
+  Minus,
+} from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { timeOptions, toMin } from '@/lib/lib'
 import { useWatch } from 'react-hook-form'
+import { Switch } from '@/components/ui/switch'
 
 // Helper functions
 
@@ -108,44 +116,86 @@ interface Props {
   initialBusinessHours?: BreakRecord
   dayName?: string
   label?: string
+  activeDay: Day
+  restrictToInitialHours: boolean
+  isDefault?: boolean
+  setCustom: (
+    value:
+      | 'custom'
+      | 'default'
+      | ((prev: 'custom' | 'default') => 'custom' | 'default'),
+  ) => void
 }
 
-export default function ServiceHourSelector({
+export default function BusinessHourSelector({
   name,
   businessBreaks,
   dayName,
   className,
   label,
   initialBusinessHours,
+  activeDay,
+  restrictToInitialHours = false,
+  isDefault,
+  setCustom,
 }: Props) {
+  // Form context
   const { setValue, getValues } = useFormContext()
 
+  // Local state for Apply to All switch
+  const [applyToAll, setApplyToAll] = useState(false)
+
+  // Avoid running effect on initial mount
+  const isFirstRender = useRef(true)
+
+  // Handle Apply to All switch change
+  const handleApplyToAll = () => {
+    setApplyToAll(!applyToAll)
+  }
   /* -------- RHF values -------- */
   const watchedValue =
     useWatch({ name: dayName || 'serviceDays' || 'businessAvailability' }) || []
-  console.log(watchedValue, 'watchedValue')
+
   const serviceDays: Day[] = Array.isArray(watchedValue)
     ? watchedValue.filter((day): day is Day => typeof day === 'string')
     : [] // 🔄 convert to Day
   const serviceHours: Record<Day, Slot[]> = useWatch({ name }) || {}
-  console.log(serviceDays, 'serviceDays')
 
   /* -------- UI state ---------- */
-  const [activeDay, setActiveDay] = useState<Day>(serviceDays[0] ?? 'Mon')
+
+  // Get min start and max end from initialBusinessHours for activeDay
+  const initialDaySlots = initialBusinessHours?.[activeDay] ?? []
+
+  // Get min start and max end from initialBusinessHours for activeDay
+  const minInitialTime = initialDaySlots.length
+    ? initialDaySlots.reduce(
+        (min, [start]) => (toMin(start) < toMin(min) ? start : min),
+        initialDaySlots[0][0],
+      )
+    : undefined
+
+  const maxInitialTime = initialDaySlots.length
+    ? initialDaySlots.reduce(
+        (max, [, end]) => (toMin(end) > toMin(max) ? end : max),
+        initialDaySlots[0][1],
+      )
+    : undefined
 
   /* -------- Filter options to exclude break times, but allow boundaries -------- */
-  const workTimeOptions = useMemo(() => {
-    const breaks = businessBreaks?.[activeDay] ?? []
-    return timeOptions.filter((t: any) => {
-      const min = toMin(t)
-      // Exclude times strictly inside a break (allow start/end boundaries)
-      return !breaks.some(([s, e]) => {
-        const startMin = toMin(s)
-        const endMin = toMin(e)
-        return min > startMin && min < endMin
+  const filteredWorkTimeOptions = useMemo(() => {
+    let options = [...timeOptions] // just clone all timeOptions, no filtering by breaks
+
+    if (restrictToInitialHours && minInitialTime && maxInitialTime) {
+      const minInitialMin = toMin(minInitialTime)
+      const maxInitialMin = toMin(maxInitialTime)
+      options = options.filter((t) => {
+        const tMin = toMin(t)
+        return tMin >= minInitialMin && tMin <= maxInitialMin
       })
-    })
-  }, [activeDay, businessBreaks])
+    }
+
+    return options
+  }, [activeDay, initialBusinessHours, restrictToInitialHours])
 
   /* -------- Helpers ---------------------------------------------- */
   const getAvailableTimes = (
@@ -192,6 +242,11 @@ export default function ServiceHourSelector({
 
   // Update the time slot
   const update = (idx: number, pos: 0 | 1, val: string) => {
+    // Switch to custom mode when any input is touched
+    if (isDefault) {
+      setCustom('custom')
+    }
+
     const updated = { ...serviceHours }
     const slots = [...(updated[activeDay] || [])]
     const slot = slots[idx] ? [...slots[idx]] : ['', '']
@@ -205,9 +260,13 @@ export default function ServiceHourSelector({
   const addSlot = () => {
     const updated = { ...serviceHours }
     const prevSlots = updated[activeDay] || []
-    const prevEnd = prevSlots.at(-1)?.[1] ?? workTimeOptions[0]
+    const prevEnd = prevSlots.at(-1)?.[1] ?? filteredWorkTimeOptions[0]
     const breaks = businessBreaks?.[activeDay] ?? []
-    const nextStart = getNextValidStartTime(prevEnd, breaks, workTimeOptions)
+    const nextStart = getNextValidStartTime(
+      prevEnd,
+      breaks,
+      filteredWorkTimeOptions,
+    )
     updated[activeDay] = [...prevSlots, [nextStart, '']]
     setValue(name, updated, { shouldDirty: true })
   }
@@ -230,141 +289,194 @@ export default function ServiceHourSelector({
     }
   }, [initialBusinessHours, name, setValue])
 
+  // Apply activeDay slots to all selected days when applyToAll toggled on
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    if (!applyToAll) return
+
+    const currentHours = getValues(name) || {}
+    const sourceSlots = currentHours[activeDay] || []
+
+    // Only update if sourceSlots exist and selectedDays > 1
+    if (sourceSlots.length === 0 || serviceDays.length <= 1) return
+
+    const updatedHours = { ...currentHours }
+    serviceDays.forEach((day) => {
+      if (day !== activeDay) {
+        updatedHours[day] = [...sourceSlots]
+      }
+    })
+    setValue(name, updatedHours, { shouldDirty: true })
+  }, [applyToAll])
+
   /* -------- Render ----------------------------------------------- */
   return (
     <div className="space-y-4">
       {/* Title */}
-      <div className="flex gap-2 items-center">
-        <Hourglass className="size-4 text-gray-500" />
-        <Label>{label || `Service Hour / day`}</Label>
-      </div>
-
-      {/* Day buttons */}
-      <div className="flex items-center gap-2 ">
-        <CalendarDays className="size-5 text-gray-500" />
-        <div className="flex gap-2 flex-wrap w-full">
-          {serviceDays
-            .sort((a, b) => days.indexOf(a) - days.indexOf(b))
-            .map((d) => (
-              <Button
-                type="button"
-                key={d}
-                variant={d === activeDay ? 'default' : 'outline'}
-                className={cn(
-                  'max-w-[72px] px-4 flex-shrink-0',
-                  d === activeDay && 'shadow-[inset_0_2px_4px_#001F5280]',
-                  className,
-                )}
-                onClick={() => setActiveDay(d)}
-              >
-                {d}
-              </Button>
-            ))}
+      <div className="flex gap-2 items-center justify-between">
+        <Label>{label || `Business Hour / day`}</Label>
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              'text-sm',
+              applyToAll ? 'text-[#111827]' : 'text-[#B5B4B4]',
+            )}
+          >
+            Apply to all
+          </span>
+          <Switch
+            checked={applyToAll}
+            onCheckedChange={handleApplyToAll}
+            className="data-[state=checked]:bg-primary"
+          />
         </div>
       </div>
 
       {/* Slots */}
       <div
         className={cn(
-          'space-y-4 flex flex-col items-center',
-          dayName === 'businessAvailability' && 'items-start px-6',
+          'space-y-2 flex flex-col items-center',
+          dayName === 'businessAvailability' && 'items-start',
+          dayName === 'serviceAvailability' && 'items-start',
         )}
       >
         {(serviceHours[activeDay] || []).map((slot, idx) => {
           // Auto-heal blank start values
-          if (!slot[0] && idx > 0) {
-            const prevEnd = serviceHours[activeDay][idx - 1][1]
+          if (!slot[0]) {
+            const prevSlot = serviceHours[activeDay][idx - 1]
+            const prevEnd = prevSlot ? prevSlot[1] : ''
             const breaks = businessBreaks?.[activeDay] ?? []
-            slot[0] = getNextValidStartTime(prevEnd, breaks, workTimeOptions)
+            slot[0] = getNextValidStartTime(
+              prevEnd,
+              breaks,
+              filteredWorkTimeOptions,
+            )
           }
 
           const prevEnd = idx > 0 ? serviceHours[activeDay][idx - 1][1] : ''
           const breaks = businessBreaks?.[activeDay] ?? []
-          const startList = getAvailableTimes(prevEnd, workTimeOptions, false)
-          const endList = getAvailableTimes(slot[0], workTimeOptions, true)
+          const startList = getAvailableTimes(
+            prevEnd,
+            filteredWorkTimeOptions,
+            false,
+          )
+          const endList = getAvailableTimes(
+            slot[0],
+            filteredWorkTimeOptions,
+            true,
+          )
 
           return (
             <div key={idx} className="flex gap-4 items-center">
               {/* Start */}
-              <Select
-                value={slot[0] || undefined}
-                onValueChange={(v) => update(idx, 0, v)}
-              >
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder="Start" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeOptions.map((t) => (
-                    <SelectItem
-                      key={t}
-                      value={t}
-                      disabled={isTimeDisabled(
-                        t,
-                        breaks,
-                        false,
-                        prevEnd || workTimeOptions[0],
-                      )}
-                    >
-                      {t}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-1">
+                <div className="text-[#252B38] text-sm font-normal">
+                  Open Time
+                </div>
+                <Select
+                  value={slot[0] || undefined}
+                  onValueChange={(v) => update(idx, 0, v)}
+                >
+                  <SelectTrigger className="w-32 md:w-40">
+                    <SelectValue placeholder="Start" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {startList.map((t) => {
+                      const tMin = toMin(t)
+                      const disabledByRestriction =
+                        restrictToInitialHours &&
+                        minInitialTime &&
+                        maxInitialTime &&
+                        (tMin < toMin(minInitialTime) ||
+                          tMin > toMin(maxInitialTime))
+
+                      return (
+                        <SelectItem
+                          key={t}
+                          value={t}
+                          disabled={
+                            disabledByRestriction ||
+                            isTimeDisabled(
+                              t,
+                              breaks,
+                              false,
+                              prevEnd || filteredWorkTimeOptions[0],
+                            )
+                          }
+                        >
+                          {t}
+                        </SelectItem>
+                      )
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* End */}
-              <div className="relative">
+              <div className="relative flex flex-col gap-1">
+                <div className="text-[#252B38] text-sm font-normal">
+                  Close Time
+                </div>
                 <Select
                   value={slot[1] || undefined}
                   onValueChange={(v) => update(idx, 1, v)}
                 >
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-32 md:w-40">
                     <SelectValue placeholder="End" />
                   </SelectTrigger>
                   <SelectContent>
-                    {timeOptions.map((t) => (
-                      <SelectItem
-                        key={t}
-                        value={t}
-                        disabled={isTimeDisabled(t, breaks, true, slot[0])}
-                      >
-                        {t}
-                      </SelectItem>
-                    ))}
+                    {startList.map((t) => {
+                      const tMin = toMin(t)
+                      const disabledByRestriction =
+                        restrictToInitialHours &&
+                        minInitialTime &&
+                        maxInitialTime &&
+                        (tMin < toMin(minInitialTime) ||
+                          tMin > toMin(maxInitialTime))
+
+                      return (
+                        <SelectItem
+                          key={t}
+                          value={t}
+                          disabled={
+                            disabledByRestriction ||
+                            isTimeDisabled(
+                              t,
+                              breaks,
+                              true,
+                              prevEnd || filteredWorkTimeOptions[0],
+                            )
+                          }
+                        >
+                          {t}
+                        </SelectItem>
+                      )
+                    })}
                   </SelectContent>
                 </Select>
-
+                {idx === 0 && !isDefault && (
+                  <div
+                    className="absolute -right-6 top-9 text-xs border-blue-600 rounded-[4px] border-[1px]"
+                    onClick={addSlot}
+                  >
+                    <Plus className="w-3 h-3" />
+                  </div>
+                )}
                 {idx > 0 && (
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="absolute -right-8 top-0"
+                  <div
+                    className="absolute -right-6 top-9 border-[1px] border-red-400 rounded-[4px]"
                     onClick={() => removeSlot(idx)}
                   >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
+                    <Minus className="w-3 h-3 text-destructive" />
+                  </div>
                 )}
               </div>
             </div>
           )
         })}
-
-        <Button
-          type="button"
-          variant="outline"
-          className="text-xs gap-1"
-          onClick={addSlot}
-        >
-          <Plus className="w-3 h-3" /> Add Time Slot
-        </Button>
-
-        {/* Break Time Note */}
-        {businessBreaks && (
-          <div className="mt-2 flex items-start gap-2 rounded-md bg-muted/50 p-3 text-sm text-muted-foreground max-w-md">
-            <Info className="size-4 mt-0.5 flex-shrink-0" />
-            <p>{formatBreaks(activeDay, businessBreaks?.[activeDay] ?? [])}</p>
-          </div>
-        )}
       </div>
     </div>
   )

@@ -725,6 +725,7 @@ const NewServiceForm = ({
                 />
                 <ServiceHoursSelector
                   name="serviceHours"
+                  dayName="serviceAvailability"
                   businessBreaks={defaultBusinessAvailability.breaks}
                   className="w-full border border-blue-200 rounded-[4px]"
                 />

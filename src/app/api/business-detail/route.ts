@@ -3,6 +3,8 @@ import { ZodError } from 'zod'
 
 import { prisma } from '@/lib/prisma'
 import { getBusinessDetailById } from '@/db/businessDetail'
+
+import { Prisma, WeekDays } from '@prisma/client'
 import { businessDetailSchema } from '@/app/(protected)/admin/business-settings/_schema/schema'
 
 // Create a new business detail
@@ -102,6 +104,7 @@ import { businessDetailSchema } from '@/app/(protected)/admin/business-settings/
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
+    // console.log('fequest revcieved', body.serviceAvailability)
     const parsedData = businessDetailSchema.parse(body)
 
     // Check for existing business
@@ -111,7 +114,13 @@ export async function POST(req: NextRequest) {
 
     if (existingBusiness) {
       return NextResponse.json(
-        { error: 'Business with this email already exists!' },
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Business with this email already exists!',
+          errorDetail: null,
+        },
         { status: 400 },
       )
     }
@@ -124,12 +133,16 @@ export async function POST(req: NextRequest) {
         phone: parsedData.phone,
         website: parsedData.website,
         businessRegistrationNumber: parsedData.businessRegistrationNumber,
-        businessOwner: parsedData.businessOwner,
+        taxID: parsedData.taxID,
+        businessType: parsedData.businessType,
         status: parsedData.status,
+        businessOwner: parsedData.businessOwner,
+        timeZone: parsedData.timeZone,
         address: {
           create: parsedData.address.map((address) => ({
             street: address.street,
             city: address.city,
+            state: address.state,
             country: address.country,
             zipCode: address.zipCode,
             googleMap: address.googleMap || '',
@@ -143,6 +156,17 @@ export async function POST(req: NextRequest) {
               create: availability.timeSlots.map((timeSlot) => ({
                 startTime: timeSlot.startTime,
                 endTime: timeSlot.endTime,
+              })),
+            },
+          })),
+        },
+        serviceAvailability: {
+          create: parsedData.serviceAvailability?.map((availability) => ({
+            weekDay: availability.weekDay as WeekDays,
+            timeSlots: {
+              create: availability.timeSlots.map((slot) => ({
+                startTime: slot.startTime,
+                endTime: slot.endTime,
               })),
             },
           })),
@@ -174,6 +198,7 @@ export async function POST(req: NextRequest) {
             timeSlots: true,
           },
         },
+        serviceAvailability: { include: { timeSlots: true } },
         holiday: true,
         serviceAvailability: {
           include: {
@@ -185,24 +210,56 @@ export async function POST(req: NextRequest) {
 
     if (!newBusiness) {
       return NextResponse.json(
-        { error: 'Failed to create business' },
+        { message: 'Failed to create business!', success: false },
         { status: 500 },
       )
     }
 
     return NextResponse.json(
-      { message: 'Business created successfully!', business: newBusiness },
+      {
+        data: newBusiness,
+        status: 201,
+        success: true,
+        message: 'Business Created successfully!',
+        errorDetail: null,
+      },
       { status: 201 },
     )
   } catch (error) {
-    if (error instanceof ZodError) {
+    if (error instanceof Prisma.PrismaClientValidationError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors[0].message },
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Prisma Validation failed',
+          errorDetail: error.message,
+        },
         { status: 400 },
       )
     }
+
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Zod Validation failed!',
+          errorDetail: error.errors,
+        },
+        { status: 400 },
+      )
+    }
+
     return NextResponse.json(
-      { error: 'Internal server error', detail: error },
+      {
+        data: null,
+        status: 500,
+        success: false,
+        message: 'Failed to create new business!',
+        errorDetail: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 },
     )
   }
@@ -219,21 +276,64 @@ export async function GET() {
             timeSlots: true,
           },
         },
+        serviceAvailability: { include: { timeSlots: true } },
         holiday: true,
+        services: {
+          include: {
+            serviceAvailability: {
+              include: {
+                timeSlots: true,
+              },
+            },
+          },
+        },
       },
     })
 
     if (businessDetails.length === 0) {
       return NextResponse.json(
-        { error: 'No business details found' },
+        {
+          message: 'No business details found!',
+          success: false,
+          errorDetail: null,
+          data: null,
+          status: 404,
+        },
         { status: 404 },
       )
     }
-
-    return NextResponse.json(businessDetails, { status: 200 })
-  } catch (error) {
     return NextResponse.json(
-      { error: 'Failed to fetch business details' },
+      {
+        data: businessDetails,
+        success: true,
+        message: 'Business fetched successfully!',
+        errorDetail: null,
+        status: 200,
+      },
+      { status: 200 },
+    )
+  } catch (error) {
+    console.log(' error:', error)
+    if (error instanceof Prisma.PrismaClientValidationError) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Prisma Validation failed',
+          errorDetail: error.message,
+        },
+        { status: 400 },
+      )
+    }
+    return NextResponse.json(
+      {
+        message: 'Failed to fetch business details!',
+        success: false,
+        errorDetail: error,
+        data: null,
+        status: 500,
+      },
       { status: 500 },
     )
   }
@@ -275,6 +375,7 @@ export async function PUT(req: NextRequest) {
             update: {
               street: addr.street,
               city: addr.city,
+              state: addr.state,
               country: addr.country,
               zipCode: addr.zipCode,
               googleMap: addr.googleMap || '',
@@ -282,6 +383,7 @@ export async function PUT(req: NextRequest) {
             create: {
               street: addr.street,
               city: addr.city,
+              state: addr.state,
               country: addr.country,
               zipCode: addr.zipCode,
               googleMap: addr.googleMap || '',

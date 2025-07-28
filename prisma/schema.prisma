@@ -1,3 +1,544 @@
+// // This is your Prisma schema file,
+// // learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// generator client {
+//   provider = "prisma-client-js"
+//   // output   = "../src/generated/prisma"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+// }
+
+// model User {
+//   id            String    @id @default(cuid())
+//   name          String?
+//   email         String    @unique
+//   emailVerified DateTime?
+//   phone         String?
+//   password      String?
+//   role          Role      @default(USER)
+//   isActive      Boolean   @default(true) // Whether the user account is active
+
+//   // Optional for OAuth support
+//   image    String?
+//   accounts Account[]
+//   // Optional for WebAuthn support
+
+//   // Relationship Model: Appoinments, Address, FAQ, Ticket, Individual, Events, BusinessDetails
+//   appointments  Appointment[] @relation("BookedUser") // Appointments booked by this user for themselves
+//   bookings      Appointment[] @relation("BookedBy") // Appointments booked by this user for others
+//   adminBookings Appointment[] @relation("CreatedBy") // Appointments created by this user (e.g., admin)
+
+//   address Address? // Optional one-to-one relation to Address
+
+//   FAQ            FAQ[] // FAQs created/updated by this user
+//   Ticket         Ticket[] // Support tickets raised by this user
+//   individual     Individual?
+//   events         Event[]
+//   businessDetail BusinessDetail[]
+
+//   lastActive DateTime @default(now()) // Last activity timestamp
+//   createdAt  DateTime @default(now())
+//   updatedAt  DateTime @updatedAt
+// }
+
+// model Account {
+//   userId            String
+//   type              String
+//   provider          String
+//   providerAccountId String
+//   refresh_token     String?
+//   access_token      String?
+//   expires_at        Int?
+//   token_type        String?
+//   scope             String?
+//   id_token          String?
+//   session_state     String?
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+//   @@id([provider, providerAccountId])
+// }
+
+// enum Role {
+//   USER
+//   ADMIN
+//   SUPER_ADMIN
+//   GUEST
+//   // Add more roles as needed
+// }
+
+// // ------ Verification models ------
+// model VerificationToken {
+//   id        String   @id @default(cuid())
+//   email     String
+//   token     String   @unique
+//   expiresAt DateTime
+
+//   @@unique([email, token])
+// }
+
+// model PasswordResetToken {
+//   id        String   @id @default(cuid())
+//   email     String
+//   token     String   @unique
+//   expiresAt DateTime
+
+//   @@unique([email, token])
+// }
+
+// // Other Models
+
+// model Address {
+//   id      Int    @id @default(autoincrement()) // Auto-incrementing ID
+//   street  String // Street address
+//   city    String // City
+//   country String // Country
+//   zipCode String // Zip/postal code
+//   user    User   @relation(fields: [userId], references: [id], onDelete: Cascade) // Link to User
+//   userId  String @unique // Foreign key, one address per user
+// }
+
+// // --------- Service
+
+// model Service {
+//   id                  String                @id @default(cuid()) // Unique ID for the service
+//   title               String // Service name (e.g., "Haircut")
+//   description         String // Service description
+//   createdAt           DateTime              @default(now()) // Creation timestamp
+//   status              Status                @default(ACTIVE) // Service status (ACTIVE/INACTIVE)
+//   estimatedDuration   Int // Duration in minutes (e.g., 60 for 1 hour)
+//   serviceAvailability ServiceAvailability[] // Available times for this service
+//   appointments        Appointment[] // Appointments booked for this service
+//   reminders           Reminder[] // Reminders associated with this service
+//   resources           Resource[] // Resources (e.g., staff) for this service
+//   updatedAt           DateTime              @updatedAt
+//   businessDetail      BusinessDetail?       @relation(fields: [businessDetailId], references: [id]) // Link to business
+//   businessDetailId    String? // Optional foreign key
+// }
+
+// model ServiceAvailability {
+//   id        String        @id @default(cuid()) // Unique ID
+//   service   Service?       @relation(fields: [serviceId], references: [id], onDelete: Cascade) // Link to Service
+//   serviceId String? // Foreign key
+//   weekDay   WeekDays // Day of the week (e.g., MONDAY)
+//   timeSlots ServiceTime[] // Available time slots for this day
+//   businessDetail BusinessDetail?  @relation(fields: [businessDetailId], references: [id])
+//   businessDetailId String?  
+// }
+
+// model ServiceTime {
+//   id                    String              @id @default(cuid()) // Unique ID
+//   serviceAvailability   ServiceAvailability @relation(fields: [serviceAvailabilityId], references: [id], onDelete: Cascade)
+//   serviceAvailabilityId String // Foreign key
+//   startTime             String // e.g., "08:00:00" (24-hour)
+//   endTime               String // e.g., "17:00:00" (24-hour)
+// }
+
+// enum Status {
+//   ACTIVE
+//   INACTIVE
+// }
+
+// enum WeekDays {
+//   SUNDAY
+//   MONDAY
+//   TUESDAY
+//   WEDNESDAY
+//   THURSDAY
+//   FRIDAY
+//   SATURDAY
+// }
+
+// // -------- Notification & Reminders
+
+// enum ReminderType {
+//   REMINDER // Sent before appointment (e.g., 48h, 24h, 1h)
+//   FOLLOW_UP // Sent after appointment (e.g., feedback)
+//   CANCELLATION // Sent after cancellation
+//   MISSED // Sent after a missed appointment
+//   CUSTOM // Flexible, admin-defined timing
+// }
+
+// enum NotificationMethod {
+//   SMS
+//   EMAIL
+//   PUSH
+// }
+
+// model Reminder {
+//   id             String           @id @default(cuid()) // Unique ID
+//   type           ReminderType // Type of reminder
+//   title          String // Reminder title
+//   description    String? // Optional description
+//   message        String? // Optional message content
+//   services       Service[] // Services this reminder applies to
+//   notifications  Notification[] // Notification methods (SMS, EMAIL, PUSH)
+//   reminderOffset ReminderOffset[] // Offset timings for this reminder
+// }
+
+// model ReminderOffset {
+//   id                 String                      @id @default(cuid()) // Unique ID
+//   sendOffset         Int? // Offset in minutes (e.g., 2880 for 48 hours)
+//   customScheduleAt   String?
+//   sendBefore         Boolean // True if before appointment, false if after
+//   reminder           Reminder                    @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+//   reminderId         String // Foreign key
+//   appointmentOffsets AppointmentReminderOffset[] // Appointment-specific offsets
+// }
+
+// model AppointmentReminderOffset {
+//   id               String         @id @default(cuid()) // Unique ID
+//   appointment      Appointment    @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+//   appointmentId    String // Foreign key to Appointment
+//   reminderOffset   ReminderOffset @relation(fields: [reminderOffsetId], references: [id], onDelete: Cascade)
+//   reminderOffsetId String // Foreign key to ReminderOffset
+//   scheduledAt      DateTime // When this reminder should fire
+//   status           ReminderStatus @default(PENDING)
+// }
+
+// enum ReminderStatus {
+//   PENDING // Not yet processed
+//   TRIGGERED // Scheduled to be sent (e.g. via inngest ts)
+//   SENT // Actually sent successfully
+//   FAILED // Attempted but failed
+// }
+
+// model Notification {
+//   id         String             @id @default(cuid()) // Unique ID
+//   method     NotificationMethod // Notification type (SMS, EMAIL, PUSH)
+//   reminderId String // Foreign key
+//   reminder   Reminder           @relation(fields: [reminderId], references: [id], onDelete: Cascade)
+// }
+
+// // ------ Appointments
+
+// model Appointment {
+//   id           String            @id @default(cuid()) // Unique ID
+//   customerName String // Name of the customer
+//   email        String // Customer’s email
+//   phone        String // Customer’s phone
+//   status       AppointmentStatus @default(SCHEDULED) // Appointment status
+//   cancelledAt  DateTime? // Timestamp of cancellation, if applicable
+
+//   userId          String? // Optional user who booked for themselves
+//   user            User?                       @relation("BookedUser", fields: [userId], references: [id])
+//   bookedById      String? // Optional user who booked for someone else
+//   bookedBy        User?                       @relation("BookedBy", fields: [bookedById], references: [id])
+//   service         Service                     @relation(fields: [serviceId], references: [id])
+//   serviceId       String // Foreign key
+//   selectedDate    DateTime // Date of appointment
+//   selectedTime    String // Time of appointment
+//   message         String? // Optional notes
+//   isForSelf       Boolean?                    @default(true) // True if booked for self
+//   createdBy       User?                       @relation("CreatedBy", fields: [createdById], references: [id])
+//   createdById     String? // User who created the appointment
+//   createdAt       DateTime                    @default(now()) // Creation timestamp
+//   updatedAt       DateTime                    @updatedAt // Last update timestamp
+//   Resource        Resource?                   @relation(fields: [resourceId], references: [id])
+//   resourceId      String? // Optional resource (e.g., staff)
+//   reminderOffsets AppointmentReminderOffset[] // Appointment-specific reminders
+// }
+
+// // Appointment Status 
+// enum AppointmentStatus {
+//   SCHEDULED
+//   COMPLETED
+//   MISSED
+//   CANCELLED
+//   FOLLOW_UP
+// }
+
+// // -------- Announcement 
+
+// model AnnouncementOrOffer {
+//   id          String  @id @default(cuid()) // Unique ID
+//   title       String // Announcement title
+//   description String? // Optional description
+//   message     String? // Optional message
+
+//   audience    TargetAudience // Who sees it (ALL, APPOINTED_USERS, etc.)
+//   isImmediate Boolean        @default(true) // Send immediately?
+//   scheduledAt DateTime // When to send/show
+//   showOn      Showon // Where to display (BANNER, PUSH, etc.)
+
+//   expiredAt ExpirationDuration @default(THIRTY_DAYS) // When it expires
+
+//   createdAt DateTime @default(now()) // Creation timestamp
+//   updatedAt DateTime @updatedAt
+// }
+
+// enum Showon {
+//   BANNER
+//   PUSH
+//   EMAIL
+//   SMS
+//   ALL
+// }
+
+// enum TargetAudience {
+//   ALL
+//   APPOINTED_USERS
+//   CANCELLED_USERS
+// }
+
+// enum ExpirationDuration {
+//   ONE_DAY
+//   THREE_DAYS
+//   SEVEN_DAYS
+//   THIRTY_DAYS
+//   NEVER
+// }
+
+// // Business Details
+// model BusinessDetail {
+//   id                         String            @id @default(cuid()) // Unique ID
+//   name                       String // Business name
+//   industry                   String // Industry type
+//   email                      String            @unique // Business email
+//   phone                      String // Business phone
+//   website                    String? // Optional website
+//   address                    BusinessAddress[] // Physical addresses
+//   businessRegistrationNumber String // Registration number
+//   status                     BusinessStatus    @default(PENDING) // Business status
+//   timeZone                   String?
+//   user                       User?             @relation(fields: [businessOwner], references: [id], onDelete: Cascade)
+//   businessOwner              String? // Optional link to business
+
+//   businessAvailability BusinessAvailability[] // Operating hours
+//   holiday              Holiday[] // Holidays
+
+//   createdAt             DateTime               @default(now()) // Creation timestamp
+//   updatedAt             DateTime               @updatedAt // Last update
+//   supportBusinessDetail SupportBusinessDetail? // Optional support details
+//   resources             Resource[] // Staff/resources
+//   services              Service[] // Services offered
+//   serviceAvailability   ServiceAvailability[]
+// }
+
+// model BusinessAddress {
+//   id         String                 @id @default(cuid()) // Unique ID
+//   street     String // Street
+//   city       String // City
+//   country    String // Country
+//   zipCode    String // Zip code
+//   googleMap  String // Google Maps link
+//   business   BusinessDetail?        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+//   businessId String? // Optional link to business
+//   support    SupportBusinessDetail? @relation(fields: [supportId], references: [id], onDelete: Cascade)
+//   supportId  String? // Optional link to support
+// }
+
+// model BusinessAvailability {
+//   id                      String                 @id @default(cuid()) // Unique ID
+//   business                BusinessDetail?        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+//   businessId              String? // Optional business link
+//   weekDay                 WeekDays // Day of week
+//   type                    AvailabilityType       @default(GENERAL) // GENERAL or SUPPORT
+//   timeSlots               BusinessTime[] // Available times
+//   SupportBusinessDetail   SupportBusinessDetail? @relation(fields: [supportBusinessDetailId], references: [id], onDelete: Cascade)
+//   supportBusinessDetailId String? // Optional support link
+// }
+
+// enum AvailabilityType {
+//   GENERAL
+//   SUPPORT
+// }
+
+// enum BusinessTimeType {
+//   WORK
+//   BREAK
+// }
+
+// model BusinessTime {
+//   id                     String               @id @default(cuid()) // Unique ID
+//   businessAvailability   BusinessAvailability @relation(fields: [businessAvailabilityId], references: [id], onDelete: Cascade)
+//   type                   BusinessTimeType     @default(WORK)
+//   businessAvailabilityId String // Foreign key
+//   startTime              String // e.g., "08:00:00" (24-hour)
+//   endTime                String // e.g., "17:00:00" (24-hour)
+// }
+
+// model Holiday {
+//   id                      String                 @id @default(cuid()) // Unique ID
+//   business                BusinessDetail?        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+//   businessId              String? // Optional business link
+//   holiday                 WeekDays // Holiday day
+//   type                    HolidayType            @default(GENERAL) // GENERAL or SUPPORT
+//   date                    DateTime? // Specific date, if applicable
+//   SupportBusinessDetail   SupportBusinessDetail? @relation(fields: [supportBusinessDetailId], references: [id])
+//   supportBusinessDetailId String? // Optional support link
+// }
+
+// enum HolidayType {
+//   GENERAL
+//   SUPPORT
+// }
+
+// enum BusinessStatus {
+//   ACTIVE
+//   INACTIVE
+//   PENDING
+//   SUSPENDED
+// }
+
+// // ------- Support and Help
+
+// model SupportBusinessDetail {
+//   id                  String                 @id @default(cuid()) // Unique ID
+//   supportBusinessName String // Support team name
+//   supportEmail        String                 @unique // Support email
+//   supportPhone        String // Support phone
+//   supportGoogleMap    String? // Optional Google Maps link
+//   supportAvailability BusinessAvailability[] // Support hours
+//   supportHoliday      Holiday[] // Support holidays
+//   // supportAddress      BusinessAddress[] // Support addresses
+//   supportAddress      String // Support addresses
+
+//   business        BusinessDetail    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+//   businessId      String            @unique // Link to business
+//   BusinessAddress BusinessAddress[]
+// }
+
+// //----- FAQ
+
+// model FAQ {
+//   id        String   @id @default(cuid()) // Unique ID
+//   question  String // FAQ question
+//   answer    String // FAQ answer
+//   category  String? // Optional category
+//   isActive  Boolean  @default(true) // Active status
+//   order     Int? // Optional display order
+//   createdAt DateTime @default(now()) // Creation timestamp
+//   updatedAt DateTime @updatedAt // Last update
+
+//   lastUpdatedById String // ID of user who last updated
+//   User            User   @relation(fields: [createdById], references: [id])
+//   createdById     String // ID of user who created
+// }
+
+// // -- Ticket
+
+// model Ticket {
+//   id                String       @id @default(cuid()) // Unique ID
+//   userType          Role // Type of user (USER, ADMIN, etc.)
+//   subject           String // Ticket subject
+//   ticketDescription String // Ticket details
+//   category          String // Ticket category
+//   priority          Priority     @default(MEDIUM) // Priority level
+//   status            TicketStatus @default(OPEN) // Ticket status
+
+//   createdAt             DateTime @default(now()) // Creation timestamp
+//   updatedAt             DateTime @updatedAt // Last update
+//   assignedTo            String? // Optional assignee
+//   resolutionDescription String? // Optional resolution notes
+//   proofFiles            String? // Optional file links
+
+//   initiatedById String? // Optional initiator
+//   userId        String // User who raised ticket
+//   user          User    @relation(fields: [userId], references: [id])
+// }
+
+// enum Priority {
+//   LOW
+//   MEDIUM
+//   HIGH
+//   URGENT
+// }
+
+// enum TicketStatus {
+//   OPEN
+//   IN_PROGRESS
+//   RESOLVED
+//   CLOSED
+// }
+
+// // -------- Resources
+
+// model Resource {
+//   id         String         @id @default(cuid()) // Unique ID
+//   name       String // Resource name (e.g., staff)
+//   email      String         @unique // Resource email
+//   phone      String // Resource phone
+//   role       String // Resource role
+//   address    String? // Optional address
+//   businessId String // Link to business
+//   business   BusinessDetail @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+//   services     Service[] // Services this resource provides
+//   appointments Appointment[] // Appointments assigned to resource
+
+//   createdAt DateTime @default(now()) // Creation timestamp
+//   updatedAt DateTime @updatedAt // Last update
+// }
+
+// // -------- Individual
+
+// model Individual {
+//   id              String   @id @default(cuid())
+//   userId          String   @unique
+//   bio             String?
+//   position        String // e.g. "Product Designer", "Marketing Coach"
+//   profileImage    String?
+//   country         String
+//   zoomAccessToken String?
+//   createdAt       DateTime @default(now())
+//   updatedAt       DateTime @updatedAt
+//   user            User     @relation(fields: [userId], references: [id])
+//   events          Event[]
+// }
+
+// enum VideoProvider {
+//   ZOOM
+//   GOOGLE_MEET
+// }
+
+// model Meeting {
+//   id            String         @id @default(cuid())
+//   eventId       String
+//   timeSlot      DateTime
+//   bookedByName  String
+//   bookedByEmail String
+//   customAnswers Json?
+//   videoUrl      String?
+//   videoProvider VideoProvider?
+//   slug          String?        @unique
+//   event         Event          @relation(fields: [eventId], references: [id])
+// }
+
+// model Availability {
+//   id        String @id @default(cuid())
+//   eventId   String
+//   dayOfWeek Int
+//   startTime String
+//   endTime   String
+//   duration  Int
+//   event     Event  @relation(fields: [eventId], references: [id])
+// }
+
+// model Event {
+//   id           String         @id @default(cuid())
+//   title        String
+//   description  String?
+//   location     String // e.g. Zoom, Google Meet
+//   slug         String         @unique
+//   userId       String
+//   user         User           @relation(fields: [userId], references: [id])
+//   createdAt    DateTime       @default(now())
+//   individualId String
+//   individual   Individual     @relation(fields: [individualId], references: [id])
+//   availability Availability[]
+//   meetings     Meeting[]
+// }
+
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
@@ -112,12 +653,12 @@ model Service {
 }
 
 model ServiceAvailability {
-  id               String          @id @default(cuid())
-  service          Service?        @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  serviceId        String?
-  weekDay          WeekDays
-  timeSlots        ServiceTime[]
-  BusinessDetail   BusinessDetail? @relation(fields: [businessDetailId], references: [id])
+  id               String          @id @default(cuid()) // Unique ID
+  service          Service?        @relation(fields: [serviceId], references: [id], onDelete: Cascade) // Link to Service
+  serviceId        String? // Foreign key
+  weekDay          WeekDays // Day of the week (e.g., MONDAY)
+  timeSlots        ServiceTime[] // Available time slots for this day
+  businessDetail   BusinessDetail? @relation(fields: [businessDetailId], references: [id])
   businessDetailId String?
 }
 
@@ -283,6 +824,8 @@ model BusinessDetail {
   website                    String?
   address                    BusinessAddress[]
   businessRegistrationNumber String
+  taxID                      String?
+  businessType               BusinessType           @default(PHYSICAL)
   status                     BusinessStatus         @default(PENDING)
   timeZone                   String?
   user                       User?                  @relation(fields: [businessOwner], references: [id], onDelete: Cascade)
@@ -298,6 +841,12 @@ model BusinessDetail {
   resources                  Resource[]
   services                   Service[]
   documents                  Document[]
+}
+
+enum BusinessType {
+  PHYSICAL
+  VIRTUAL
+  ALL
 }
 
 model BusinessAdmin {
@@ -329,6 +878,7 @@ model BusinessAddress {
   street     String
   city       String
   country    String
+  state      String
   zipCode    String
   googleMap  String
   business   BusinessDetail?        @relation(fields: [businessId], references: [id], onDelete: Cascade)
