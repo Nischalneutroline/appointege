@@ -41,6 +41,8 @@ export async function POST(req: NextRequest) {
         phone: parsedData.phone,
         website: parsedData.website,
         businessRegistrationNumber: parsedData.businessRegistrationNumber,
+        taxID: parsedData.taxID,
+        businessType: parsedData.businessType,
         status: parsedData.status,
         businessOwner: parsedData.businessOwner,
         timeZone: parsedData.timeZone,
@@ -48,6 +50,7 @@ export async function POST(req: NextRequest) {
           create: parsedData.address.map((address) => ({
             street: address.street,
             city: address.city,
+            state: address.state,
             country: address.country,
             zipCode: address.zipCode,
             googleMap: address.googleMap || '',
@@ -264,6 +267,7 @@ export async function PUT(req: NextRequest) {
             update: {
               street: addr.street,
               city: addr.city,
+              state: addr.state,
               country: addr.country,
               zipCode: addr.zipCode,
               googleMap: addr.googleMap || '',
@@ -271,6 +275,7 @@ export async function PUT(req: NextRequest) {
             create: {
               street: addr.street,
               city: addr.city,
+              state: addr.state,
               country: addr.country,
               zipCode: addr.zipCode,
               googleMap: addr.googleMap || '',

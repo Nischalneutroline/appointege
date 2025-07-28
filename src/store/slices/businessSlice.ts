@@ -98,6 +98,7 @@ interface Address {
   street: string
   city: string
   country: string
+  state: string
   zipCode: string
   googleMap: string
   businessId?: string | null
@@ -112,9 +113,11 @@ export interface BusinessDetail {
   phone: string
   website?: string | null
   businessRegistrationNumber: string
+  taxID: string
+  businessType: 'PHYSICAL' | 'VIRTUAL' | 'ALL'
   status: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'SUSPENDED'
   timeZone?: string | null
-  businessOwner?: string
+  businessOwner?: string | null
   createdAt: Date
   updatedAt: Date
   businessAvailability: BusinessAvailability[]

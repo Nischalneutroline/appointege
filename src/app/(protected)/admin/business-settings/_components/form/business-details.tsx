@@ -40,7 +40,8 @@ export const businessDetailFormSchema = z.object({
     .string()
     .min(10, 'Phone number must be at least 10 digits')
     .optional(),
-  businessType: z.enum(['PHYSICAL', 'VIRTUAL', 'ALL']).optional(),
+  businessType: z.enum(['PHYSICAL', 'VIRTUAL', 'ALL']),
+  businessOwner: z.string().optional(),
   website: z.string().url('Invalid URL').optional(),
   street: z.string().min(1, 'Street is required').optional(),
   city: z.string().min(1, 'City is required').optional(),
@@ -101,7 +102,7 @@ export const transformApiData = (
     country: address.country || '',
     googleMap: address.googleMap || null,
     registrationNumber: apiData.businessRegistrationNumber || '',
-    taxId: apiData.taxId || '',
+    taxId: apiData.taxID || '',
     logo: apiData.logo || null,
   }
 }
@@ -152,6 +153,8 @@ const BusinessDetail = ({ data }: { data?: any }) => {
       phone: formData.phone || '',
       website: formData.website || '',
       businessRegistrationNumber: formData.registrationNumber || '',
+      taxID: formData.taxId || '',
+      businessType: formData.businessType || 'PHYSICAL',
       address: formData.street
         ? [
             {
@@ -173,8 +176,6 @@ const BusinessDetail = ({ data }: { data?: any }) => {
       serviceAvailability: selectedBusiness?.serviceAvailability || [],
       status: selectedBusiness?.status || 'PENDING',
       businessOwner: selectedBusiness?.businessOwner || null,
-      createdAt: selectedBusiness?.createdAt || new Date(),
-      updatedAt: new Date(),
       id: selectedBusiness?.id || '',
     }
 
@@ -207,6 +208,8 @@ const BusinessDetail = ({ data }: { data?: any }) => {
       phone: formData.phone || '',
       website: formData.website || '',
       businessRegistrationNumber: formData.registrationNumber || '',
+      taxID: formData.taxId || '',
+      businessType: formData.businessType || 'PHYSICAL',
       address: formData.street
         ? [
             {
@@ -228,8 +231,8 @@ const BusinessDetail = ({ data }: { data?: any }) => {
       serviceAvailability: selectedBusiness?.serviceAvailability || [],
       status: selectedBusiness?.status || 'PENDING',
       businessOwner: selectedBusiness?.businessOwner || null,
-      createdAt: selectedBusiness?.createdAt || new Date(),
-      updatedAt: new Date(),
+      // createdAt: selectedBusiness?.createdAt || new Date(),
+      // updatedAt: new Date(),
       id: selectedBusiness?.id || '',
     }
     dispatch(setBusinessDetail(updatedData))

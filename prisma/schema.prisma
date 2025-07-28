@@ -653,13 +653,13 @@ model Service {
 }
 
 model ServiceAvailability {
-  id        String        @id @default(cuid()) // Unique ID
-  service   Service?       @relation(fields: [serviceId], references: [id], onDelete: Cascade) // Link to Service
-  serviceId String? // Foreign key
-  weekDay   WeekDays // Day of the week (e.g., MONDAY)
-  timeSlots ServiceTime[] // Available time slots for this day
-  businessDetail BusinessDetail?  @relation(fields: [businessDetailId], references: [id])
-  businessDetailId String?  
+  id               String          @id @default(cuid()) // Unique ID
+  service          Service?        @relation(fields: [serviceId], references: [id], onDelete: Cascade) // Link to Service
+  serviceId        String? // Foreign key
+  weekDay          WeekDays // Day of the week (e.g., MONDAY)
+  timeSlots        ServiceTime[] // Available time slots for this day
+  businessDetail   BusinessDetail? @relation(fields: [businessDetailId], references: [id])
+  businessDetailId String?
 }
 
 model ServiceTime {
@@ -824,6 +824,8 @@ model BusinessDetail {
   website                    String?
   address                    BusinessAddress[]
   businessRegistrationNumber String
+  taxID                      String?
+  businessType               BusinessType           @default(PHYSICAL)
   status                     BusinessStatus         @default(PENDING)
   timeZone                   String?
   user                       User?                  @relation(fields: [businessOwner], references: [id], onDelete: Cascade)
@@ -839,6 +841,12 @@ model BusinessDetail {
   resources                  Resource[]
   services                   Service[]
   documents                  Document[]
+}
+
+enum BusinessType {
+  PHYSICAL
+  VIRTUAL
+  ALL
 }
 
 model BusinessAdmin {
@@ -870,6 +878,7 @@ model BusinessAddress {
   street     String
   city       String
   country    String
+  state      String
   zipCode    String
   googleMap  String
   business   BusinessDetail?        @relation(fields: [businessId], references: [id], onDelete: Cascade)

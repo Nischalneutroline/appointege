@@ -250,6 +250,8 @@ const ServiceAvailabilityForm = () => {
       businessOwner: user?.id,
     }
 
+    console.log(finalBusinessData, 'finalBusinessData')
+
     try {
       dispatch(setBusinessDetail(finalBusinessData))
       dispatch(setServiceAvailabilityForm(filteredFormData))

@@ -51,65 +51,44 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
     if (!id) {
       return NextResponse.json(
-        { message: 'Business ID is required!', success: false },
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Business ID is required!',
+          errorDetail: null,
+        },
         { status: 400 },
       )
     }
 
     const parsedData = businessDetailSchema.parse(body)
 
+    // Check if business exists
     const business = await getBusinessDetailById(id)
-
     if (!business) {
       return NextResponse.json(
-        { message: 'Business Detail with id not found!', success: false },
+        {
+          data: null,
+          status: 404,
+          success: false,
+          message: 'Business Detail with id not found!',
+          errorDetail: null,
+        },
         { status: 404 },
       )
     }
 
-    // Use a transaction to delete related records and update the business
-    const updatedBusiness = await prisma.$transaction(async (tx) => {
-      // Delete related timeSlots for serviceAvailability
-      await tx.serviceTime.deleteMany({
-        where: {
-          serviceAvailability: {
-            businessDetailId: id,
-          },
-        },
-      })
+    // Use a transaction to delete the existing business and create a new one with the same ID
+    // Delete the business (cascading deletes handle related records)
+    const deletedBusiness = await prisma.businessDetail.delete({
+      where: { id },
+    })
 
-      // Delete serviceAvailability records
-      await tx.serviceAvailability.deleteMany({
-        where: { businessDetailId: id },
-      })
+    console.log('deletedBusiness', deletedBusiness)
 
-      // Delete related timeSlots for businessAvailability
-      await tx.businessTime.deleteMany({
-        where: {
-          businessAvailability: {
-            businessId: id,
-          },
-        },
-      })
-
-      // Delete businessAvailability records
-      await tx.businessAvailability.deleteMany({
-        where: { businessId: id },
-      })
-
-      // Delete existing addresses
-      await tx.businessAddress.deleteMany({
-        where: { businessId: id },
-      })
-
-      // Delete existing holidays
-      await tx.holiday.deleteMany({
-        where: { businessId: id },
-      })
-
-      // Update the business with new data
-      return await tx.businessDetail.update({
-        where: { id },
+    if (deletedBusiness) {
+      const newBusiness = await prisma.businessDetail.create({
         data: {
           name: parsedData.name,
           industry: parsedData.industry,
@@ -117,13 +96,16 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
           phone: parsedData.phone,
           website: parsedData.website,
           businessRegistrationNumber: parsedData.businessRegistrationNumber,
+          taxID: parsedData.taxID,
+          businessType: parsedData.businessType,
           status: parsedData.status,
-          timeZone: parsedData.timeZone,
           businessOwner: parsedData.businessOwner,
+          timeZone: parsedData.timeZone,
           address: {
             create: parsedData.address.map((address) => ({
               street: address.street,
               city: address.city,
+              state: address.state,
               country: address.country,
               zipCode: address.zipCode,
               googleMap: address.googleMap || '',
@@ -134,17 +116,17 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
               weekDay: availability.weekDay,
               type: availability.type,
               timeSlots: {
-                create: availability.timeSlots.map((slot) => ({
-                  type: slot.type || BusinessTimeType.WORK, // Ensure type is set
-                  startTime: slot.startTime,
-                  endTime: slot.endTime,
+                create: availability.timeSlots.map((timeSlot) => ({
+                  type: timeSlot.type,
+                  startTime: timeSlot.startTime,
+                  endTime: timeSlot.endTime,
                 })),
               },
             })),
           },
           serviceAvailability: {
             create: parsedData.serviceAvailability?.map((availability) => ({
-              weekDay: availability.weekDay,
+              weekDay: availability.weekDay as WeekDays,
               timeSlots: {
                 create: availability.timeSlots.map((slot) => ({
                   startTime: slot.startTime,
@@ -157,7 +139,7 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
             create: parsedData.holiday?.map((holiday) => ({
               holiday: holiday.holiday,
               type: holiday.type,
-              date: holiday.date || null,
+              date: holiday.date,
             })),
           },
         },
@@ -168,38 +150,35 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
               timeSlots: true,
             },
           },
-          serviceAvailability: {
-            include: { timeSlots: true },
-          },
+          serviceAvailability: { include: { timeSlots: true } },
           holiday: true,
         },
       })
-    })
-
-    return NextResponse.json(
-      {
-        data: updatedBusiness,
-        status: 200,
-        success: true,
-        message: 'Business updated successfully!',
-        errorDetail: null,
-      },
-      { status: 200 },
-    )
-  } catch (error) {
-    if (error instanceof Prisma.PrismaClientValidationError) {
+      return NextResponse.json(
+        {
+          data: newBusiness,
+          status: 200,
+          success: true,
+          message: 'Business updated successfully!',
+          errorDetail: null,
+        },
+        { status: 200 },
+      )
+    } else {
       return NextResponse.json(
         {
           data: null,
-          status: 400,
+          status: 500,
           success: false,
-          message: 'Prisma Validation failed',
-          errorDetail: error.message,
+          message: 'Failed to update business!',
+          errorDetail: 'Business deletion returned null',
         },
-        { status: 400 },
+        { status: 500 },
       )
     }
-
+    // Create a new business with the same ID
+  } catch (error) {
+    console.error('Prisma Error:', error)
     if (error instanceof ZodError) {
       return NextResponse.json(
         {
@@ -212,20 +191,30 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
         { status: 400 },
       )
     }
-
+    if (error instanceof Prisma.PrismaClientValidationError) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Prisma Validation failed',
+          errorDetail: error.message,
+        },
+        { status: 400 },
+      )
+    }
     return NextResponse.json(
       {
         data: null,
         status: 500,
         success: false,
-        message: 'Failed to create update business!',
+        message: 'Failed to update business!',
         errorDetail: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 },
     )
   }
 }
-
 // Delete a business detail
 export async function DELETE(req: NextRequest, { params }: ParamsProps) {
   try {

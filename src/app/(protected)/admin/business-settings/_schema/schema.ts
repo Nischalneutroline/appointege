@@ -1,3 +1,4 @@
+import { BusinessType } from '@prisma/client'
 import {
   BusinessAddress,
   BusinessStatus,
@@ -48,6 +49,7 @@ const businessAddressSchema = z.object({
   street: z.string(),
   city: z.string(),
   country: z.string(),
+  state: z.string(),
   zipCode: z.string(),
   googleMap: z.string(),
 })
@@ -60,6 +62,9 @@ export const businessDetailSchema = z.object({
   phone: z.string(),
   website: z.string().url().optional(),
   businessRegistrationNumber: z.string(),
+  taxID: z.string().optional(),
+  logo: z.string().optional(),
+  businessType: z.nativeEnum(BusinessType),
   status: z.nativeEnum(BusinessStatus),
   timeZone: z.string().optional(),
   address: z.array(businessAddressSchema),
