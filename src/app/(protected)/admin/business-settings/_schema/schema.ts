@@ -5,27 +5,9 @@ import {
   HolidayType,
   WeekDays,
   AvailabilityType,
+  BusinessTimeType,
 } from '../_types/types'
 import { z } from 'zod'
-
-/* Zod schema for ServiceTime (Service availability time slots) */
-const serviceTimeSchema = z.object({
-  id: z.string().optional(),
-  startTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: 'Start time must be a valid ISO date string',
-  }),
-  endTime: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: 'End time must be a valid ISO date string',
-  }),
-})
-
-/* Zod schema for ServiceAvailability (Service availability) */
-const serviceAvailabilitySchema = z.object({
-  id: z.string().optional(),
-  weekDay: z.nativeEnum(WeekDays),
-  timeSlots: z.array(serviceTimeSchema),
-  serviceId: z.string().optional(), // Optional, as it may not be provided during creation
-})
 
 /* Zod schema for BusinessTime (Working hours) */
 const businessTimeSchema = z.object({
@@ -35,7 +17,7 @@ const businessTimeSchema = z.object({
   type: z.nativeEnum(BusinessTimeType),
 })
 
-/* Zod schema for BusinessAvailability (Business availability) */
+// Zod schema for BusinessAvailability (Business availability)
 const businessAvailabilitySchema = z.object({
   id: z.string().optional(),
   weekDay: z.nativeEnum(WeekDays),
@@ -61,7 +43,7 @@ const holidaySchema = z.object({
   date: z.string().optional().nullable(),
 })
 
-/* Zod schema for BusinessAddress */
+// Zod schema for BusinessAddress
 const businessAddressSchema = z.object({
   id: z.string().optional(),
   street: z.string(),
@@ -69,12 +51,11 @@ const businessAddressSchema = z.object({
   country: z.string(),
   state: z.string(),
   zipCode: z.string(),
-  googleMap: z.string().optional(),
+  googleMap: z.string(),
 })
 
-/* Zod schema for BusinessDetail */
+// Zod schema for BusinessDetail
 export const businessDetailSchema = z.object({
-  id: z.string().optional(),
   name: z.string(),
   industry: z.string(),
   email: z.string().email(),
@@ -85,11 +66,11 @@ export const businessDetailSchema = z.object({
   logo: z.string().optional(),
   businessType: z.nativeEnum(BusinessType),
   status: z.nativeEnum(BusinessStatus),
+  timeZone: z.string().optional(),
   address: z.array(businessAddressSchema),
-  businessAvailability: z.array(businessAvailabilitySchema),
-  businessOwner: z.string(),
-  holiday: z.array(holidaySchema),
-  serviceAvailability: z.array(serviceAvailabilitySchema).optional(), // Add serviceAvailability
+  businessAvailability: z.array(businessAvailabilitySchema).optional(),
+  holiday: z.array(holidaySchema).optional(),
+  businessOwner: z.string().optional(),
   supportBusinessDetail: z
     .object({
       supportPhone: z.string().optional(),
