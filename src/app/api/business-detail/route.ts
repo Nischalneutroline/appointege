@@ -11,6 +11,7 @@ import { businessDetailSchema } from '@/app/(protected)/admin/business-settings/
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
+    // console.log('fequest revcieved', body.serviceAvailability)
     const parsedData = businessDetailSchema.parse(body)
 
     // create business in prisma
@@ -21,7 +22,13 @@ export async function POST(req: NextRequest) {
 
     if (existingBusiness) {
       return NextResponse.json(
-        { message: 'Business with this email already exists!', success: false },
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Business with this email already exists!',
+          errorDetail: null,
+        },
         { status: 400 },
       )
     }
@@ -100,33 +107,48 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         data: newBusiness,
+        status: 201,
         success: true,
-        message: 'Business created successfully!',
+        message: 'Business Created successfully!',
+        errorDetail: null,
       },
       { status: 201 },
     )
   } catch (error) {
-    console.log(' error:', error)
     if (error instanceof Prisma.PrismaClientValidationError) {
-      console.log('Validation error:', error)
-      // Handle the validation error specifically
-      return {
-        error: 'Validation failed',
-        details: error, // or use error.stack for full stack trace
-      }
-    }
-    if (error instanceof ZodError) {
       return NextResponse.json(
         {
-          message: 'Validation failed!',
-          error: error,
+          data: null,
+          status: 400,
           success: false,
+          message: 'Prisma Validation failed',
+          errorDetail: error.message,
         },
         { status: 400 },
       )
     }
+
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Zod Validation failed!',
+          errorDetail: error.errors,
+        },
+        { status: 400 },
+      )
+    }
+
     return NextResponse.json(
-      { message: 'Failed to create business!', success: false, error: error },
+      {
+        data: null,
+        status: 500,
+        success: false,
+        message: 'Failed to create new business!',
+        errorDetail: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 },
     )
   }
@@ -159,7 +181,13 @@ export async function GET() {
 
     if (businessDetails.length === 0) {
       return NextResponse.json(
-        { message: 'No business details found!', success: false },
+        {
+          message: 'No business details found!',
+          success: false,
+          errorDetail: null,
+          data: null,
+          status: 404,
+        },
         { status: 404 },
       )
     }
@@ -168,24 +196,32 @@ export async function GET() {
         data: businessDetails,
         success: true,
         message: 'Business fetched successfully!',
+        errorDetail: null,
+        status: 200,
       },
       { status: 200 },
     )
   } catch (error) {
     console.log(' error:', error)
     if (error instanceof Prisma.PrismaClientValidationError) {
-      console.log('Validation error:', error)
-      // Handle the validation error specifically
-      return {
-        error: 'Validation failed',
-        details: error, // or use error.stack for full stack trace
-      }
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Prisma Validation failed',
+          errorDetail: error.message,
+        },
+        { status: 400 },
+      )
     }
     return NextResponse.json(
       {
         message: 'Failed to fetch business details!',
         success: false,
-        error: error,
+        errorDetail: error,
+        data: null,
+        status: 500,
       },
       { status: 500 },
     )

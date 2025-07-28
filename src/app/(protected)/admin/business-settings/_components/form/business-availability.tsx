@@ -17,7 +17,6 @@ import {
   setActiveTab,
   setBusinessDetail,
   setBusinessAvailabilityForm,
-  updateBusiness,
   convertFormToApiFormat,
   transformAvailabilityForForm,
   weekdayMap,
@@ -81,15 +80,41 @@ const BusinessAvailabilityForm = () => {
 
   const form = useForm<BusinessAvailabilityFormValues>({
     resolver: zodResolver(businessAvailabilityFormSchema),
-    defaultValues,
+    defaultValues: businessData?.businessAvailabilityForm || defaultValues,
   })
 
   useEffect(() => {
     let initialData: BusinessAvailabilityFormValues = defaultValues
 
     if (businessData?.businessAvailabilityForm) {
-      initialData = businessData.businessAvailabilityForm
+      const result = businessAvailabilityFormSchema.safeParse(
+        businessData.businessAvailabilityForm,
+      )
+      initialData = result.success
+        ? {
+            ...result.data,
+            businessDays: normalizeWeekDays(
+              Object.fromEntries(
+                Object.entries(result.data.businessDays).map(([day, slots]) => [
+                  day,
+                  slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+                ]),
+              ),
+            ),
+            breakHours: normalizeWeekDays(
+              Object.fromEntries(
+                Object.entries(result.data.breakHours).map(([day, slots]) => [
+                  day,
+                  slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+                ]),
+              ),
+            ),
+          }
+        : defaultValues
     } else if (selectedBusiness?.businessAvailability?.length) {
+      const { work, break: breakHours } = transformAvailabilityForForm(
+        selectedBusiness.businessAvailability,
+      )
       initialData = {
         timezone: selectedBusiness.timeZone || defaultValues.timezone,
         holidays:
@@ -101,18 +126,28 @@ const BusinessAvailabilityForm = () => {
             ?.map((avail) => weekdayMap[avail.weekDay] as WeekDay)
             .filter((day): day is WeekDay => !!day) ||
           defaultValues.businessAvailability,
-        businessDays:
-          transformAvailabilityForForm(selectedBusiness.businessAvailability)
-            .work || defaultValues.businessDays,
-        breakHours:
-          transformAvailabilityForForm(selectedBusiness.businessAvailability)
-            .break || defaultValues.breakHours,
+        businessDays: normalizeWeekDays(
+          Object.fromEntries(
+            Object.entries(work).map(([day, slots]) => [
+              day,
+              slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+            ]),
+          ),
+        ),
+        breakHours: normalizeWeekDays(
+          Object.fromEntries(
+            Object.entries(breakHours).map(([day, slots]) => [
+              day,
+              slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+            ]),
+          ),
+        ),
       }
     }
 
     const initialDataStr = JSON.stringify(initialData)
     if (initialDataStr !== lastResetDataRef.current) {
-      form.reset(initialData)
+      form.reset(initialData, { keepDirty: false })
       lastResetDataRef.current = initialDataStr
     }
   }, [selectedBusiness, businessData, form])
@@ -127,7 +162,25 @@ const BusinessAvailabilityForm = () => {
       let safeData: BusinessAvailabilityFormValues
 
       if (result.success) {
-        safeData = result.data
+        safeData = {
+          ...result.data,
+          businessDays: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(result.data.businessDays).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+          breakHours: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(result.data.breakHours).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+        }
       } else {
         safeData = {
           ...defaultValues,
@@ -136,8 +189,26 @@ const BusinessAvailabilityForm = () => {
           holidays: formData.holidays || defaultValues.holidays,
           businessAvailability:
             formData.businessAvailability || defaultValues.businessAvailability,
-          businessDays: formData.businessDays || defaultValues.businessDays,
-          breakHours: formData.breakHours || defaultValues.breakHours,
+          businessDays: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(
+                formData.businessDays || defaultValues.businessDays,
+              ).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+          breakHours: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(
+                formData.breakHours || defaultValues.breakHours,
+              ).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
         }
       }
 
@@ -158,30 +229,48 @@ const BusinessAvailabilityForm = () => {
   })
 
   const onSubmit = async (formData: BusinessAvailabilityFormValues) => {
-    const { businessAvailability, holidays } = convertFormToApiFormat(formData)
+    const result = businessAvailabilityFormSchema.safeParse(formData)
+    if (!result.success) {
+      toast.error('Invalid business availability data.')
+      return
+    }
+
+    const filteredFormData = {
+      ...formData,
+      businessDays: normalizeWeekDays(
+        Object.fromEntries(
+          Object.entries(formData.businessDays).map(([day, slots]) => [
+            day,
+            slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+          ]),
+        ),
+      ),
+      breakHours: normalizeWeekDays(
+        Object.fromEntries(
+          Object.entries(formData.breakHours).map(([day, slots]) => [
+            day,
+            slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+          ]),
+        ),
+      ),
+    }
+
+    const { businessAvailability, holidays } =
+      convertFormToApiFormat(filteredFormData)
 
     const updatedData = {
       ...selectedBusiness,
-      timeZone: formData.timezone,
+      timeZone: filteredFormData.timezone,
       businessAvailability,
       holiday: holidays,
       updatedAt: new Date(),
     }
 
-    console.log(updatedData, '--------------updatedData')
-
     dispatch(setBusinessDetail(updatedData))
+    dispatch(setBusinessAvailabilityForm(filteredFormData))
 
     try {
-      // if (selectedBusiness?.id) {
-      // await dispatch(
-      //   updateBusiness({ id: selectedBusiness.id, data: updatedData }),
-      // ).unwrap()
-      //   toast.success('Business availability updated successfully')
-      // } else {
-      //   toast.error('No business ID found. Please save business details first.')
-      //   return
-      // }
+      toast.success('Business availability saved successfully')
       dispatch(setActiveTab(BusinessTab.ServiceAvailability))
     } catch (error) {
       toast.error('Failed to save business availability')
@@ -192,7 +281,25 @@ const BusinessAvailabilityForm = () => {
     const currentData = form.getValues()
     const result = businessAvailabilityFormSchema.safeParse(currentData)
     const safeData: BusinessAvailabilityFormValues = result.success
-      ? result.data
+      ? {
+          ...result.data,
+          businessDays: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(result.data.businessDays).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+          breakHours: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(result.data.breakHours).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+        }
       : {
           ...defaultValues,
           ...currentData,
@@ -201,8 +308,26 @@ const BusinessAvailabilityForm = () => {
           businessAvailability:
             currentData.businessAvailability ||
             defaultValues.businessAvailability,
-          businessDays: currentData.businessDays || defaultValues.businessDays,
-          breakHours: currentData.breakHours || defaultValues.breakHours,
+          businessDays: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(
+                currentData.businessDays || defaultValues.businessDays,
+              ).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+          breakHours: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(
+                currentData.breakHours || defaultValues.breakHours,
+              ).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
         }
     dispatch(setBusinessAvailabilityForm(safeData))
     dispatch(setActiveTab(BusinessTab.ServiceAvailability))
@@ -212,7 +337,25 @@ const BusinessAvailabilityForm = () => {
     const currentData = form.getValues()
     const result = businessAvailabilityFormSchema.safeParse(currentData)
     const safeData: BusinessAvailabilityFormValues = result.success
-      ? result.data
+      ? {
+          ...result.data,
+          businessDays: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(result.data.businessDays).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+          breakHours: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(result.data.breakHours).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+        }
       : {
           ...defaultValues,
           ...currentData,
@@ -221,8 +364,26 @@ const BusinessAvailabilityForm = () => {
           businessAvailability:
             currentData.businessAvailability ||
             defaultValues.businessAvailability,
-          businessDays: currentData.businessDays || defaultValues.businessDays,
-          breakHours: currentData.breakHours || defaultValues.breakHours,
+          businessDays: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(
+                currentData.businessDays || defaultValues.businessDays,
+              ).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
+          breakHours: normalizeWeekDays(
+            Object.fromEntries(
+              Object.entries(
+                currentData.breakHours || defaultValues.breakHours,
+              ).map(([day, slots]) => [
+                day,
+                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
+              ]),
+            ),
+          ),
         }
     dispatch(setBusinessAvailabilityForm(safeData))
     dispatch(setActiveTab(BusinessTab.BusinessDetail))
@@ -270,10 +431,10 @@ const BusinessAvailabilityForm = () => {
             name="businessDays"
             dayName="businessAvailability"
             label="Business Hours"
-            initialBusinessHours={defaultValues.businessDays}
-            businessBreaks={normalizeWeekDays(
-              breakHours || defaultValues.breakHours,
+            initialBusinessHours={normalizeWeekDays(
+              businessData?.businessAvailabilityForm?.businessDays,
             )}
+            businessBreaks={normalizeWeekDays(breakHours)}
             className="border border-blue-200 rounded-[4px]"
             activeDay={activeDay}
             restrictToInitialHours={false}
@@ -286,7 +447,7 @@ const BusinessAvailabilityForm = () => {
             name="breakHours"
             dayName="businessAvailability"
             label="Break Hours"
-            // initialBusinessHours={defaultValues.breakHours}
+            initialBusinessHours={normalizeWeekDays(breakHours)}
             className="border border-blue-200 rounded-[4px]"
             activeDay={activeDay}
             restrictToInitialHours={false}

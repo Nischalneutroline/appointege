@@ -4,7 +4,7 @@ import { getAppointmentById } from '@/db/appointment'
 import { getBusinessDetailById } from '@/db/businessDetail'
 import { prisma } from '@/lib/prisma'
 import { ZodError } from 'zod'
-import { Prisma, WeekDays } from '@prisma/client'
+import { BusinessTimeType, Prisma, WeekDays } from '@prisma/client'
 import { businessDetailSchema } from '@/app/(protected)/admin/business-settings/_schema/schema'
 
 interface ParamsProps {
@@ -43,9 +43,10 @@ export async function GET(req: NextRequest, { params }: ParamsProps) {
 }
 
 // Update an existing business detail
+
 export async function PUT(req: NextRequest, { params }: ParamsProps) {
   try {
-    const { id } = await params // or Get the ID from the request body
+    const { id } = await params
     const body = await req.json()
 
     if (!id) {
@@ -66,24 +67,59 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
       )
     }
 
-    const deletedBusiness = await prisma.businessDetail.delete({
-      where: { id },
-    })
-    if (deletedBusiness) {
-      const updatedBusiness = await prisma.businessDetail.create({
+    // Use a transaction to delete related records and update the business
+    const updatedBusiness = await prisma.$transaction(async (tx) => {
+      // Delete related timeSlots for serviceAvailability
+      await tx.serviceTime.deleteMany({
+        where: {
+          serviceAvailability: {
+            businessDetailId: id,
+          },
+        },
+      })
+
+      // Delete serviceAvailability records
+      await tx.serviceAvailability.deleteMany({
+        where: { businessDetailId: id },
+      })
+
+      // Delete related timeSlots for businessAvailability
+      await tx.businessTime.deleteMany({
+        where: {
+          businessAvailability: {
+            businessId: id,
+          },
+        },
+      })
+
+      // Delete businessAvailability records
+      await tx.businessAvailability.deleteMany({
+        where: { businessId: id },
+      })
+
+      // Delete existing addresses
+      await tx.businessAddress.deleteMany({
+        where: { businessId: id },
+      })
+
+      // Delete existing holidays
+      await tx.holiday.deleteMany({
+        where: { businessId: id },
+      })
+
+      // Update the business with new data
+      return await tx.businessDetail.update({
+        where: { id },
         data: {
-          id: id,
           name: parsedData.name,
           industry: parsedData.industry,
           email: parsedData.email,
           phone: parsedData.phone,
           website: parsedData.website,
-          businessOwner: parsedData.businessOwner,
           businessRegistrationNumber: parsedData.businessRegistrationNumber,
           status: parsedData.status,
           timeZone: parsedData.timeZone,
-
-          // Handle addresses
+          businessOwner: parsedData.businessOwner,
           address: {
             create: parsedData.address.map((address) => ({
               street: address.street,
@@ -93,26 +129,22 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
               googleMap: address.googleMap || '',
             })),
           },
-          // Handle business availability
           businessAvailability: {
             create: parsedData.businessAvailability?.map((availability) => ({
               weekDay: availability.weekDay,
               type: availability.type,
               timeSlots: {
                 create: availability.timeSlots.map((slot) => ({
-                  type: slot.type,
+                  type: slot.type || BusinessTimeType.WORK, // Ensure type is set
                   startTime: slot.startTime,
                   endTime: slot.endTime,
                 })),
               },
             })),
           },
-
-          // Handle service availability
           serviceAvailability: {
             create: parsedData.serviceAvailability?.map((availability) => ({
-              weekDay: availability.weekDay as WeekDays,
-              // Add other fields as needed
+              weekDay: availability.weekDay,
               timeSlots: {
                 create: availability.timeSlots.map((slot) => ({
                   startTime: slot.startTime,
@@ -121,8 +153,6 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
               },
             })),
           },
-
-          // Handle holidays
           holiday: {
             create: parsedData.holiday?.map((holiday) => ({
               holiday: holiday.holiday,
@@ -138,40 +168,59 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
               timeSlots: true,
             },
           },
-          serviceAvailability: { include: { timeSlots: true } },
+          serviceAvailability: {
+            include: { timeSlots: true },
+          },
           holiday: true,
         },
       })
+    })
 
-      if (updatedBusiness) {
-        return NextResponse.json(
-          {
-            message: 'Business updated successfully!',
-            data: updatedBusiness,
-            success: true,
-          },
-          { status: 200 },
-        )
-      }
-    }
+    return NextResponse.json(
+      {
+        data: updatedBusiness,
+        status: 200,
+        success: true,
+        message: 'Business updated successfully!',
+        errorDetail: null,
+      },
+      { status: 200 },
+    )
   } catch (error) {
     if (error instanceof Prisma.PrismaClientValidationError) {
-      console.error('Validation error:', error.message)
-      // Handle the validation error specifically
-      return {
-        error: 'Validation failed',
-        details: error, // or use error.stack for full stack trace
-      }
-    }
-    if (error instanceof ZodError) {
       return NextResponse.json(
-        { message: 'Validation failed!', error: error, success: false },
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Prisma Validation failed',
+          errorDetail: error.message,
+        },
         { status: 400 },
       )
     }
-    console.error('Prisma Error:', error) // Log the full error for debugging
+
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Zod Validation failed!',
+          errorDetail: error.errors,
+        },
+        { status: 400 },
+      )
+    }
+
     return NextResponse.json(
-      { message: 'Internal server error!', error: error, success: false },
+      {
+        data: null,
+        status: 500,
+        success: false,
+        message: 'Failed to create update business!',
+        errorDetail: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 },
     )
   }

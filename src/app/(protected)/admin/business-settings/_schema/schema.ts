@@ -39,7 +39,7 @@ const holidaySchema = z.object({
   id: z.string().optional(),
   holiday: z.nativeEnum(WeekDays),
   type: z.nativeEnum(HolidayType),
-  date: z.string().optional(),
+  date: z.string().optional().nullable(),
 })
 
 // Zod schema for BusinessAddress
@@ -71,7 +71,8 @@ export const businessDetailSchema = z.object({
       supportPhone: z.string().optional(),
       supportEmail: z.string().optional(),
     })
-    .optional(),
+    .optional()
+    .nullable(),
   serviceAvailability: z.array(serviceAvailabilitySchema).optional(),
 })
 

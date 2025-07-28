@@ -2,8 +2,8 @@
 
 import { prisma } from '../lib/prisma'
 
-export const createBusinessAPI = async () => {}
-export const updateBusinessAPI = async () => {}
+export const createBusinessAPI = async (data: any) => {}
+export const updateBusinessAPI = async (id: string, data: any) => {}
 
 // get service by id
 async function getBusinessDetailById(id: string) {
