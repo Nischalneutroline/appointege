@@ -20,16 +20,32 @@ import {
   convertFormToApiFormat,
   transformAvailabilityForForm,
   weekdayMap,
+  // NOTE: We import the BASE schema for saving data to Redux
   businessAvailabilityFormSchema,
-  BusinessAvailabilityFormValues,
 } from '@/store/slices/businessSlice'
 import { timezoneOptions } from '@/schemas/businessSchema'
+import { z } from 'zod'
 
 export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 
-const defaultValues: BusinessAvailabilityFormValues = {
+const allDays: WeekDay[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+// NEW: Define the extended schema and type LOCALLY for the form's UI state.
+// This schema will be used for form validation only.
+const businessAvailabilityFormSchemaExtended =
+  businessAvailabilityFormSchema.extend({
+    from: z.enum(allDays).optional(),
+    to: z.enum(allDays).optional(),
+  })
+type BusinessAvailabilityFormValuesExtended = z.infer<
+  typeof businessAvailabilityFormSchemaExtended
+>
+
+const defaultValues: BusinessAvailabilityFormValuesExtended = {
   timezone: 'UTC',
   holidays: ['Sat', 'Sun'],
+  from: 'Mon',
+  to: 'Fri',
   businessAvailability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
   businessDays: {
     Mon: [['09:00 AM', '05:00 PM']],
@@ -68,326 +84,127 @@ export const normalizeWeekDays = (
 
 const BusinessAvailabilityForm = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { selectedBusiness, businessData } = useSelector(
+  const { selectedBusiness, businessData, hasFetched } = useSelector(
     (state: RootState) => state.business,
   )
   const [currentMode, setCurrentMode] = useState<'default' | 'custom'>(
     'default',
   )
   const [activeDay, setActiveDay] = useState<WeekDay>('Mon')
-  const lastFormDataRef = useRef<string | null>(null)
-  const lastResetDataRef = useRef<string | null>(null)
+  const isInitialized = useRef(false)
 
-  const form = useForm<BusinessAvailabilityFormValues>({
-    resolver: zodResolver(businessAvailabilityFormSchema),
-    defaultValues: businessData?.businessAvailabilityForm || defaultValues,
+  // MODIFIED: The form uses the extended schema for validation.
+  const form = useForm<BusinessAvailabilityFormValuesExtended>({
+    resolver: zodResolver(businessAvailabilityFormSchemaExtended),
+    defaultValues: {}, // Start empty
   })
 
+  // MODIFIED: Main initialization effect
   useEffect(() => {
-    let initialData: BusinessAvailabilityFormValues = defaultValues
+    if (isInitialized.current || !hasFetched) return
+
+    let initialValues: BusinessAvailabilityFormValuesExtended | null = null
 
     if (businessData?.businessAvailabilityForm) {
-      const result = businessAvailabilityFormSchema.safeParse(
-        businessData.businessAvailabilityForm,
+      // Priority 1: Redux state (for tab navigation)
+      const reduxData = businessData.businessAvailabilityForm
+      const sortedDays = allDays.filter((d) =>
+        reduxData.businessAvailability.includes(d),
       )
-      initialData = result.success
-        ? {
-            ...result.data,
-            businessDays: normalizeWeekDays(
-              Object.fromEntries(
-                Object.entries(result.data.businessDays).map(([day, slots]) => [
-                  day,
-                  slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-                ]),
-              ),
-            ),
-            breakHours: normalizeWeekDays(
-              Object.fromEntries(
-                Object.entries(result.data.breakHours).map(([day, slots]) => [
-                  day,
-                  slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-                ]),
-              ),
-            ),
-          }
-        : defaultValues
-    } else if (selectedBusiness?.businessAvailability?.length) {
+      initialValues = {
+        ...reduxData,
+        from: sortedDays.length > 0 ? sortedDays[0] : undefined,
+        to:
+          sortedDays.length > 0 ? sortedDays[sortedDays.length - 1] : undefined,
+      }
+    } else if (
+      selectedBusiness &&
+      selectedBusiness.businessAvailability?.length > 0
+    ) {
+      // Priority 2: Fetched data from API
       const { work, break: breakHours } = transformAvailabilityForForm(
         selectedBusiness.businessAvailability,
       )
-      initialData = {
+      const availableDays = Object.keys(work).filter(
+        (day) => (work[day as WeekDay] ?? []).length > 0,
+      ) as WeekDay[]
+      const sortedDays = allDays.filter((d) => availableDays.includes(d))
+
+      initialValues = {
         timezone: selectedBusiness.timeZone || defaultValues.timezone,
         holidays:
-          selectedBusiness.holiday?.map(
-            (h) => weekdayMap[h.holiday] as WeekDay,
-          ) || defaultValues.holidays,
-        businessAvailability:
-          selectedBusiness.businessAvailability
-            ?.map((avail) => weekdayMap[avail.weekDay] as WeekDay)
-            .filter((day): day is WeekDay => !!day) ||
-          defaultValues.businessAvailability,
-        businessDays: normalizeWeekDays(
-          Object.fromEntries(
-            Object.entries(work).map(([day, slots]) => [
-              day,
-              slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-            ]),
-          ),
-        ),
-        breakHours: normalizeWeekDays(
-          Object.fromEntries(
-            Object.entries(breakHours).map(([day, slots]) => [
-              day,
-              slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-            ]),
-          ),
-        ),
+          selectedBusiness.holiday
+            ?.map((h) => weekdayMap[h.holiday] as WeekDay)
+            .filter(Boolean) || defaultValues.holidays,
+        businessAvailability: sortedDays,
+        businessDays: normalizeWeekDays(work),
+        breakHours: normalizeWeekDays(breakHours),
+        from: sortedDays.length > 0 ? sortedDays[0] : undefined,
+        to:
+          sortedDays.length > 0 ? sortedDays[sortedDays.length - 1] : undefined,
       }
+    } else if (hasFetched) {
+      // Priority 3: No data, use defaults
+      initialValues = defaultValues
     }
 
-    const initialDataStr = JSON.stringify(initialData)
-    if (initialDataStr !== lastResetDataRef.current) {
-      form.reset(initialData, { keepDirty: false })
-      lastResetDataRef.current = initialDataStr
+    if (initialValues) {
+      form.reset(initialValues)
+      const firstDay = initialValues.businessAvailability?.[0] || 'Mon'
+      setActiveDay(firstDay)
+      isInitialized.current = true
     }
-  }, [selectedBusiness, businessData, form])
+  }, [hasFetched, selectedBusiness, businessData, form])
 
-  const formData = useWatch({
-    control: form.control,
-  }) as BusinessAvailabilityFormValues
+  const formData = useWatch({ control: form.control })
 
+  // MODIFIED: This effect saves the CORE data to Redux, stripping out from/to.
   useEffect(() => {
+    if (!isInitialized.current) return
     const timer = setTimeout(() => {
-      const result = businessAvailabilityFormSchema.safeParse(formData)
-      let safeData: BusinessAvailabilityFormValues
-
-      if (result.success) {
-        safeData = {
-          ...result.data,
-          businessDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.businessDays).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-          breakHours: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.breakHours).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
-      } else {
-        safeData = {
-          ...defaultValues,
-          ...formData,
-          timezone: formData.timezone || defaultValues.timezone,
-          holidays: formData.holidays || defaultValues.holidays,
-          businessAvailability:
-            formData.businessAvailability || defaultValues.businessAvailability,
-          businessDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(
-                formData.businessDays || defaultValues.businessDays,
-              ).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-          breakHours: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(
-                formData.breakHours || defaultValues.breakHours,
-              ).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
+      // Validate with the extended schema to ensure `from`/`to` are present for UI
+      const validationResult =
+        businessAvailabilityFormSchemaExtended.safeParse(formData)
+      if (validationResult.success) {
+        // But parse with the BASE schema to get a clean object for Redux
+        const reduxSafeData = businessAvailabilityFormSchema.parse(
+          validationResult.data,
+        )
+        dispatch(setBusinessAvailabilityForm(reduxSafeData))
       }
-
-      const safeDataStr = JSON.stringify(safeData)
-      if (safeDataStr !== lastFormDataRef.current) {
-        dispatch(setBusinessAvailabilityForm(safeData))
-        lastFormDataRef.current = safeDataStr
-      }
-    }, 300)
-
+    }, 500)
     return () => clearTimeout(timer)
   }, [formData, dispatch])
 
-  const breakHours = useWatch({
+  const businessDaysValues = useWatch({
     control: form.control,
-    name: 'breakHours',
-    defaultValue: defaultValues.breakHours,
+    name: 'businessDays',
   })
+  const breakHours = useWatch({ control: form.control, name: 'breakHours' })
 
-  const onSubmit = async (formData: BusinessAvailabilityFormValues) => {
-    const result = businessAvailabilityFormSchema.safeParse(formData)
-    if (!result.success) {
-      toast.error('Invalid business availability data.')
-      return
-    }
-
-    const filteredFormData = {
-      ...formData,
-      businessDays: normalizeWeekDays(
-        Object.fromEntries(
-          Object.entries(formData.businessDays).map(([day, slots]) => [
-            day,
-            slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-          ]),
-        ),
-      ),
-      breakHours: normalizeWeekDays(
-        Object.fromEntries(
-          Object.entries(formData.breakHours).map(([day, slots]) => [
-            day,
-            slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-          ]),
-        ),
-      ),
-    }
-
+  const onSubmit = async (data: BusinessAvailabilityFormValuesExtended) => {
+    // Parse with the base schema to ensure only API-relevant data is used
+    const backendSafeData = businessAvailabilityFormSchema.parse(data)
     const { businessAvailability, holidays } =
-      convertFormToApiFormat(filteredFormData)
+      convertFormToApiFormat(backendSafeData)
 
     const updatedData = {
       ...selectedBusiness,
-      timeZone: filteredFormData.timezone,
+      timeZone: backendSafeData.timezone,
       businessAvailability,
       holiday: holidays,
       updatedAt: new Date(),
     }
-
     dispatch(setBusinessDetail(updatedData))
-    dispatch(setBusinessAvailabilityForm(filteredFormData))
-
-    try {
-      toast.success('Business availability saved successfully')
-      dispatch(setActiveTab(BusinessTab.ServiceAvailability))
-    } catch (error) {
-      toast.error('Failed to save business availability')
-    }
-  }
-
-  const handleSkip = () => {
-    const currentData = form.getValues()
-    const result = businessAvailabilityFormSchema.safeParse(currentData)
-    const safeData: BusinessAvailabilityFormValues = result.success
-      ? {
-          ...result.data,
-          businessDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.businessDays).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-          breakHours: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.breakHours).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
-      : {
-          ...defaultValues,
-          ...currentData,
-          timezone: currentData.timezone || defaultValues.timezone,
-          holidays: currentData.holidays || defaultValues.holidays,
-          businessAvailability:
-            currentData.businessAvailability ||
-            defaultValues.businessAvailability,
-          businessDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(
-                currentData.businessDays || defaultValues.businessDays,
-              ).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-          breakHours: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(
-                currentData.breakHours || defaultValues.breakHours,
-              ).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
-    dispatch(setBusinessAvailabilityForm(safeData))
+    // Save the core data to Redux state
+    dispatch(setBusinessAvailabilityForm(backendSafeData))
+    toast.success('Business availability saved successfully')
     dispatch(setActiveTab(BusinessTab.ServiceAvailability))
   }
 
-  const handleBack = () => {
-    const currentData = form.getValues()
-    const result = businessAvailabilityFormSchema.safeParse(currentData)
-    const safeData: BusinessAvailabilityFormValues = result.success
-      ? {
-          ...result.data,
-          businessDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.businessDays).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-          breakHours: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.breakHours).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
-      : {
-          ...defaultValues,
-          ...currentData,
-          timezone: currentData.timezone || defaultValues.timezone,
-          holidays: currentData.holidays || defaultValues.holidays,
-          businessAvailability:
-            currentData.businessAvailability ||
-            defaultValues.businessAvailability,
-          businessDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(
-                currentData.businessDays || defaultValues.businessDays,
-              ).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-          breakHours: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(
-                currentData.breakHours || defaultValues.breakHours,
-              ).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
-    dispatch(setBusinessAvailabilityForm(safeData))
-    dispatch(setActiveTab(BusinessTab.BusinessDetail))
-  }
+  const handleBack = () => dispatch(setActiveTab(BusinessTab.BusinessDetail))
+  const handleSkip = () =>
+    dispatch(setActiveTab(BusinessTab.ServiceAvailability))
 
   return (
     <FormProvider {...form}>
@@ -407,11 +224,7 @@ const BusinessAvailabilityForm = () => {
               key={mode}
               type="button"
               onClick={() => setCurrentMode(mode as 'default' | 'custom')}
-              className={`w-[100px] text-base font-medium ${
-                currentMode === mode
-                  ? 'text-blue-600 bg-white rounded-[6px]'
-                  : 'text-gray-600'
-              }`}
+              className={`w-[100px] text-base font-medium ${currentMode === mode ? 'text-blue-600 bg-white rounded-[6px]' : 'text-gray-600'}`}
             >
               {mode.charAt(0).toUpperCase() + mode.slice(1)}
             </button>
@@ -421,21 +234,14 @@ const BusinessAvailabilityForm = () => {
           <BusinessDaySelector
             name="businessAvailability"
             label="Business Days"
-            className="border border-blue-200 rounded-[8px]"
             activeDay={activeDay}
             setActiveDay={setActiveDay}
-            currentMode={currentMode}
-            setCurrentMode={setCurrentMode}
           />
           <BusinessHourSelector
             name="businessDays"
             dayName="businessAvailability"
             label="Business Hours"
-            initialBusinessHours={normalizeWeekDays(
-              businessData?.businessAvailabilityForm?.businessDays,
-            )}
             businessBreaks={normalizeWeekDays(breakHours)}
-            className="border border-blue-200 rounded-[4px]"
             activeDay={activeDay}
             restrictToInitialHours={false}
             isDefault={currentMode === 'default'}
@@ -447,12 +253,11 @@ const BusinessAvailabilityForm = () => {
             name="breakHours"
             dayName="businessAvailability"
             label="Break Hours"
-            initialBusinessHours={normalizeWeekDays(breakHours)}
-            className="border border-blue-200 rounded-[4px]"
+            initialBusinessHours={normalizeWeekDays(businessDaysValues)}
             activeDay={activeDay}
-            restrictToInitialHours={false}
-            setCustom={setCurrentMode}
+            restrictToInitialHours={true}
             isDefault={currentMode === 'default'}
+            setCustom={setCurrentMode}
           />
         </div>
         <WeeklyPreview
@@ -462,6 +267,7 @@ const BusinessAvailabilityForm = () => {
         />
         <div className="flex justify-between text-[#BBBBBB]">
           <button
+            type="button"
             className="flex gap-1 items-center cursor-pointer"
             onClick={handleBack}
           >
@@ -470,6 +276,7 @@ const BusinessAvailabilityForm = () => {
           </button>
           <div className="flex gap-4">
             <button
+              type="button"
               className="flex gap-1 items-center cursor-pointer text-[#6AA9FF]"
               onClick={handleSkip}
             >
