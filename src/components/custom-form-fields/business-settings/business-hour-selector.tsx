@@ -81,7 +81,8 @@ const getNextValidStartTime = (
     const overlap = breaks.some(([bStart, bEnd]) => {
       const bs = toMin(bStart)
       const be = toMin(bEnd)
-      return timeMin >= bs && timeMin < be
+      // Allow exactly the break end time
+      return timeMin > bs && timeMin < be
     })
     if (!overlap) return time
   }
@@ -224,19 +225,27 @@ export default function BusinessHourSelector({
     ) {
       return true
     }
-    // Disable break start times and times within break ranges for start time
-    // Disable break end times and times within break ranges for end time
+
+    // Check if time is within any break period
     return breaks.some(([bStart, bEnd]) => {
+      const timeMin = toMin(time)
+      const bStartMin = toMin(bStart)
+      const bEndMin = toMin(bEnd)
+
       if (isEnd) {
+        // For end times:
+        // - Disable times that are exactly the break end time (time === bEnd)
+        // - Disable times strictly between break start and end (bStart < time < bEnd)
         return (
-          time === bEnd ||
-          (toMin(time) > toMin(bStart) && toMin(time) < toMin(bEnd))
+          (time === bEnd && timeMin !== bEndMin) || // Only disable if it's not exactly the break end time
+          (timeMin > bStartMin && timeMin < bEndMin)
         )
       }
-      return (
-        time === bStart ||
-        (toMin(time) > toMin(bStart) && toMin(time) < toMin(bEnd))
-      )
+
+      // For start times:
+      // - Disable times that are exactly the break start time (time === bStart)
+      // - Disable times strictly between break start and end (bStart < time < bEnd)
+      return time === bStart || (timeMin > bStartMin && timeMin < bEndMin)
     })
   }
 
