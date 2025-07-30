@@ -256,6 +256,7 @@ export async function POST(
 
     // Parse and validate request body
     const body = await req.json()
+    console.log('Body: -------', body)
     const parsedData = serviceSchema.parse(body)
 
     // Validate business access for ADMIN
@@ -286,7 +287,7 @@ export async function POST(
         title: parsedData.title,
         description: parsedData.description,
         estimatedDuration: parsedData.estimatedDuration,
-        status: parsedData.ServiceStatus || 'ACTIVE', // Fixed: Use lowercase 'status'
+        status: parsedData.status || 'ACTIVE', // Fixed: Use lowercase 'status'
         serviceAvailability: {
           create: parsedData.serviceAvailability?.map((availability) => ({
             weekDay: availability.weekDay,
@@ -330,6 +331,7 @@ export async function POST(
       )
     }
     if (error instanceof ZodError) {
+      console.error('Zod error:', error)
       return NextResponse.json(
         {
           data: null,

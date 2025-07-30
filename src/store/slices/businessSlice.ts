@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { z } from 'zod'
 import {
   PrismaClient,
-  WeekDays,
+  // WeekDays,
   AvailabilityType,
   HolidayType,
   BusinessTimeType,
@@ -11,6 +11,7 @@ import { getBusinessDetailByOwnerId } from '@/db/businessDetail'
 import { axiosApi } from '@/lib/baseUrl'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
+import { WeekDays } from '@/app/(protected)/admin/service/_types/service'
 
 const prisma = new PrismaClient()
 

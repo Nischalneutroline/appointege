@@ -1,3 +1,4 @@
+// src/store/slices/serviceSlice.ts
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import axios, { AxiosError } from 'axios'
 import { getBaseUrl } from '@/lib/baseUrl'
@@ -9,6 +10,7 @@ import {
   ServiceFilterLabel,
   ServiceFilterValue,
   ServiceStatus,
+  WeekDays,
 } from '@/app/(protected)/admin/service/_types/service'
 
 export interface ServiceOption {
@@ -16,12 +18,19 @@ export interface ServiceOption {
   value: string
 }
 
-// export type ServiceFilterValue = 'all' | 'active' | 'inactive'
-
 export interface PostServiceData {
-  name: string
+  title: string // Changed from name to match NewServiceForm
   description: string
+  estimatedDuration: number
+  serviceAvailability: {
+    weekDay: WeekDays
+    timeSlots: { startTime: string; endTime: string }[]
+  }[]
+  businessDetailId: string
   status: ServiceStatus
+  message: string
+  image: string
+  userId: string
 }
 
 interface RejectError {
@@ -234,6 +243,7 @@ const storeCreateService = createAsyncThunk<
   PostServiceData,
   { rejectValue: RejectError }
 >('service/storeCreateService', async (serviceData, { rejectWithValue }) => {
+  console.log('storeCreateService: serviceData =', serviceData)
   try {
     const response = await api.post('/api/service', serviceData)
     const { data, success, errorDetail, message } = response.data

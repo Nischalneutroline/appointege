@@ -654,7 +654,7 @@ export async function PUT(
           title: parsedData.title,
           description: parsedData.description,
           estimatedDuration: parsedData.estimatedDuration,
-          status: parsedData.ServiceStatus || 'ACTIVE',
+          status: parsedData.status || 'ACTIVE',
           businessDetailId: parsedData.businessDetailId,
           serviceAvailability: {
             create: parsedData.serviceAvailability?.map((availability) => ({
