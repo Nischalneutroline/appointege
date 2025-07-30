@@ -34,7 +34,7 @@ export async function embedAndIndexAppointment(
   const dateStr = appointment.selectedDate.toISOString().split('T')[0]
   const content = `Appointment for ${appointment.service?.title || 'service'} on ${dateStr} ${appointment.selectedTime} by user email: ${appointment.email || appointment.user?.email}, name: ${appointment.customerName}, phone: ${appointment.phone}`
   const chunks = await splitter.splitText(content)
-  const accessLevel = ['GUEST', 'USER', 'ADMIN', 'SUPER_ADMIN']
+  const accessLevel = ['USER', 'ADMIN', 'SUPER_ADMIN']
 
   for (const chunk of chunks) {
     const id = uuidv4()
@@ -47,6 +47,8 @@ export async function embedAndIndexAppointment(
       userId: appointment.userId,
       bookedById: appointment.bookedById,
       serviceId: appointment.serviceId,
+      selectedDate: dateStr,
+      selectedTime: appointment.selectedTime,
       source: 'appointment',
       accessLevel,
     },
@@ -90,7 +92,7 @@ export async function embedAndIndexService(
       baseUrl: 'http://localhost:11434',
     })
 
-    const accessLevel = ['GUEST', 'USER', 'ADMIN', 'SUPER_ADMIN']
+    const accessLevel = ['USER', 'ADMIN', 'SUPER_ADMIN']
     for (const chunk of chunks) {
       const id = uuidv4()
       const embedding = await embeddings.embedQuery(chunk)
