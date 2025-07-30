@@ -1,3 +1,4 @@
+// src/features/service/_components/service-day-selector.tsx
 'use client'
 
 import { useFormContext } from 'react-hook-form'
@@ -57,10 +58,13 @@ export default function ServiceDaySelector({
     setValue(name, updatedDays, { shouldDirty: true })
   }
 
-  const availableDays = days.filter(
-    (day) =>
-      !businessAvailability.holidays?.includes(weekdayMap[day] as WeekDay),
-  )
+  // Only show days that are in serviceAvailability and not in holidays
+  const availableDays = selectedDays
+    .map((d: any) => d.weekDay)
+    .filter(
+      (day: WeekDays) =>
+        !businessAvailability.holidays?.includes(weekdayMap[day] as WeekDay),
+    )
 
   return (
     <div className="space-y-4">
@@ -69,26 +73,33 @@ export default function ServiceDaySelector({
         <Label>Service Days</Label>
       </div>
       <div className="flex flex-wrap gap-3">
-        {availableDays.map((day) => (
-          <Button
-            type="button"
-            key={day}
-            variant={
-              selectedDays.some((d: any) => d.weekDay === day)
-                ? 'default'
-                : 'outline'
-            }
-            className={cn(
-              'min-w-[72px] px-6',
-              selectedDays.some((d: any) => d.weekDay === day) &&
-                'shadow-[inset_0_2px_4px_#001F5280]',
-              className,
-            )}
-            onClick={() => toggleDay(day)}
-          >
-            {weekdayMap[day]}
-          </Button>
-        ))}
+        {availableDays.length > 0 ? (
+          availableDays.map((day: WeekDays) => (
+            <Button
+              type="button"
+              key={day}
+              variant={
+                selectedDays.some((d: any) => d.weekDay === day)
+                  ? 'default'
+                  : 'outline'
+              }
+              className={cn(
+                'min-w-[72px] px-6',
+                selectedDays.some((d: any) => d.weekDay === day) &&
+                  'shadow-[inset_0_2px_4px_#001F5280]',
+                className,
+              )}
+              onClick={() => toggleDay(day)}
+            >
+              {weekdayMap[day]}
+            </Button>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No service days available. Please configure service availability in
+            business settings.
+          </p>
+        )}
       </div>
       <div className="mt-2 flex items-start gap-2 rounded-md bg-muted/50 p-3 text-sm text-muted-foreground max-w-md">
         <Info className="size-4 mt-0.5 flex-shrink-0" />

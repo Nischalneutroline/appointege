@@ -1,7 +1,6 @@
-// src/components/custom-form-fields/serivce/service-hours-selector.tsx
 'use client'
 
-import { useFormContext, useWatch } from 'react-hook-form'
+import { useFormContext } from 'react-hook-form'
 import {
   Select,
   SelectContent,
@@ -13,10 +12,11 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { CalendarDays, Hourglass, Plus, Trash2, Info } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { timeOptions, toMin } from '@/lib/lib'
 import { weekdayMap } from '@/store/slices/businessSlice'
 import { WeekDays } from '@prisma/client'
+import { WeekDay } from '../business-settings/business-day-selector'
 
 export type BreakRecord = Record<WeekDay, [string, string][]>
 
@@ -46,7 +46,8 @@ const getNextValidStartTime = (
     const overlap = breaks.some(([bStart, bEnd]) => {
       const bs = toMin(bStart)
       const be = toMin(bEnd)
-      return timeMin >= bs && timeMin <= be
+      // A valid start time cannot be within a break
+      return timeMin >= bs && timeMin < be
     })
     if (!overlap) return time
   }
@@ -63,7 +64,9 @@ const formatBreaks = (day: Day, breaks: Slot[]) => {
   }
   const breakStrings = breaks.map(([start, end]) => `${start} to ${end}`)
   const lastBreak = breakStrings.pop()
-  return `Breaks on ${weekdayMap[day]} are from ${breakStrings.join(', ')}, and ${lastBreak}.`
+  return `Breaks on ${weekdayMap[day]} are from ${breakStrings.join(
+    ', ',
+  )}, and ${lastBreak}.`
 }
 
 interface Props {
@@ -104,47 +107,50 @@ export default function ServiceHoursSelector({
     serviceDays[0]?.weekDay ?? WeekDays.MONDAY,
   )
 
-  const workTimeOptions = useMemo(() => {
-    const breaks = businessBreaks?.[weekdayMap[activeDay] as WeekDay] ?? []
-    return timeOptions.filter((t: string) => {
-      const min = toMin(t)
-      return !breaks.some(([s, e]) => {
-        const startMin = toMin(s)
-        const endMin = toMin(e)
-        return min >= startMin && min <= endMin
-      })
-    })
-  }, [activeDay, businessBreaks])
-
-  const getAvailableTimes = (
-    afterTime: string | undefined,
-    options: string[],
-    isEnd: boolean = false,
-  ) => {
-    if (!afterTime || !options.includes(afterTime)) return options
-    const index = options.indexOf(afterTime)
-    return isEnd ? options.slice(index + 1) : options
-  }
-
+  // FIX 1: Create a single, robust function to determine if a time slot should be disabled.
   const isTimeDisabled = (
     time: string,
     breaks: Slot[],
     isEnd: boolean,
-    referenceTime: string,
+    referenceTime?: string,
   ): boolean => {
-    if (
-      referenceTime &&
-      toMin(time) <= (isEnd ? toMin(referenceTime) : toMin(referenceTime) - 1)
-    ) {
-      return true
+    const timeInMinutes = toMin(time)
+
+    // Condition 1: Check against the reference time (e.g., end time must be after start time).
+    if (referenceTime) {
+      const referenceTimeInMinutes = toMin(referenceTime)
+      if (isEnd) {
+        // An end time must be strictly greater than its start time.
+        if (timeInMinutes <= referenceTimeInMinutes) return true
+      } else {
+        // A start time must be greater than or equal to the previous slot's end time.
+        if (timeInMinutes < referenceTimeInMinutes) return true
+      }
     }
-    return breaks.some(([bStart, bEnd]) => {
-      const startMin = toMin(bStart)
-      const endMin = toMin(bEnd)
-      return isEnd
-        ? toMin(time) >= startMin && toMin(time) <= endMin
-        : toMin(time) >= startMin && toMin(time) <= endMin
+
+    // Condition 2: Check against business breaks.
+    const isDuringBreak = breaks.some(([bStart, bEnd]) => {
+      const breakStartInMinutes = toMin(bStart)
+      const breakEndInMinutes = toMin(bEnd)
+
+      if (isEnd) {
+        // A service cannot end *inside* a break. It can end when a break begins.
+        // e.g., if break is 12:00-13:00, service can't end at 12:15 or 13:00. It can end at 12:00.
+        return (
+          timeInMinutes > breakStartInMinutes &&
+          timeInMinutes <= breakEndInMinutes
+        )
+      } else {
+        // A service cannot start *inside* a break. It can start when a break ends.
+        // e.g., if break is 12:00-13:00, service can't start at 12:00 or 12:30. It can start at 13:00.
+        return (
+          timeInMinutes >= breakStartInMinutes &&
+          timeInMinutes < breakEndInMinutes
+        )
+      }
     })
+
+    return isDuringBreak
   }
 
   const update = (idx: number, pos: 0 | 1, val: string) => {
@@ -157,7 +163,8 @@ export default function ServiceHoursSelector({
     if (pos === 0) {
       slot.startTime = val
       const breaks = businessBreaks?.[weekdayMap[activeDay] as WeekDay] ?? []
-      const validEndTime = getNextValidStartTime(val, breaks, workTimeOptions)
+      const validEndTime = getNextValidStartTime(val, breaks, timeOptions)
+      // Also reset end time if it's no longer valid
       if (!slot.endTime || toMin(slot.endTime) <= toMin(val)) {
         slot.endTime = validEndTime
       }
@@ -166,7 +173,7 @@ export default function ServiceHoursSelector({
     }
     slots[idx] = slot
     updatedDays[dayIndex].timeSlots = slots.filter(
-      (s) => s.startTime && s.endTime, // Remove invalid slots
+      (s) => s.startTime && s.endTime,
     )
 
     setValue(dayName || 'serviceAvailability', updatedDays, {
@@ -181,14 +188,14 @@ export default function ServiceHoursSelector({
     if (dayIndex === -1) return
 
     const prevSlots = updatedDays[dayIndex].timeSlots || []
-    const prevEnd = prevSlots.at(-1)?.endTime ?? workTimeOptions[0]
+    const prevEnd = prevSlots.at(-1)?.endTime ?? '08:45 AM' // Default to before 9am
     const breaks = businessBreaks?.[weekdayMap[activeDay] as WeekDay] ?? []
-    const nextStart = getNextValidStartTime(prevEnd, breaks, workTimeOptions)
+    const nextStart = getNextValidStartTime(prevEnd, breaks, timeOptions)
     updatedDays[dayIndex].timeSlots = [
       ...prevSlots,
       {
         startTime: nextStart,
-        endTime: getNextValidStartTime(nextStart, breaks, workTimeOptions),
+        endTime: getNextValidStartTime(nextStart, breaks, timeOptions),
       },
     ]
 
@@ -252,15 +259,9 @@ export default function ServiceHoursSelector({
               ? serviceDays.find((d) => d.weekDay === activeDay)?.timeSlots[
                   idx - 1
                 ]?.endTime
-              : ''
+              : undefined // No previous slot for the first item
           const breaks =
             businessBreaks?.[weekdayMap[activeDay] as WeekDay] ?? []
-          const startList = getAvailableTimes(prevEnd, workTimeOptions, false)
-          const endList = getAvailableTimes(
-            slot.startTime,
-            workTimeOptions,
-            true,
-          )
 
           return (
             <div key={idx} className="flex gap-4 items-center">
@@ -272,16 +273,13 @@ export default function ServiceHoursSelector({
                   <SelectValue placeholder="Start" />
                 </SelectTrigger>
                 <SelectContent>
-                  {startList.map((t) => (
+                  {/* FIX 2: Always map over the FULL `timeOptions` array */}
+                  {timeOptions.map((t) => (
                     <SelectItem
                       key={t}
                       value={t}
-                      disabled={isTimeDisabled(
-                        t,
-                        breaks,
-                        false,
-                        prevEnd || workTimeOptions[0],
-                      )}
+                      // FIX 3: Use the new robust disabling function
+                      disabled={isTimeDisabled(t, breaks, false, prevEnd)}
                     >
                       {t}
                     </SelectItem>
@@ -298,7 +296,7 @@ export default function ServiceHoursSelector({
                     <SelectValue placeholder="End" />
                   </SelectTrigger>
                   <SelectContent>
-                    {endList.map((t) => (
+                    {timeOptions.map((t) => (
                       <SelectItem
                         key={t}
                         value={t}
@@ -355,7 +353,7 @@ export default function ServiceHoursSelector({
       </div>
       {errors[dayName || 'serviceAvailability'] && (
         <p className="text-red-500">
-          {JSON.stringify(errors[dayName || 'serviceAvailability'], null, 2)}
+          Please ensure all time slots are valid and do not overlap.
         </p>
       )}
     </div>

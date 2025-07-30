@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { weekdayMap } from '@/store/slices/businessSlice'
 import { z } from 'zod'
-import { ServiceStatus, WeekDay, WeekDays } from '../_types/service' // Use WeekDays from service.ts
+import { ServiceStatus, WeekDay, WeekDays } from '../_types/service'
 import InputField from '@/components/custom-form-fields/input-field'
 import TextAreaField from '@/components/custom-form-fields/textarea-field'
 import FileUploadField from '@/components/custom-form-fields/image-upload'
@@ -39,7 +39,7 @@ const formatAvailabilityNote = () => {
 const transformBusinessAvailability = (
   businessAvailability:
     | {
-        weekDay: WeekDays // Use WeekDays from ../_types/service
+        weekDay: WeekDays
         timeSlots: { type: string; startTime: string; endTime: string }[]
       }[]
     | null
@@ -58,7 +58,6 @@ const transformBusinessAvailability = (
 
   if (businessAvailability && Array.isArray(businessAvailability)) {
     businessAvailability.forEach((avail) => {
-      // Ensure weekDay is a valid WeekDays enum value
       const isValidWeekDay = Object.values(WeekDays).includes(
         avail.weekDay as WeekDays,
       )
@@ -135,7 +134,6 @@ const NewServiceForm = ({
   })
 
   useEffect(() => {
-    // Inverse weekdayMap to normalize weekDay values
     const inverseWeekdayMap: Record<string, WeekDays> = {
       Mon: WeekDays.MONDAY,
       Tue: WeekDays.TUESDAY,
@@ -193,7 +191,7 @@ const NewServiceForm = ({
           (avail) => ({
             weekDay: normalizeWeekDay(avail.weekDay),
             timeSlots: avail.timeSlots
-              .filter((slot) => slot.startTime && slot.endTime) // Filter valid slots
+              .filter((slot) => slot.startTime && slot.endTime)
               .map((slot) => ({
                 startTime: slot.startTime,
                 endTime: slot.endTime,
@@ -229,20 +227,18 @@ const NewServiceForm = ({
         title: data.title,
         description: data.description,
         estimatedDuration: data.estimatedDuration,
-        serviceAvailability: data.serviceAvailability?.map((day) => ({
-          weekDay: day.weekDay,
-          timeSlots:
-            day.timeSlots?.map(({ startTime, endTime }) => ({
-              startTime,
-              endTime,
-            })) || [],
-        })),
+        serviceAvailability:
+          data.serviceAvailability?.map((day) => ({
+            weekDay: day.weekDay,
+            timeSlots:
+              day.timeSlots?.map(({ startTime, endTime }) => ({
+                startTime,
+                endTime,
+              })) || [],
+          })) || [],
         businessDetailId:
           data.businessDetailId || user.ownedBusinesses?.[0]?.id || '',
-        status: ServiceStatus.ACTIVE,
-        message: data.message,
-        image: data.image,
-        userId: user.id,
+        status: data.status || ServiceStatus.ACTIVE,
       }
 
       if (serviceFormMode === 'edit' && currentService?.id) {
@@ -267,7 +263,28 @@ const NewServiceForm = ({
 
   const handleBack = () => {
     onChange(false)
-    // dispatch(closeServiceForm())
+  }
+
+  if (!selectedBusiness) {
+    return (
+      <Dialog onOpenChange={handleBack} open={open}>
+        <DialogContent className="md:max-w-2xl">
+          <DialogHeader className="gap-0">
+            <DialogTitle className="flex justify-center text-blue-700 text-xl">
+              {serviceFormMode === 'edit'
+                ? 'Edit Service'
+                : 'Enter Service Details'}
+            </DialogTitle>
+            <DialogDescription className="flex justify-center text-sm text-muted-foreground">
+              Getting business details...
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center items-center py-10">
+            <p className="text-muted-foreground">Loading business details...</p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    )
   }
 
   return (
