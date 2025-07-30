@@ -22,13 +22,13 @@ const DataTable = <T,>({
   rowClassName,
 }: TableProps<T>) => {
   return (
-    <table className="lg:min-w-full min-w-[600px] border  overflow-auto border-[#DCE9F9] ">
+    <table className="lg:min-w-full min-w-[600px] border-[1px] overflow-auto border-[#DCE9F9] ">
       <thead className="bg-[#F8F9FA] h-12 ">
         <tr className="border-0">
           {columns.map((col, idx) => (
             <th
               key={idx}
-              className={`px-6 py-3 border-t-0 text-left text-sm  font-bold text-[#111827]  tracking-wider ${
+              className={`px-6 py-3 border-t-0 text-left text-sm font-semibold text-[#111827] tracking-wider ${
                 col.className || ''
               }`}
             >
@@ -37,7 +37,7 @@ const DataTable = <T,>({
           ))}
         </tr>
       </thead>
-      <tbody className="bg-white">
+      <tbody className="bg-white rounded-b-[10px]">
         {data.map((row, rowIndex) => (
           <tr
             key={String(row[rowKey])}
@@ -63,3 +63,10 @@ const DataTable = <T,>({
 }
 
 export default DataTable
+
+export interface TableColumn<T> {
+  header: string
+  accessor: keyof T
+  render?: (value: T[keyof T], row: T, index: number) => React.ReactNode
+  className?: string
+}

@@ -30,7 +30,7 @@ const BusinessSetting = () => {
   const [data1, setData1] = useState<string | null>(null)
   const [data2, setData2] = useState<string | null>(null)
   const [currentMode, setCurrentMode] = useState('business-details')
-  const { businessDetail, isLoading, activeStep, isSaving } = useSelector(
+  const { businessDetail, loading:isLoading, isSaving } = useSelector(
     (state: RootState) => state.business,
   )
   console.log(businessDetail, 'Data form Api')

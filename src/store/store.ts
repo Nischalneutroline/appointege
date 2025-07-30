@@ -8,6 +8,7 @@ import serviceReducer from './slices/serviceslice'
 import customerReducer from './slices/customerSlice'
 import businessReducer from './slices/businessSlice'
 import faqReducer from './slices/faqSlice'
+import ticketReducer from './slices/ticketSlice'
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -18,6 +19,7 @@ export const store = configureStore({
     customer: customerReducer,
     business: businessReducer,
     faq: faqReducer,
+    ticket: ticketReducer,
   },
 })
 

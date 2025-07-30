@@ -12,6 +12,7 @@ import { axiosApi } from '@/lib/baseUrl'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 
+
 const prisma = new PrismaClient()
 
 // Define form schemas
@@ -314,7 +315,7 @@ export const convertFormToApiFormat = (
   const holidays = (
     Object.keys(weekdayMap).filter((d) => d.length === 3) as string[]
   )
-    .filter((day) => !selectedDaysSet.has(day))
+    .filter((day) => !selectedDaysSet.has(day as any))
     .map((day) => ({
       holiday: weekdayMap[day] as Holiday['holiday'],
       type: 'GENERAL' as Holiday['type'],

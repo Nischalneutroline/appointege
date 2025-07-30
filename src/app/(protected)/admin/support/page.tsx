@@ -1,8 +1,5 @@
 'use client'
-import InputField from '@/components/custom-form-fields/input-field'
-import PhoneField from '@/components/custom-form-fields/phone-field'
-import SelectField from '@/components/custom-form-fields/select-field'
-import { Input } from '@/components/ui/input'
+
 import { cn } from '@/lib/utils'
 import {
   ContactRound,
@@ -11,13 +8,13 @@ import {
   List,
   ShieldUser,
 } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
-import { Form, FormProvider, useForm } from 'react-hook-form'
-import CustomerInformation from './_components/customer-info'
-import FaqSection from './_components/faqs'
-import { useDispatch } from 'react-redux'
-import { fetchBusinessDetail } from '@/store/slices/businessSlice'
-import { AppDispatch } from '@/store/store'
+import React, { useState } from 'react'
+
+import CustomerInformation from './_components/pages/customer-info'
+import FaqSection from './_components/pages/faqs'
+
+import CustomerTicket from './_components/pages/customer-ticket'
+import AdminTicket from './_components/pages/admin-ticket'
 
 const TabInfo = [
   {
@@ -125,13 +122,6 @@ const TabButton = ({
 
 const Page = () => {
   const [selectedTab, setSelectedTab] = useState('contact-info')
-  // const businessId = 'cmd5ezcj90000ur0dg4km9om0'
-  // const dispatch = useDispatch<AppDispatch>()
-
-  // useEffect(() => {
-  //   dispatch(fetchBusinessDetail(businessId))
-  // }, [dispatch, businessId])
-
   return (
     <div className="flex flex-col w-full gap-4">
       <div className="flex  gap-12 w-full">
@@ -148,16 +138,12 @@ const Page = () => {
       </div>
 
       {/* Debug Output */}
-      <div
-        className={cn(
-          'flex p-4 max-h-[calc(100vh-150px)]  overflow-y-auto bg-white  rounded-[8px] border border-[#E5E7EB]',
-        )}
-      >
-        <div className="flex flex-col gap-8 w-full">
+      <div className={cn()}>
+        <div className="flex flex-col gap-8  w-full">
           {selectedTab === 'contact-info' && <CustomerInformation />}
           {selectedTab === 'faqs' && <FaqSection />}
-          {/* {selectedTab === 'customer-support' && <CustomerSupport />}
-          {selectedTab === 'admin-support' && <AdminSupport />} */}
+          {selectedTab === 'customer-support' && <CustomerTicket />}
+          {selectedTab === 'admin-support' && <AdminTicket />}
         </div>
       </div>
     </div>

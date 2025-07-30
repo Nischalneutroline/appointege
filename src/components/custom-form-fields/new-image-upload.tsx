@@ -204,11 +204,12 @@ export function NewImageUpload({
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
-          'group relative border-2 border-dashed rounded-lg transition-all duration-300 cursor-pointer',
+          'group relative border-2 border-dashed rounded-md transition-all duration-300 bg-primary/10 cursor-pointer',
           'hover:border-primary/60 hover:bg-primary/5',
           isDragging ? 'border-primary bg-primary/10' : 'border-gray-300',
           error ? 'border-red-500' : '',
-          preview ? 'p-3' : 'p-8',
+          preview ? 'p-2' : 'p-4',
+          'max-w-[250px]', // Limit maximum width
         )}
         role="button"
         tabIndex={0}
@@ -264,7 +265,7 @@ export function NewImageUpload({
               src={preview}
               alt={`Preview of ${label}`}
               className={cn(
-                'w-full h-40 object-contain rounded-md transition-all duration-300',
+                'w-full h-24 object-contain rounded transition-all duration-300',
                 aspectRatio === 'square' ? 'aspect-square' : 'aspect-video',
               )}
             />
@@ -272,7 +273,7 @@ export function NewImageUpload({
               type="button"
               onClick={removeFile}
               className={cn(
-                'absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow-md',
+                'absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-sm',
                 'hover:bg-red-600 transition-all duration-300 focus:outline-none',
                 'focus:ring-2 focus:ring-red-500 focus:ring-offset-2',
                 showRemove ? 'opacity-100 scale-100' : 'opacity-0 scale-90',
@@ -285,17 +286,17 @@ export function NewImageUpload({
         ) : (
           // Empty State
           <div
-            className="flex flex-col items-center justify-center space-y-3 text-center p-4"
+            className="flex flex-col items-center justify-center space-y-2 text-center "
             aria-hidden={!!preview}
           >
             <div
-              className="p-3 bg-primary/10 rounded-full text-primary transition-all duration-300 group-hover:bg-primary/20"
+              className="p-2 rounded-full text-primary transition-all duration-300 group-hover:bg-primary/20"
               aria-hidden="true"
             >
-              <FiUpload className="w-6 h-6" />
+              <FiUpload className="w-5 h-5" />
             </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium text-gray-900">
+            <div className="space-y-0.5">
+              <p className="text-xs font-medium text-gray-900">
                 <span className="text-primary">Click to upload</span> or drag
                 and drop
               </p>

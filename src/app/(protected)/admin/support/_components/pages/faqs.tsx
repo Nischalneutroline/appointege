@@ -11,50 +11,35 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
 
 import { capitalizeFirstChar } from '@/utils/utils'
-import FaqFormModal from './faqmodalform'
-import { closeFaqForm, FilterOptionState, openFaqForm, setActiveFilter, setActiveFilters, setFaqs } from '@/store/slices/faqSlice'
+import FaqFormModal from '../forms/faqmodal-form'
+import { deleteFaq } from '../../../../../../store/slices/faqSlice'
+import {
+  closeFaqForm,
+  fetchFaq,
+  FilterOptionState,
+  openFaqForm,
+  setActiveFilter,
+  setActiveFilters,
+  setFaqs,
+} from '@/store/slices/faqSlice'
 
 // Types
 export type FaqFilterValue = 'all' | 'public' | 'private'
 
 export interface FAQItem {
-  id: string
+  id?: string
   question: string
   answer: string
-  category?: FaqFilterValue
+  category: FaqFilterValue
+  createdById: string
+  isActive: boolean
+  order: number | null
+  createdAt: string
+  updatedAt: string
+  lastUpdatedById: string
 }
 
 // Default data
-const defaultFaqs: FAQItem[] = [
-  {
-    id: '1',
-    question: 'How do I reschedule an appointment?',
-    answer:
-      'You can reschedule your appointment by going to the My Appointments section and selecting Reschedule next to the booking.',
-    category: 'public',
-  },
-  {
-    id: '2',
-    question: 'Can I cancel after booking?',
-    answer:
-      'Yes, appointments can be canceled up to 24 hours in advance for a full refund.',
-    category: 'public',
-  },
-  {
-    id: '3',
-    question: 'Is customer support available 24/7?',
-    answer:
-      'Customer support is available 9 AM - 6 PM from Monday to Saturday.',
-    category: 'private',
-  },
-  {
-    id: '4',
-    question: 'What payment methods are accepted?',
-    answer:
-      'We accept Visa, MasterCard, American Express, and online wallets like PayPal and Stripe.',
-    category: 'public',
-  },
-]
 
 const DEFAULT_FAQ_FILTERS_VALUES: FaqFilterValue[] = [
   'all',
@@ -93,7 +78,7 @@ const createFilterOptions = (faqs: FAQItem[]) => {
   return filters.map((option) => ({
     ...option,
     count: faqs.filter(
-      (faq) => option.value === 'all' || faq.category === option.value,
+      (faq) => option?.value === 'all' || faq?.category === option?.value,
     ).length,
   }))
 }
@@ -105,32 +90,35 @@ export default function FaqSection() {
   const [isRefreshing, setIsRefreshing] = useState(false)
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
 
+  const hasFetched = useRef(false)
+
+  useEffect(() => {
+    if (!hasFetched.current) {
+      dispatch(fetchFaq())
+      hasFetched.current = true
+    }
+  }, [dispatch])
+
   const {
-    faqs: storeFaqs = [],
+    faqs,
     activeFilters = DEFAULT_FAQ_FILTERS_VALUES,
     isFaqFormOpen,
     currentFaq,
     faqFormMode,
   } = useSelector((state: RootState) => state.faq)
 
-  useEffect(() => {
-    if (storeFaqs.length === 0) {
-      dispatch(setFaqs(defaultFaqs))
-    }
-  }, [dispatch, storeFaqs.length])
-
-  const allFaqs = storeFaqs.length > 0 ? storeFaqs : defaultFaqs
+  const allFaqs = faqs?.length > 0 ? faqs : []
 
   const filteredFaqs = useMemo(() => {
     return allFaqs.filter((faq) => {
       const matchesSearch =
         searchQuery === '' ||
-        faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+        faq?.question?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        faq?.answer?.toLowerCase().includes(searchQuery.toLowerCase())
 
       const matchesCategory =
         activeFilters.includes('all') ||
-        activeFilters.includes(faq.category as FaqFilterValue)
+        activeFilters.includes(faq?.category as FaqFilterValue)
 
       return matchesSearch && matchesCategory
     })
@@ -149,7 +137,7 @@ export default function FaqSection() {
     if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
     setIsRefreshing(true)
     debounceTimeout.current = setTimeout(() => {
-      dispatch(setFaqs(defaultFaqs)) // Simulate refresh
+      dispatch(fetchFaq()) // Simulate refresh
       setIsRefreshing(false)
     }, 800)
   }, [dispatch])
@@ -167,7 +155,7 @@ export default function FaqSection() {
   }
 
   return (
-    <>
+    <div className="flex flex-col p-4 h-full gap-4 bg-white  rounded-[8px] border border-[#E5E7EB]">
       <div className="flex justify-between items-center w-full">
         <div className="flex flex-col w-fit">
           <div className="text-lg md:text-xl font-semibold text-[#111827]">
@@ -185,8 +173,8 @@ export default function FaqSection() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col md:flex-row md:justify-between gap-2 w-full">
+      <div className="relative flex flex-col gap-4">
+        <div className="flex flex-col md:flex-row md:justify-between gap-2 w-full sticky">
           <div
             className={cn(
               'w-full md:w-fit flex items-center gap-1 overflow-x-auto px-0.5 bg-[#FAFCFE] h-11 rounded-[10px] border border-[#E5E7EB]',
@@ -235,15 +223,15 @@ export default function FaqSection() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 overflow-y-auto">
           {filteredFaqs.length === 0 ? (
             <div className="text-center text-sm text-gray-500 italic">
               No FAQs found.
             </div>
           ) : (
-            filteredFaqs.map((faq, index) => (
+            filteredFaqs?.map((faq, index) => (
               <div
-                key={faq.id}
+                key={index}
                 className={cn(
                   'bg-white p-4 rounded-lg border border-gray-200 shadow-sm',
                   openIndex === index && 'bg-[#E9F1FD]',
@@ -253,7 +241,7 @@ export default function FaqSection() {
                   className="flex justify-between items-center cursor-pointer"
                   onClick={() => toggle(index)}
                 >
-                  <h4 className="font-medium text-gray-900">{faq.question}</h4>
+                  <h4 className="font-medium text-gray-900">{faq?.question}</h4>
 
                   <div className="flex gap-2 items-center">
                     {openIndex === index && (
@@ -270,13 +258,16 @@ export default function FaqSection() {
                         <Trash2
                           strokeWidth={2}
                           size={17}
-                          onClick={() => {}}
+                          onClick={() => {
+                            dispatch(deleteFaq(faq?.id || ''))
+                            handleRefresh()
+                          }}
                           className="hover:text-red-400"
                         />
                       </div>
                     )}
                     <div className="text-[#367C39] text-xs font-medium">
-                      {capitalizeFirstChar(faq.category as string)}
+                      {capitalizeFirstChar(faq?.category || '')}
                     </div>
                     <ChevronDown
                       className={cn(
@@ -287,7 +278,7 @@ export default function FaqSection() {
                   </div>
                 </div>
                 {openIndex === index && (
-                  <p className="mt-2 text-sm text-gray-700">{faq.answer}</p>
+                  <p className="mt-2 text-sm text-gray-700">{faq?.answer}</p>
                 )}
               </div>
             ))
@@ -296,6 +287,6 @@ export default function FaqSection() {
       </div>
 
       <FaqFormModal open={isFaqFormOpen} onChange={handleCloseForm} />
-    </>
+    </div>
   )
 }

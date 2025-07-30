@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button'
 import LoadingSpinner from '@/components/loading-spinner'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState, AppDispatch } from '@/store/store'
-import { closeFaqForm, storeFaq, updateFaq } from '@/store/slices/faqSlice'
+
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -28,14 +28,17 @@ const categoryOptions = [
 ]
 
 import { z } from 'zod'
+import {
+  closeFaqForm,
+  createFaq,
+  fetchFaq,
+  updateFaq,
+  // createFaq,
+  // storeFaq,
+  // updateFaq,
+} from '@/store/slices/faqSlice'
+import { faqSchema } from '../../_schemas/faqSchema'
 
-export const faqSchema = z.object({
-  question: z.string().min(1, 'Question is required'),
-  answer: z.string().min(1, 'Answer is required'),
-  category: z.enum(['public', 'private', 'all'], {
-    required_error: 'Category is required',
-  }),
-})
 
 export type FAQFormData = z.infer<typeof faqSchema>
 
@@ -50,6 +53,7 @@ const FaqFormModal = ({
   const { currentFaq, faqFormMode, isFaqFormOpen, success } = useSelector(
     (state: RootState) => state.faq,
   )
+  const user = useSelector((state: RootState) => state.auth.user)
 
   const form = useForm<FAQFormData>({
     resolver: zodResolver(faqSchema),
@@ -79,11 +83,6 @@ const FaqFormModal = ({
     if (success && isSubmitting) {
       setIsSubmitting(false)
       setIsSubmitted(true)
-      toast.success(
-        faqFormMode === 'edit'
-          ? 'FAQ updated successfully!'
-          : 'FAQ created successfully!',
-      )
     }
   }, [success, isSubmitting, faqFormMode])
 
@@ -92,16 +91,44 @@ const FaqFormModal = ({
     onChange(false)
   }
 
-  const onSubmit = async (data: FAQFormData) => {
+  const onSubmit = async (data: any) => {
+    // console.log('Form Data:', {
+    //   ...data,
+    //   // Show the raw form data along with additional context
+    //   formMode: faqFormMode,
+    //   currentFaqId: currentFaq?.id,
+    //   timestamp: new Date().toISOString()
+    // });
+    const updatedData = {
+      ...data,
+      createdById: user?.id,
+      // lastUpdatedById: user?.id,
+    }
+    console.log(updatedData, 'data')
+    // For now, we're just logging the data
+    // Uncomment and modify the following when ready to submit:
+    form.reset()
     try {
       setIsSubmitting(true)
       if (faqFormMode === 'edit' && currentFaq?.id) {
-        await dispatch(updateFaq({ id: currentFaq.id, ...data })).unwrap()
+        const updatedBeforeUpdate = {
+          id: currentFaq.id,
+          ...data,
+          lastUpdatedById: user?.id,
+          lastUpdatedAt: new Date().toISOString(),
+        }
+        await dispatch(updateFaq(updatedBeforeUpdate)).unwrap()
+        await dispatch(fetchFaq())
+
+        onChange(false) // Close the modal after successful update
       } else {
-        await dispatch(storeFaq(data)).unwrap()
+        await dispatch(createFaq(updatedData)).unwrap()
+        await dispatch(fetchFaq())
+
+        onChange(false) // Close the modal after successful create
       }
     } catch (err) {
-      toast.error('Something went wrong.')
+      console.error('Error submitting form:', err)
       setIsSubmitting(false)
     }
   }
@@ -152,15 +179,13 @@ const FaqFormModal = ({
                 className="w-24"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? (
-                  <LoadingSpinner
-                    text={faqFormMode === 'edit' ? 'Updating...' : 'Saving...'}
-                  />
-                ) : faqFormMode === 'edit' ? (
-                  'Update'
-                ) : (
-                  'Save'
-                )}
+                {isSubmitting
+                  ? faqFormMode === 'edit'
+                    ? 'Updating...'
+                    : 'Saving...'
+                  : faqFormMode === 'edit'
+                    ? 'Update'
+                    : 'Save'}
               </Button>
             </div>
           </form>
