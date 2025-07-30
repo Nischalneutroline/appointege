@@ -350,7 +350,7 @@ const NewServiceForm = ({
               placeholder="Any special requests?"
             />
             <div className="flex flex-col gap-3 md:flex-row justify-center items-center mt-6">
-              <Button
+              {/* <Button
                 type="button"
                 variant="outline"
                 className="w-full sm:w-auto hover:opacity-80 active:outline active:outline-blue-700 transition-transform duration-200"
@@ -358,7 +358,7 @@ const NewServiceForm = ({
                 disabled={isSubmitting}
               >
                 ← Back
-              </Button>
+              </Button> */}
               <Button
                 type="submit"
                 variant="default"
@@ -371,13 +371,13 @@ const NewServiceForm = ({
             <div className="text-sm text-muted-foreground text-center">
               {formatAvailabilityNote()}
             </div>
-            <Button
+            {/* <Button
               type="button"
               variant="outline"
               onClick={() => console.log('Form values:', form.getValues())}
             >
               Debug Form Values
-            </Button>
+            </Button> */}
           </form>
         </FormProvider>
       </DialogContent>

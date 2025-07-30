@@ -19,7 +19,7 @@ import {
   transformAvailabilityForForm,
   convertFormToApiFormat,
   convertServiceAvailabilityToApi,
-  serviceAvailabilityFormSchema, // Base schema for Redux/API
+  serviceAvailabilityFormSchema,
   ServiceAvailabilityFormValues,
   createBusiness,
   updateBusiness,
@@ -30,7 +30,6 @@ import { z } from 'zod'
 export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 const allDays: WeekDay[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-// LOCAL EXTENDED SCHEMA: Add `from` and `to` for UI-only state management
 const serviceAvailabilityFormSchemaExtended =
   serviceAvailabilityFormSchema.extend({
     from: z.enum(allDays).optional(),
@@ -53,7 +52,9 @@ const ServiceAvailabilityForm = () => {
   const [activeDay, setActiveDay] = useState<WeekDay>('Mon')
   const isInitialized = useRef(false)
 
-  // Get data from the previous step to use as constraints
+  // Get business availability days to constrain service availability
+  const businessAvailabilityDays =
+    businessData?.businessAvailabilityForm?.businessAvailability || []
   const businessHoursFromState =
     businessData?.businessAvailabilityForm?.businessDays
   const businessBreaksFromState =
@@ -61,12 +62,16 @@ const ServiceAvailabilityForm = () => {
 
   const form = useForm<ServiceAvailabilityFormValuesExtended>({
     resolver: zodResolver(serviceAvailabilityFormSchemaExtended),
-    defaultValues: {}, // Will be populated by the main useEffect
+    defaultValues: {},
   })
 
-  // THE "BRAIN": This effect correctly initializes the form based on mode (Create vs. Update)
   useEffect(() => {
-    if (isInitialized.current || !hasFetched) return
+    if (
+      isInitialized.current ||
+      !hasFetched ||
+      !businessAvailabilityDays.length
+    )
+      return
 
     let sourceData: ServiceAvailabilityFormValues
     let sourceAvailabilityArray: WeekDay[] = []
@@ -74,39 +79,41 @@ const ServiceAvailabilityForm = () => {
     const isUpdateMode = !!selectedBusiness?.id
 
     if (isUpdateMode && selectedBusiness.serviceAvailability?.length > 0) {
-      // --- UPDATE MODE ---
-      // Source of truth is the existing service availability from the fetched business
+      // In update mode, use existing service availability but filter by current business days
       const { work: serviceWork } = transformAvailabilityForForm(
         selectedBusiness.serviceAvailability,
       )
       sourceAvailabilityArray = allDays.filter(
-        (day) => (serviceWork[day] || []).length > 0,
+        (day) =>
+          (serviceWork[day] || []).length > 0 &&
+          businessAvailabilityDays.includes(day),
       )
+
+      // If no matching days, fall back to business availability days
+      if (sourceAvailabilityArray.length === 0) {
+        sourceAvailabilityArray = [...businessAvailabilityDays]
+      }
 
       sourceData = {
         serviceAvailability: sourceAvailabilityArray,
         serviceDays: normalizeWeekDays(serviceWork),
-        isServiceVisible: true, // You might want to get this from `selectedBusiness` if it's stored there
+        isServiceVisible: true,
         isPricingEnabled: false,
       }
     } else {
-      // --- CREATE MODE (or an update with no existing service data) ---
-      // Source of truth is the Business Availability from the previous step
-      const businessAvail =
-        businessData?.businessAvailabilityForm?.businessAvailability || []
+      // In create mode, use business availability days directly
+      sourceAvailabilityArray = [...businessAvailabilityDays]
       const businessHours =
         businessData?.businessAvailabilityForm?.businessDays || {}
 
-      sourceAvailabilityArray = businessAvail
       sourceData = {
-        serviceAvailability: businessAvail,
+        serviceAvailability: sourceAvailabilityArray,
         serviceDays: normalizeWeekDays(businessHours),
         isServiceVisible: true,
         isPricingEnabled: false,
       }
     }
 
-    // Derive `from` and `to` from the determined availability array
     const sortedDays = allDays.filter((d) =>
       sourceAvailabilityArray.includes(d),
     )
@@ -114,7 +121,6 @@ const ServiceAvailabilityForm = () => {
     const to =
       sortedDays.length > 0 ? sortedDays[sortedDays.length - 1] : undefined
 
-    // Reset the form with the complete data, including the UI fields `from` and `to`
     form.reset({
       ...sourceData,
       from,
@@ -123,9 +129,14 @@ const ServiceAvailabilityForm = () => {
 
     setActiveDay(from || 'Mon')
     isInitialized.current = true
-  }, [selectedBusiness, businessData, hasFetched, form])
+  }, [
+    selectedBusiness,
+    businessData,
+    hasFetched,
+    form,
+    businessAvailabilityDays,
+  ])
 
-  // This effect saves the CORE data (without from/to) to Redux for persistence
   const formData = useWatch({ control: form.control })
   useEffect(() => {
     if (!isInitialized.current) return
@@ -133,7 +144,6 @@ const ServiceAvailabilityForm = () => {
       const validationResult =
         serviceAvailabilityFormSchemaExtended.safeParse(formData)
       if (validationResult.success) {
-        // Parse with BASE schema to strip UI fields before dispatching
         const reduxSafeData = serviceAvailabilityFormSchema.parse(
           validationResult.data,
         )
@@ -150,9 +160,7 @@ const ServiceAvailabilityForm = () => {
       return
     }
 
-    // Parse with BASE schema to get clean data for the API
     const apiSafeData = serviceAvailabilityFormSchema.parse(data)
-
     const { businessAvailability, holidays } = convertFormToApiFormat(
       businessData.businessAvailabilityForm,
     )
@@ -220,6 +228,7 @@ const ServiceAvailabilityForm = () => {
               label="Service Days"
               activeDay={activeDay}
               setActiveDay={setActiveDay}
+              availableDays={businessAvailabilityDays} // Pass business days as available days
             />
             <BusinessHourSelector
               name="serviceDays"

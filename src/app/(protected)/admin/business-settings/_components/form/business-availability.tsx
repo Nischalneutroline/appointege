@@ -20,7 +20,6 @@ import {
   convertFormToApiFormat,
   transformAvailabilityForForm,
   weekdayMap,
-  // NOTE: We import the BASE schema for saving data to Redux
   businessAvailabilityFormSchema,
 } from '@/store/slices/businessSlice'
 import { timezoneOptions } from '@/schemas/businessSchema'
@@ -30,8 +29,6 @@ export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 
 const allDays: WeekDay[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-// NEW: Define the extended schema and type LOCALLY for the form's UI state.
-// This schema will be used for form validation only.
 const businessAvailabilityFormSchemaExtended =
   businessAvailabilityFormSchema.extend({
     from: z.enum(allDays).optional(),
@@ -93,20 +90,18 @@ const BusinessAvailabilityForm = () => {
   const [activeDay, setActiveDay] = useState<WeekDay>('Mon')
   const isInitialized = useRef(false)
 
-  // MODIFIED: The form uses the extended schema for validation.
   const form = useForm<BusinessAvailabilityFormValuesExtended>({
     resolver: zodResolver(businessAvailabilityFormSchemaExtended),
-    defaultValues: {}, // Start empty
+    defaultValues: {},
   })
 
-  // MODIFIED: Main initialization effect
+  // Initialize form
   useEffect(() => {
     if (isInitialized.current || !hasFetched) return
 
     let initialValues: BusinessAvailabilityFormValuesExtended | null = null
 
     if (businessData?.businessAvailabilityForm) {
-      // Priority 1: Redux state (for tab navigation)
       const reduxData = businessData.businessAvailabilityForm
       const sortedDays = allDays.filter((d) =>
         reduxData.businessAvailability.includes(d),
@@ -121,7 +116,6 @@ const BusinessAvailabilityForm = () => {
       selectedBusiness &&
       selectedBusiness.businessAvailability?.length > 0
     ) {
-      // Priority 2: Fetched data from API
       const { work, break: breakHours } = transformAvailabilityForForm(
         selectedBusiness.businessAvailability,
       )
@@ -144,7 +138,6 @@ const BusinessAvailabilityForm = () => {
           sortedDays.length > 0 ? sortedDays[sortedDays.length - 1] : undefined,
       }
     } else if (hasFetched) {
-      // Priority 3: No data, use defaults
       initialValues = defaultValues
     }
 
@@ -156,17 +149,46 @@ const BusinessAvailabilityForm = () => {
     }
   }, [hasFetched, selectedBusiness, businessData, form])
 
+  // Sync businessDays and breakHours with businessAvailability
+  useEffect(() => {
+    if (!isInitialized.current) return
+
+    const currentBusinessAvailability =
+      form.getValues('businessAvailability') || []
+    const currentBusinessDays =
+      form.getValues('businessDays') || normalizeWeekDays()
+    const currentBreakHours =
+      form.getValues('breakHours') || normalizeWeekDays()
+
+    // Add default slots for new days in businessAvailability
+    const updatedBusinessDays = { ...currentBusinessDays }
+    const updatedBreakHours = { ...currentBreakHours }
+
+    currentBusinessAvailability.forEach((day) => {
+      if (!updatedBusinessDays[day]?.length) {
+        updatedBusinessDays[day] = defaultValues.businessDays[day] || [
+          ['09:00 AM', '05:00 PM'],
+        ]
+      }
+      if (!updatedBreakHours[day]?.length) {
+        updatedBreakHours[day] = defaultValues.breakHours[day] || [
+          ['12:00 PM', '01:00 PM'],
+        ]
+      }
+    })
+
+    form.setValue('businessDays', updatedBusinessDays, { shouldDirty: true })
+    form.setValue('breakHours', updatedBreakHours, { shouldDirty: true })
+  }, [form.getValues('businessAvailability'), form])
+
   const formData = useWatch({ control: form.control })
 
-  // MODIFIED: This effect saves the CORE data to Redux, stripping out from/to.
   useEffect(() => {
     if (!isInitialized.current) return
     const timer = setTimeout(() => {
-      // Validate with the extended schema to ensure `from`/`to` are present for UI
       const validationResult =
         businessAvailabilityFormSchemaExtended.safeParse(formData)
       if (validationResult.success) {
-        // But parse with the BASE schema to get a clean object for Redux
         const reduxSafeData = businessAvailabilityFormSchema.parse(
           validationResult.data,
         )
@@ -183,7 +205,6 @@ const BusinessAvailabilityForm = () => {
   const breakHours = useWatch({ control: form.control, name: 'breakHours' })
 
   const onSubmit = async (data: BusinessAvailabilityFormValuesExtended) => {
-    // Parse with the base schema to ensure only API-relevant data is used
     const backendSafeData = businessAvailabilityFormSchema.parse(data)
     const { businessAvailability, holidays } =
       convertFormToApiFormat(backendSafeData)
@@ -196,7 +217,6 @@ const BusinessAvailabilityForm = () => {
       updatedAt: new Date(),
     }
     dispatch(setBusinessDetail(updatedData))
-    // Save the core data to Redux state
     dispatch(setBusinessAvailabilityForm(backendSafeData))
     toast.success('Business availability saved successfully')
     dispatch(setActiveTab(BusinessTab.ServiceAvailability))
