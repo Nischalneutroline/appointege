@@ -64,8 +64,15 @@ async function getBusinessDetailByOwnerId(id: string) {
     },
   })
 
-  console.log(businessDetails, 'businessDetails')
-  return businessDetails
+  // Convert Date objects to ISO strings
+  return JSON.parse(
+    JSON.stringify(businessDetails, (key, value) => {
+      if (value instanceof Date) {
+        return value.toISOString()
+      }
+      return value
+    }),
+  )
 }
 
 export { getBusinessDetailById, getBusinessDetailByOwnerId }

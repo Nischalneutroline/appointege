@@ -64,52 +64,27 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
         // Handle business availability
         supportAvailability: {
-          upsert: parsedData.supportAvailability.map((availability) => ({
-            where: { id: availability.id || '' },
-            update: {
-              weekDay: availability.weekDay,
-              type: availability.type,
-              timeSlots: {
-                upsert: availability.timeSlots.map((slot) => ({
-                  where: { id: slot.id || '' },
-                  update: {
-                    startTime: slot.startTime,
-                    endTime: slot.endTime,
-                  },
-                  create: {
-                    startTime: slot.startTime,
-                    endTime: slot.endTime,
-                  },
-                })),
-              },
-            },
-            create: {
-              weekDay: availability.weekDay,
-              type: availability.type,
-              timeSlots: {
-                create: availability.timeSlots.map((slot) => ({
-                  startTime: slot.startTime,
-                  endTime: slot.endTime,
-                })),
-              },
+          deleteMany: {}, // Delete all existing supportAvailability
+          create: parsedData.supportAvailability.map((availability) => ({
+            weekDay: availability.weekDay,
+            type: availability.type,
+            timeSlots: {
+              create: availability.timeSlots.map((slot) => ({
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                type: "WORK",
+              })),
             },
           })),
         },
 
         // Handle holidays
         supportHoliday: {
-          upsert: parsedData.supportHoliday.map((holiday) => ({
-            where: { id: holiday.id || '' },
-            update: {
-              holiday: holiday.holiday as WeekDays,
-              type: holiday.type,
-              date: holiday.date,
-            },
-            create: {
-              holiday: holiday.holiday as WeekDays,
-              type: holiday.type,
-              date: holiday.date,
-            },
+          deleteMany: {}, // Delete all existing supportHoliday
+          create: parsedData.supportHoliday.map((holiday) => ({
+            holiday: holiday.holiday as WeekDays,
+            type: "SUPPORT",
+            date: holiday.date,
           })),
         },
       },
@@ -133,7 +108,7 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: 'Validation failed', details: error.errors },
+        { error: 'Validation failed', details: error.errors,message: error.message },
         { status: 400 },
       )
     }

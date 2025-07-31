@@ -30,7 +30,7 @@ const BusinessSetting = () => {
   const [data1, setData1] = useState<string | null>(null)
   const [data2, setData2] = useState<string | null>(null)
   const [currentMode, setCurrentMode] = useState('business-details')
-  const { businessDetail, loading:isLoading, isSaving } = useSelector(
+  const { businessDetail, isLoading, isSaving } = useSelector(
     (state: RootState) => state.business,
   )
   console.log(businessDetail, 'Data form Api')
@@ -147,12 +147,7 @@ const BusinessSetting = () => {
               </div>
             ))}
           {currentMode === 'business-details' && !isLoading && !isSaving && (
-            <BusinessDetail
-              setTab={(tab) => setCurrentMode(tab)}
-              data={businessDetail || {}}
-              onBack={handleBack}
-              onSubmitSuccess={handleBusinessDetailSubmitSuccess}
-            />
+            <BusinessDetail data={businessDetail || {}} />
           )}
           {currentMode === 'business-availability' && isLoading && (
             <div className="flex justify-center items-center py-10 sm:py-20 text-muted-foreground text-sm">
@@ -161,23 +156,10 @@ const BusinessSetting = () => {
           )}
           {currentMode === 'business-availability' &&
             !isLoading &&
-            !isSaving && (
-              <BusinessAvailabilityForm
-                setTab={(tab: string) => setCurrentMode(tab)}
-                data={businessDetail}
-                onBack={() => setCurrentMode('business-details')}
-                onSubmitSuccess={handleBusinessAvailabilitySubmitSuccess}
-              />
-            )}
+            !isSaving && <BusinessAvailabilityForm />}
           {currentMode === 'service-availability' &&
             !isLoading &&
-            !isSaving && (
-              <ServiceAvailabilityForm
-                data={businessDetail?.serviceAvailability}
-                onBack={() => setCurrentMode('business-availability')}
-                // onSubmitSuccess={handleServiceAvailabilitySubmitSuccess}
-              />
-            )}
+            !isSaving && <ServiceAvailabilityForm />}
         </div>
       </div>
     </div>

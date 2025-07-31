@@ -9,31 +9,40 @@ import {
 } from '@/store/slices/businessSlice'
 import InputField from '@/components/custom-form-fields/input-field'
 import PhoneField from '@/components/custom-form-fields/phone-field'
-import SelectField from '@/components/custom-form-fields/select-field'
 
 import { AppDispatch, RootState } from '@/store/store'
 import BusinessDaySelector from '@/components/custom-form-fields/business-settings/business-day-selector'
-import { WeekDay } from '@/components/custom-form-fields/business-settings/business-day-selector'
+
 import BusinessHourSelector from '@/components/custom-form-fields/business-settings/business-hour-selector'
 
-import {
-  transformToSupportBusinessDetail,
-  transformServiceAvailability,
-} from '@/lib/support-business'
+import { transformToSupportBusinessDetail } from '@/lib/support-business'
 
 import { CheckCircle } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 
-// Define the day type for TypeScript
-type DayOfWeek = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
+import {
+  createSupportInfo,
+  DayOfWeek,
+  updateSupportInfo,
+} from '@/store/slices/supportInfoSlice'
 
-// Type for time range (e.g., ["09:00 AM", "05:00 PM"])
-type TimeRange = [string, string]
+type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 
-// Type for business hours (e.g., { Mon: [["09:00 AM", "05:00 PM"]] })
-type BusinessHours = Record<DayOfWeek, TimeRange[]>
+const allWeekDays: WeekDay[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
+const weekdayMap: Record<string, WeekDay> = {
+  MONDAY: 'Mon',
+  TUESDAY: 'Tue',
+  WEDNESDAY: 'Wed',
+  THURSDAY: 'Thu',
+  FRIDAY: 'Fri',
+  SATURDAY: 'Sat',
+  SUNDAY: 'Sun',
+}
+interface BusinessHours {
+  [key: string]: [string, string][]
+}
 // Type for the form values
 interface BusinessFormValues {
   useBusinessInfo: boolean
@@ -48,7 +57,7 @@ interface BusinessFormValues {
 }
 
 const CustomerInformation = () => {
-  // const [useBusinessInfo, setUseBusinessInfo] = useState<boolean>(false)
+  const [useBusinessInfo, setUseBusinessInfo] = useState<boolean>(false)
   // Then in your component, use the types like this:
   const form = useForm<BusinessFormValues>({
     defaultValues: {
@@ -68,164 +77,216 @@ const CustomerInformation = () => {
   useEffect(() => {
     dispatch(fetchBusinessByOwnerId(user?.id as string))
   }, [user])
-
+  let supportId: string = ''
   const [activeDay, setActiveDay] = useState<WeekDay>('Mon')
-  const { businesses, loading: isLoading } = useSelector(
+  const { selectedBusiness: businessDetail, loading: isLoading } = useSelector(
     (state: RootState) => state.business,
   )
-  const businessDetail = businesses?.[0]
+  const supportBusinessDetail = businessDetail?.supportBusinessDetail
+  supportId = supportBusinessDetail?.id as string
 
   const [currentMode, setCurrentMode] = useState<'default' | 'custom'>(
     'default',
   )
-  const useBusinessInfo = useWatch({
-    name: 'useBusinessInfo',
-    control: form.control,
-  })
+
   // const [selectedDay, setSelectedDay] = useState<string[]>(['monday'])
   // const [manuallySelectedDay, setManuallySelectedDay] = useState<string | null>(
   //   'monday',
   // )
 
   // Load API data: update Redux and reset form
+  const workHours: Record<WeekDay, [string, string][]>[] = []
+  const breakHours: Record<WeekDay, [string, string][]>[] = []
+  useEffect(() => {
+    if (!isLoading && businessDetail) {
+      console.log(supportId, 'id')
+      // Business Detail Transformation
+      const { work: workHours, break: breakHours } =
+        transformAvailabilityForForm(businessDetail?.businessAvailability)
 
-  // const apiDataToForm = convertFromApiFormat({
-  //   timeZone: businessDetail?.timeZone || '',
-  //   businessAvailability: businessDetail?.businessAvailability || [],
-  //   holiday: businessDetail?.holiday || [],
-  // })
-  // const apiSupportToForm = convertFromApiFormat({
-  //   timeZone: businessDetail?.timeZone || '',
-  //   businessAvailability:
-  //     businessDetail?.supportBusinessDetail?.supportAvailability || [],
-  //   holiday: businessDetail?.supportBusinessDetail?.supportHoliday || [],
-  // })
+      const holidays: WeekDay[] =
+        businessDetail?.holiday
+          .map((h) => weekdayMap[h.holiday])
+          .filter((day): day is WeekDay => !!day) || []
+
+      const businessAvailability: WeekDay[] = allWeekDays.filter(
+        (day) => !holidays.includes(day),
+      )
+
+      const businessData = {
+        supportTeamName: businessDetail?.name || '',
+        supportEmail: businessDetail?.email || '',
+        supportNumber: businessDetail?.phone || '',
+        physicalAddress:
+          `${businessDetail?.address?.[0].street}, ${businessDetail?.address?.[0].city}` ||
+          '',
+        googleMap: businessDetail?.address?.[0].googleMap || '',
+        businessAvailability,
+        businessHours: workHours,
+        breakHours,
+      }
+
+      // Support Detail Transformation
+      const { work: supportWorkHours, break: supportBreakHours } =
+        transformAvailabilityForForm(supportBusinessDetail?.supportAvailability)
+
+      const supportData = {
+        supportTeamName: supportBusinessDetail?.supportBusinessName || '',
+        supportEmail: supportBusinessDetail?.supportEmail || '',
+        supportNumber: supportBusinessDetail?.supportPhone || '',
+        physicalAddress: supportBusinessDetail?.supportAddress || '',
+        googleMap: supportBusinessDetail?.supportGoogleMap || '',
+        businessAvailability,
+        businessHours: supportWorkHours,
+        breakHours: supportBreakHours,
+      }
+
+      if (useBusinessInfo && businessDetail) {
+        form.reset(businessData)
+      } else if (!useBusinessInfo && supportBusinessDetail) {
+        form.reset(supportData)
+      } else {
+        form.reset({
+          supportTeamName: '',
+          supportEmail: '',
+          supportNumber: '',
+          physicalAddress: '',
+          googleMap: '',
+          businessAvailability,
+          businessHours: workHours,
+          breakHours: breakHours,
+        })
+      }
+    }
+  }, [isLoading, businessDetail, form, useBusinessInfo])
 
   // dispatch(updateBusinessAvailabilityForm(apiDataToForm))
   // form.reset(apiDataToForm)
 
   // 🔄 Sync service hours with business hours if "Same as Business Hours" is selected
-  // supportTeamName:
-  //   businessDetail?.supportBusinessDetail?.supportBusinessName || '',
-  // supportEmail: businessDetail?.supportBusinessDetail?.supportEmail || '',
-  // supportNumber: businessDetail?.supportBusinessDetail?.supportPhone || '',
-  // physicalAddress:
-  //   businessDetail?.supportBusinessDetail?.supportAddress || '',
-  // googleMap: businessDetail?.supportBusinessDetail?.supportGoogleMap || '',
-  // supportHourType: businessDetail?.supportBusinessDetail
-  //   ? 'SAME_AS_SUPPORT_HOURS'
-  //   : 'SAME_AS_BUSINESS_HOURS',
-  // businessAvailability: apiDataToForm.businessAvailability,
-  // businessHours:
-  //   supportHour === 'SAME_AS_BUSINESS_HOURS'
-  //     ? apiDataToForm.businessHours
-  //     : businessDetail?.supportBusinessDetail?.supportAvailability
-  //       ? apiSupportToForm.businessHours
-  //       : {
-  //           Mon: [['09:00 AM', '05:00 PM']],
-  //           Tue: [['09:00 AM', '05:00 PM']],
-  //           Wed: [['09:00 AM', '05:00 PM']],
-  //           Thu: [['09:00 AM', '05:00 PM']],
-  //           Fri: [['09:00 AM', '05:00 PM']],
-  //           Sat: [['09:00 AM', '05:00 PM']],
-  //           Sun: [['09:00 AM', '05:00 PM']],
-  //         },
-  // breakHours:
-  //   supportHour === 'SAME_AS_BUSINESS_HOURS'
-  //     ? apiDataToForm.breakHours
-  //     : businessDetail?.supportBusinessDetail?.supportAvailability
-  //       ? apiSupportToForm.breakHours
-  // : {
-  //     Mon: [['12:00 PM', '01:00 PM']],
-  //     Tue: [['12:00 PM', '01:00 PM']],
-  //     Wed: [['12:00 PM', '01:00 PM']],
-  //     Thu: [['12:00 PM', '01:00 PM']],
-  //     Fri: [['12:00 PM', '01:00 PM']],
-  //     Sat: [['12:00 PM', '01:00 PM']],
-  //     Sun: [['12:00 PM', '01:00 PM']],
-  //   },
+  // const defaultValues = {
+  //   supportTeamName:
+  //     supportBusinessDetail?.supportBusinessName || '',
+  //   supportEmail: supportBusinessDetail?.supportEmail || '',
+  //   supportNumber: supportBusinessDetail?.supportPhone || '',
+  //   physicalAddress:
+  //     supportBusinessDetail?.supportAddress || '',
+  //   googleMap: supportBusinessDetail?.supportGoogleMap || '',
+  //   supportHourType: supportBusinessDetail
+  //     ? 'SAME_AS_SUPPORT_HOURS'
+  //     : 'SAME_AS_BUSINESS_HOURS',
+  //   businessAvailability: apiDataToForm.businessAvailability,
+  //   businessHours:
+  //     supportHour === 'SAME_AS_BUSINESS_HOURS'
+  //       ? apiDataToForm.businessHours
+  //       : businessDetail?.supportBusinessDetail?.supportAvailability
+  //         ? apiSupportToForm.businessHours
+  //         : {
+  //             Mon: [['09:00 AM', '05:00 PM']],
+  //             Tue: [['09:00 AM', '05:00 PM']],
+  //             Wed: [['09:00 AM', '05:00 PM']],
+  //             Thu: [['09:00 AM', '05:00 PM']],
+  //             Fri: [['09:00 AM', '05:00 PM']],
+  //             Sat: [['09:00 AM', '05:00 PM']],
+  //             Sun: [['09:00 AM', '05:00 PM']],
+  //           },
+  //   breakHours:
+  //     supportHour === 'SAME_AS_BUSINESS_HOURS'
+  //       ? apiDataToForm.breakHours
+  //       : businessDetail?.supportBusinessDetail?.supportAvailability
+  //         ? apiSupportToForm.breakHours
+  //         : {
+  //             Mon: [['12:00 PM', '01:00 PM']],
+  //             Tue: [['12:00 PM', '01:00 PM']],
+  //             Wed: [['12:00 PM', '01:00 PM']],
+  //             Thu: [['12:00 PM', '01:00 PM']],
+  //             Fri: [['12:00 PM', '01:00 PM']],
+  //             Sat: [['12:00 PM', '01:00 PM']],
+  //             Sun: [['12:00 PM', '01:00 PM']],
+  //           },
+  // }
   // ✅ Set default values including support details and service hours (business or support)
-  useEffect(() => {
-    const { work: businessHours, break: breakHours } =
-      transformAvailabilityForForm(businessDetail?.businessAvailability || [])
+  // useEffect(() => {
+  //   const { work: businessHours, break: breakHours } =
+  //     transformAvailabilityForForm(businessDetail?.businessAvailability || [])
 
-    const apiDataToForm = {
-      timeZone: businessDetail?.timeZone || '',
-      businessAvailability: Object.entries(businessHours)
-        .filter(([_, slots]) => slots.length > 0)
-        .map(([day]) => day as keyof typeof businessHours),
-      businessDays: businessHours,
-      breakHours,
-      holidays: businessDetail?.holiday?.map((h: any) => h.holiday) || [],
-    }
+  //   const apiDataToForm = {
+  //     timeZone: businessDetail?.timeZone || '',
+  //     businessAvailability: Object.entries(businessHours)
+  //       .filter(([_, slots]) => slots.length > 0)
+  //       .map(([day]) => day as keyof typeof businessHours),
+  //     businessDays: businessHours,
+  //     breakHours,
+  //     holidays: businessDetail?.holiday?.map((h: any) => h.holiday) || [],
+  //   }
 
-    const { work: supportHours, break: supportBreakHours } =
-      transformAvailabilityForForm(
-        businessDetail?.supportBusinessDetail?.supportAvailability || [],
-      )
+  //   const { work: supportHours, break: supportBreakHours } =
+  //     transformAvailabilityForForm(
+  //       supportBusinessDetail?.supportAvailability || [],
+  //     )
 
-    const apiSupportToForm = {
-      timeZone: businessDetail?.timeZone || '',
-      businessAvailability: Object.entries(supportHours)
-        .filter(([_, slots]) => slots.length > 0)
-        .map(([day]) => day as keyof typeof supportHours),
-      businessDays: supportHours,
-      breakHours: supportBreakHours,
-      holidays:
-        businessDetail?.supportBusinessDetail?.supportHoliday?.map(
-          (h: any) => h.holiday,
-        ) || [],
-    }
-    if (!businessDetail) return
+  //   const apiSupportToForm = {
+  //     timeZone: businessDetail?.timeZone || '',
+  //     businessAvailability: Object.entries(supportHours)
+  //       .filter(([_, slots]) => slots.length > 0)
+  //       .map(([day]) => day as keyof typeof supportHours),
+  //     businessDays: supportHours,
+  //     breakHours: supportBreakHours,
+  //     holidays:
+  //       businessDetail?.supportBusinessDetail?.supportHoliday?.map(
+  //         (h: any) => h.holiday,
+  //       ) || [],
+  //   }
+  //   if (!businessDetail) return
 
-    const hasSupportDetail = !!businessDetail?.supportBusinessDetail
+  //   const hasSupportDetail = !!businessDetail?.supportBusinessDetail
 
-    const isBusinessInfoValid =
-      businessDetail?.name &&
-      businessDetail?.email &&
-      businessDetail?.phone &&
-      businessDetail?.address?.[0]
+  //   const isBusinessInfoValid =
+  //     businessDetail?.name &&
+  //     businessDetail?.email &&
+  //     businessDetail?.phone &&
+  //     businessDetail?.address?.[0]
 
-    const isSupportInfoValid =
-      hasSupportDetail &&
-      businessDetail?.supportBusinessDetail?.supportBusinessName &&
-      businessDetail?.supportBusinessDetail?.supportEmail &&
-      businessDetail?.supportBusinessDetail?.supportPhone
+  //   const isSupportInfoValid =
+  //     hasSupportDetail &&
+  //     businessDetail?.supportBusinessDetail?.supportBusinessName &&
+  //     businessDetail?.supportBusinessDetail?.supportEmail &&
+  //     businessDetail?.supportBusinessDetail?.supportPhone
 
-    // Prevent premature form reset if data not ready
-    if (useBusinessInfo && !isBusinessInfoValid) return
-    if (!useBusinessInfo && !isSupportInfoValid) return
+  //   // Prevent premature form reset if data not ready
+  //   if (useBusinessInfo && !isBusinessInfoValid) return
+  //   if (!useBusinessInfo && !isSupportInfoValid) return
 
-    const defaultValues = useBusinessInfo
-      ? {
-          supportTeamName: businessDetail.name || '',
-          supportEmail: businessDetail.email || '',
-          supportNumber: businessDetail.phone || '',
-          physicalAddress: `${businessDetail.address?.[0]?.street || ''}, ${businessDetail.address?.[0]?.city || ''}, ${businessDetail.address?.[0]?.country || ''}`,
-          googleMap: businessDetail.address?.[0]?.googleMap || '',
-          businessAvailability: apiDataToForm.businessAvailability as WeekDay[],
-          businessHours: apiDataToForm.businessDays as BusinessHours,
-          breakHours: apiDataToForm.breakHours as BusinessHours,
-        }
-      : {
-          supportTeamName:
-            businessDetail.supportBusinessDetail?.supportBusinessName || '',
-          supportEmail:
-            businessDetail.supportBusinessDetail?.supportEmail || '',
-          supportNumber:
-            businessDetail.supportBusinessDetail?.supportPhone || '',
-          physicalAddress:
-            businessDetail.supportBusinessDetail?.supportAddress || '',
-          googleMap:
-            businessDetail.supportBusinessDetail?.supportGoogleMap || '',
-          businessAvailability:
-            apiSupportToForm.businessAvailability as WeekDay[],
-          businessHours: apiSupportToForm.businessDays as BusinessHours,
-          breakHours: apiSupportToForm.breakHours as BusinessHours,
-        }
+  //   const defaultValues = useBusinessInfo
+  //     ? {
+  //         supportTeamName: businessDetail.name || '',
+  //         supportEmail: businessDetail.email || '',
+  //         supportNumber: businessDetail.phone || '',
+  //         physicalAddress: `${businessDetail.address?.[0]?.street || ''}, ${businessDetail.address?.[0]?.city || ''}, ${businessDetail.address?.[0]?.country || ''}`,
+  //         googleMap: businessDetail.address?.[0]?.googleMap || '',
+  //         businessAvailability: apiDataToForm.businessAvailability as WeekDay[],
+  //         businessHours: apiDataToForm.businessDays as BusinessHours,
+  //         breakHours: apiDataToForm.breakHours as BusinessHours,
+  //       }
+  //     : {
+  //         supportTeamName:
+  //           businessDetail.supportBusinessDetail?.supportBusinessName || '',
+  //         supportEmail:
+  //           businessDetail.supportBusinessDetail?.supportEmail || '',
+  //         supportNumber:
+  //           businessDetail.supportBusinessDetail?.supportPhone || '',
+  //         physicalAddress:
+  //           businessDetail.supportBusinessDetail?.supportAddress || '',
+  //         googleMap:
+  //           businessDetail.supportBusinessDetail?.supportGoogleMap || '',
+  //         businessAvailability:
+  //           apiSupportToForm.businessAvailability as WeekDay[],
+  //         businessHours: apiSupportToForm.businessDays as BusinessHours,
+  //         breakHours: apiSupportToForm.breakHours as BusinessHours,
+  //       }
 
-    form.reset(defaultValues)
-  }, [useBusinessInfo, businessDetail])
+  //   form.reset(defaultValues)
+  // }, [useBusinessInfo, businessDetail])
 
   // 🧹 Reset form when businessDetail or supportHourType changes
   // useEffect(() => {
@@ -242,23 +303,39 @@ const CustomerInformation = () => {
   //   form.reset(formData)
   // }, [businessDetail, form, supportHour])
 
-  const onSubmit = (data: any) => {
+  const onSubmit = async (data: any) => {
     console.log(data, 'data')
+
     const updatedData = transformToSupportBusinessDetail(
       data,
       businessDetail?.id as string,
     )
-    if (businessDetail?.supportBusinessDetail?.id) {
-      dispatch(
-        updateSupportBusinessDetail({
-          id: businessDetail?.supportBusinessDetail?.id,
-          data: updatedData,
-        }),
-      )
-    } else {
-      dispatch(createSupportBusinessDetail({ data: updatedData }))
-    }
+
+    console.log(supportId, 'Id from the support detail')
     console.log(updatedData, 'updatedData')
+
+    try {
+      if (businessDetail?.supportBusinessDetail) {
+        // Await the update thunk and only fetch business after success
+        await dispatch(
+          updateSupportInfo({
+            id: supportId as string,
+            ...updatedData,
+          }),
+        ).unwrap()
+
+        await dispatch(fetchBusinessByOwnerId(user?.id as string))
+        setUseBusinessInfo(false)
+      } else {
+        // Await the create thunk too if you want to ensure sequencing
+        await dispatch(createSupportInfo(updatedData)).unwrap()
+
+        await dispatch(fetchBusinessByOwnerId(user?.id as string))
+        setUseBusinessInfo(false)
+      }
+    } catch (error) {
+      console.error('❌ Error during support info update/create:', error)
+    }
   }
 
   return (
@@ -286,7 +363,12 @@ const CustomerInformation = () => {
                   name="useBusinessInfo"
                   render={({ field: { onChange, value } }) => (
                     <div className="flex items-center gap-2">
-                      <Switch checked={value} onCheckedChange={onChange} />
+                      <Switch
+                        checked={useBusinessInfo}
+                        onCheckedChange={() =>
+                          setUseBusinessInfo(!useBusinessInfo)
+                        }
+                      />
                       <div className="flex items-center gap-2">
                         <CheckCircle className="size-4 text-gray-500" />
                         <Label>Use Business Info</Label>
@@ -372,8 +454,8 @@ const CustomerInformation = () => {
                   name="businessHours" // form field name
                   dayName="businessAvailability"
                   label="Business Hours"
-                  initialBusinessHours={apiDataToForm.businessHours} // initial display data for business hours
-                  businessBreaks={apiDataToForm.breakHours} // pass transformed break hours
+                  initialBusinessHours={workHours} // initial display data for business hours
+                  businessBreaks={breakHours} // pass transformed break hours
                   className=" border border-blue-200 rounded-[4px]"
                   activeDay={activeDay}
                   restrictToInitialHours={false}

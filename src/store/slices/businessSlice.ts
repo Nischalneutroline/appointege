@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import { z } from 'zod'
 import {
   PrismaClient,
-  WeekDays,
   AvailabilityType,
   HolidayType,
   BusinessTimeType,
@@ -11,47 +10,63 @@ import { getBusinessDetailByOwnerId } from '@/db/businessDetail'
 import { axiosApi } from '@/lib/baseUrl'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
-
+import { WeekDays } from '@/app/(protected)/admin/service/_types/service'
 
 const prisma = new PrismaClient()
 
-// Define form schemas
+// Define a constant for all weekdays in order for reliable sorting
+export const allWeekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+// Define a reusable Zod enum for weekdays
+const weekDayEnum = z.enum(allWeekDays)
+export type WeekDay = z.infer<typeof weekDayEnum>
+
+// ──────────────────────────────────────────────────────────────────────────
+// SCHEMAS & TYPES
+// ──────────────────────────────────────────────────────────────────────────
+
+// Schema for the core data needed for API submission. It does NOT include UI-specific fields.
 export const businessAvailabilityFormSchema = z.object({
   timezone: z.string().min(1, 'Time zone is required'),
-  holidays: z.array(z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])),
-  businessAvailability: z.array(
-    z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
-  ),
+  holidays: z.array(weekDayEnum),
+  businessAvailability: z.array(weekDayEnum),
   businessDays: z.record(
-    z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
+    weekDayEnum,
     z.array(z.tuple([z.string(), z.string()])),
   ),
-  breakHours: z.record(
-    z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
-    z.array(z.tuple([z.string(), z.string()])),
-  ),
+  breakHours: z.record(weekDayEnum, z.array(z.tuple([z.string(), z.string()]))),
 })
 
+// Extended schema for the form's UI state. It includes `from` and `to` for the day selector.
+export const businessAvailabilityFormSchemaExtended =
+  businessAvailabilityFormSchema.extend({
+    from: weekDayEnum.optional(),
+    to: weekDayEnum.optional(),
+  })
+
 export const serviceAvailabilityFormSchema = z.object({
-  serviceAvailability: z.array(
-    z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
-  ),
+  serviceAvailability: z.array(weekDayEnum),
   serviceDays: z.record(
-    z.enum(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']),
+    weekDayEnum,
     z.array(z.tuple([z.string(), z.string()])),
   ),
   isServiceVisible: z.boolean(),
   isPricingEnabled: z.boolean(),
 })
 
+// Type for API-bound data
 export type BusinessAvailabilityFormValues = z.infer<
   typeof businessAvailabilityFormSchema
+>
+// Type for the full form state, including UI fields
+export type BusinessAvailabilityFormValuesExtended = z.infer<
+  typeof businessAvailabilityFormSchemaExtended
 >
 export type ServiceAvailabilityFormValues = z.infer<
   typeof serviceAvailabilityFormSchema
 >
 
-// Define Prisma-aligned interfaces
+// Prisma-aligned interfaces
 interface BusinessTime {
   id?: string
   type: BusinessTimeType
@@ -133,25 +148,6 @@ export enum BusinessTab {
   ServiceAvailability = 'Service Availability',
 }
 
-interface BusinessState {
-  businesses: BusinessDetail[]
-  selectedBusiness: BusinessDetail | null
-  businessData:
-    | (Partial<BusinessDetail> & {
-        businessAvailabilityForm?: BusinessAvailabilityFormValues
-        serviceAvailabilityForm?: ServiceAvailabilityFormValues
-      })
-    | null
-  activeTab:
-    | 'Business Detail'
-    | 'Business Availability'
-    | 'Service Availability'
-  loading: boolean
-  isRefreshing: boolean
-  hasFetched: boolean
-  error: string | null
-}
-
 export const weekdayMap: { [key: string]: string } = {
   Mon: 'MONDAY',
   MONDAY: 'Mon',
@@ -169,18 +165,40 @@ export const weekdayMap: { [key: string]: string } = {
   SUNDAY: 'Sun',
 }
 
+// ──────────────────────────────────────────────────────────────────────────
+// STATE DEFINITION
+// ──────────────────────────────────────────────────────────────────────────
+
+interface BusinessState {
+  businesses: BusinessDetail[]
+  selectedBusiness: BusinessDetail | null
+  businessData:
+    | (Partial<BusinessDetail> & {
+        // The form state now uses the EXTENDED type to hold from/to
+        businessAvailabilityForm?: BusinessAvailabilityFormValuesExtended
+        serviceAvailabilityForm?: ServiceAvailabilityFormValues
+      })
+    | null
+  activeTab: BusinessTab
+  loading: boolean
+  hasFetched: boolean
+  error: string | null
+}
+
 const initialState: BusinessState = {
   businesses: [],
   selectedBusiness: null,
   businessData: null,
-  activeTab: 'Business Detail',
+  activeTab: BusinessTab.BusinessDetail,
   loading: false,
-  isRefreshing: false,
   hasFetched: false,
   error: null,
 }
 
-// Async thunks
+// ──────────────────────────────────────────────────────────────────────────
+// ASYNC THUNKS
+// ──────────────────────────────────────────────────────────────────────────
+
 export const fetchBusinessByOwnerId = createAsyncThunk(
   'business/fetchBusinessByOwnerId',
   async (ownerId: string, { rejectWithValue }) => {
@@ -200,24 +218,18 @@ export const createBusiness = createAsyncThunk(
   async (data: Partial<BusinessDetail>, { rejectWithValue }) => {
     try {
       const response = await axiosApi.post('/api/business-detail/', data)
-      console.log(response, 'business post')
       return response.data
     } catch (error: any) {
       const errorMsg =
         error instanceof AxiosError && error.response?.data?.message
           ? error.response.data.message
           : 'An unknown error occurred'
-
       toast.error(errorMsg, {
         id: 'create-business',
         duration: 3000,
         description: errorMsg,
       })
-
-      return rejectWithValue({
-        error: error.message,
-        message: errorMsg,
-      })
+      return rejectWithValue({ error: error.message, message: errorMsg })
     }
   },
 )
@@ -230,35 +242,26 @@ export const updateBusiness = createAsyncThunk(
   ) => {
     try {
       const response = await axiosApi.put(`/api/business-detail/${id}`, data)
-      console.log(response, 'business put')
       return response.data
     } catch (error: any) {
-      console.log(error, 'error in updating business')
       const errorMsg =
         error instanceof AxiosError && error.response?.data?.message
           ? error.response.data.message
           : 'An unknown error occurred'
-
       toast.error(errorMsg, {
         id: 'update-business',
         duration: 3000,
         description: errorMsg,
       })
-
-      return rejectWithValue({
-        error: error.message,
-        message: errorMsg,
-      })
+      return rejectWithValue({ error: error.message, message: errorMsg })
     }
   },
 )
 
-// Helper function to convert time formats if needed
-const formatTimeForDB = (timeStr: string) => {
-  return timeStr
-}
+// ──────────────────────────────────────────────────────────────────────────
+// HELPER FUNCTIONS
+// ──────────────────────────────────────────────────────────────────────────
 
-// Transform availability for form
 export const transformAvailabilityForForm = (
   availability:
     | BusinessAvailability[]
@@ -266,78 +269,68 @@ export const transformAvailabilityForForm = (
     | null
     | undefined,
 ): {
-  work: Record<string, [string, string][]>
-  break: Record<string, [string, string][]>
+  work: Record<WeekDay, [string, string][]>
+  break: Record<WeekDay, [string, string][]>
 } => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  const businessHours: {
-    work: Record<string, [string, string][]>
-    break: Record<string, [string, string][]>
-  } = {
-    work: {},
-    break: {},
+  const businessHours = {
+    work: {} as Record<WeekDay, [string, string][]>,
+    break: {} as Record<WeekDay, [string, string][]>,
   }
-  days.forEach((day) => {
+  allWeekDays.forEach((day) => {
     businessHours.work[day] = []
     businessHours.break[day] = []
   })
 
-  if (!availability || !Array.isArray(availability)) return businessHours
+  if (!availability) return businessHours
 
+  const formatTime = (isoString: string): string => {
+    const date = new Date(isoString)
+    let hours = date.getHours()
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    const ampm = hours >= 12 ? 'PM' : 'AM'
+    hours = hours % 12
+    if (hours === 0) hours = 12
+    return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`
+  }
   availability.forEach((avail) => {
-    const dayKey = weekdayMap[avail.weekDay]
+    const dayKey = weekdayMap[avail.weekDay] as WeekDay | undefined
     if (!dayKey) return
-
-    if ('timeSlots' in avail) {
-      avail.timeSlots.forEach((slot: any) => {
-        const startTime = slot.startTime
-        const endTime = slot.endTime
-        const slotPair: [string, string] = [startTime, endTime]
-
-        if ('type' in slot && slot.type === 'BREAK') {
-          businessHours.break[dayKey].push(slotPair)
-        } else {
-          businessHours.work[dayKey].push(slotPair)
-        }
-      })
-    }
+    ;(avail.timeSlots as BusinessTime[]).forEach((slot) => {
+      const slotPair: [string, string] = [
+        formatTime(slot.startTime),
+        formatTime(slot.endTime),
+      ]
+      if (slot.type === 'BREAK') {
+        businessHours.break[dayKey].push(slotPair)
+      } else {
+        businessHours.work[dayKey].push(slotPair)
+      }
+    })
   })
-
   return businessHours
 }
 
-// Convert business availability form data to API format
 export const convertFormToApiFormat = (
   formData: BusinessAvailabilityFormValues,
 ): { businessAvailability: BusinessAvailability[]; holidays: Holiday[] } => {
   const selectedDaysSet = new Set(formData.businessAvailability)
 
-  const holidays = (
-    Object.keys(weekdayMap).filter((d) => d.length === 3) as string[]
-  )
-    .filter((day) => !selectedDaysSet.has(day as any))
+  const holidays: Holiday[] = allWeekDays
+    .filter((day) => !selectedDaysSet.has(day as WeekDay))
     .map((day) => ({
-      holiday: weekdayMap[day] as Holiday['holiday'],
-      type: 'GENERAL' as Holiday['type'],
+      holiday: weekdayMap[day] as WeekDays,
+      type: 'GENERAL',
       date: null,
     }))
 
   const businessAvailability: BusinessAvailability[] = []
   for (const day of formData.businessAvailability) {
-    const apiDay = weekdayMap[day] as BusinessAvailability['weekDay']
+    const apiDay = weekdayMap[day] as WeekDays
     const workSlots: BusinessTime[] = (formData.businessDays[day] || []).map(
-      ([startTime, endTime]) => ({
-        type: 'WORK' as BusinessTime['type'],
-        startTime: formatTimeForDB(startTime),
-        endTime: formatTimeForDB(endTime),
-      }),
+      ([startTime, endTime]) => ({ type: 'WORK', startTime, endTime }),
     )
     const breakSlots: BusinessTime[] = (formData.breakHours[day] || []).map(
-      ([startTime, endTime]) => ({
-        type: 'BREAK' as BusinessTime['type'],
-        startTime: formatTimeForDB(startTime),
-        endTime: formatTimeForDB(endTime),
-      }),
+      ([startTime, endTime]) => ({ type: 'BREAK', startTime, endTime }),
     )
 
     if (workSlots.length > 0 || breakSlots.length > 0) {
@@ -348,34 +341,28 @@ export const convertFormToApiFormat = (
       })
     }
   }
-
   return { businessAvailability, holidays }
 }
 
-// Convert service availability form data to API format
 export const convertServiceAvailabilityToApi = (
   formData: ServiceAvailabilityFormValues,
   businessId: string,
 ): ServiceAvailability[] => {
   const serviceAvailability: ServiceAvailability[] = []
   for (const day of formData.serviceAvailability) {
-    const apiDay = weekdayMap[day] as ServiceAvailability['weekDay']
+    const apiDay = weekdayMap[day] as WeekDays
     const timeSlots: ServiceTime[] = (formData.serviceDays[day] || []).map(
       ([startTime, endTime]) => ({
-        id: crypto.randomUUID(),
-        type: BusinessTimeType.WORK,
-        startTime: formatTimeForDB(startTime),
-        endTime: formatTimeForDB(endTime),
-        serviceAvailabilityId: '',
+        type: 'WORK',
+        startTime,
+        endTime,
       }),
     )
 
     if (timeSlots.length) {
       serviceAvailability.push({
-        id: crypto.randomUUID(),
         weekDay: apiDay,
         timeSlots,
-        serviceId: null,
         businessDetailId: businessId,
       })
     }
@@ -383,7 +370,10 @@ export const convertServiceAvailabilityToApi = (
   return serviceAvailability
 }
 
-// Create slice
+// ──────────────────────────────────────────────────────────────────────────
+// SLICE
+// ──────────────────────────────────────────────────────────────────────────
+
 const businessSlice = createSlice({
   name: 'business',
   initialState,
@@ -397,14 +387,18 @@ const businessSlice = createSlice({
     },
     setBusinessAvailabilityForm(
       state,
-      action: PayloadAction<BusinessAvailabilityFormValues>,
+      action: PayloadAction<BusinessAvailabilityFormValuesExtended>, // Accepts the extended form data
     ) {
-      const { businessAvailability, holidays } = convertFormToApiFormat(
-        action.payload,
-      )
+      // Use zod parse to strip out `from` and `to` before converting for the API format
+      const apiSafeData = businessAvailabilityFormSchema.parse(action.payload)
+      const { businessAvailability, holidays } =
+        convertFormToApiFormat(apiSafeData)
+
       state.businessData = {
         ...state.businessData,
+        // Save the full form payload (including from/to) to Redux state
         businessAvailabilityForm: action.payload,
+        // Update the top-level business data properties as before
         timeZone: action.payload.timezone,
         holiday: holidays,
         businessAvailability,
@@ -419,7 +413,7 @@ const businessSlice = createSlice({
         serviceAvailabilityForm: action.payload,
         serviceAvailability: convertServiceAvailabilityToApi(
           action.payload,
-          state.selectedBusiness?.id || crypto.randomUUID(),
+          state.selectedBusiness?.id || '',
         ),
       }
     },
@@ -436,17 +430,20 @@ const businessSlice = createSlice({
     builder
       .addCase(fetchBusinessByOwnerId.pending, (state) => {
         state.loading = true
+        state.hasFetched = false
         state.error = null
       })
       .addCase(fetchBusinessByOwnerId.fulfilled, (state, action) => {
+        state.loading = false
+        state.hasFetched = true
         state.businesses = action.payload
         state.selectedBusiness =
           action.payload.length > 0 ? action.payload[0] : null
-        state.loading = false
       })
       .addCase(fetchBusinessByOwnerId.rejected, (state, action) => {
-        state.error = (action.payload as string) || 'Failed to fetch business'
         state.loading = false
+        state.hasFetched = true
+        state.error = (action.payload as string) || 'Failed to fetch business'
       })
       .addCase(createBusiness.pending, (state) => {
         state.loading = true
@@ -457,49 +454,40 @@ const businessSlice = createSlice({
         state.businesses.push(newBusiness)
         state.selectedBusiness = newBusiness
 
-        // Transform businessAvailability and serviceAvailability for form data
         const { work: businessWork, break: breakHours } =
           transformAvailabilityForForm(newBusiness.businessAvailability)
         const { work: serviceWork } = transformAvailabilityForForm(
           newBusiness.serviceAvailability,
         )
 
+        const availableDays = (newBusiness.businessAvailability || []).map(
+          (avail) => weekdayMap[avail.weekDay] as WeekDay,
+        )
+        const sortedDays = allWeekDays.filter((d) => availableDays.includes(d))
+
         state.businessData = {
           ...newBusiness,
           businessAvailabilityForm: {
             timezone: newBusiness.timeZone || 'UTC',
-            holidays:
-              newBusiness.holiday?.map(
-                (h) =>
-                  weekdayMap[
-                    h.holiday
-                  ] as BusinessAvailabilityFormValues['holidays'][number],
-              ) || [],
-            businessAvailability:
-              newBusiness.businessAvailability?.map(
-                (avail) =>
-                  weekdayMap[
-                    avail.weekDay
-                  ] as BusinessAvailabilityFormValues['businessAvailability'][number],
-              ) || [],
+            holidays: (newBusiness.holiday || []).map(
+              (h) => weekdayMap[h.holiday] as WeekDay,
+            ),
+            businessAvailability: sortedDays,
             businessDays: businessWork,
             breakHours,
+            from: sortedDays.length > 0 ? sortedDays[0] : undefined,
+            to:
+              sortedDays.length > 0
+                ? sortedDays[sortedDays.length - 1]
+                : undefined,
           },
           serviceAvailabilityForm: {
-            serviceAvailability:
-              newBusiness.serviceAvailability?.map(
-                (avail) =>
-                  weekdayMap[
-                    avail.weekDay
-                  ] as ServiceAvailabilityFormValues['serviceAvailability'][number],
-              ) || [],
+            serviceAvailability: (newBusiness.serviceAvailability || []).map(
+              (avail) => weekdayMap[avail.weekDay] as WeekDay,
+            ),
             serviceDays: serviceWork,
-            isServiceVisible:
-              state.businessData?.serviceAvailabilityForm?.isServiceVisible ??
-              true,
-            isPricingEnabled:
-              state.businessData?.serviceAvailabilityForm?.isPricingEnabled ??
-              false,
+            isServiceVisible: true,
+            isPricingEnabled: false,
           },
         }
         state.loading = false
@@ -520,42 +508,37 @@ const businessSlice = createSlice({
         )
         state.selectedBusiness = updatedBusiness
 
-        // Transform businessAvailability and serviceAvailability for form data
         const { work: businessWork, break: breakHours } =
           transformAvailabilityForForm(updatedBusiness.businessAvailability)
         const { work: serviceWork } = transformAvailabilityForForm(
           updatedBusiness.serviceAvailability,
         )
 
+        const availableDays = (updatedBusiness.businessAvailability || []).map(
+          (avail) => weekdayMap[avail.weekDay] as WeekDay,
+        )
+        const sortedDays = allWeekDays.filter((d) => availableDays.includes(d))
+
         state.businessData = {
           ...updatedBusiness,
           businessAvailabilityForm: {
             timezone: updatedBusiness.timeZone || 'UTC',
-            holidays:
-              updatedBusiness.holiday?.map(
-                (h) =>
-                  weekdayMap[
-                    h.holiday
-                  ] as BusinessAvailabilityFormValues['holidays'][number],
-              ) || [],
-            businessAvailability:
-              updatedBusiness.businessAvailability?.map(
-                (avail) =>
-                  weekdayMap[
-                    avail.weekDay
-                  ] as BusinessAvailabilityFormValues['businessAvailability'][number],
-              ) || [],
+            holidays: (updatedBusiness.holiday || []).map(
+              (h) => weekdayMap[h.holiday] as WeekDay,
+            ),
+            businessAvailability: sortedDays,
             businessDays: businessWork,
             breakHours,
+            from: sortedDays.length > 0 ? sortedDays[0] : undefined,
+            to:
+              sortedDays.length > 0
+                ? sortedDays[sortedDays.length - 1]
+                : undefined,
           },
           serviceAvailabilityForm: {
-            serviceAvailability:
-              updatedBusiness.serviceAvailability?.map(
-                (avail) =>
-                  weekdayMap[
-                    avail.weekDay
-                  ] as ServiceAvailabilityFormValues['serviceAvailability'][number],
-              ) || [],
+            serviceAvailability: (
+              updatedBusiness.serviceAvailability || []
+            ).map((avail) => weekdayMap[avail.weekDay] as WeekDay),
             serviceDays: serviceWork,
             isServiceVisible:
               state.businessData?.serviceAvailabilityForm?.isServiceVisible ??
