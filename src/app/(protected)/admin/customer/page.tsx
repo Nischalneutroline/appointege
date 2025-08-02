@@ -952,6 +952,7 @@ const Page = () => {
               defaultFilters={DEFAULT_CUSTOMER_FILTERS_VALUES}
               sliceName="customer"
               onDispatch={{ setActiveFilter, setActiveFilters }}
+              selectActiveFilter={(state: RootState) => state.customer.activeFilter}
             />
             <div
               className={cn(

@@ -61,7 +61,7 @@ const Page = () => {
   const enrichedFilterOptions = useMemo(() => {
     return filterOptions.map((option) => ({
       ...option,
-      count: counts[option.value] || 0,
+      count: counts[option.value],
     }))
   }, [filterOptions, counts])
 
@@ -176,6 +176,9 @@ const Page = () => {
               defaultFilters={DEFAULT_APPOINTMENT_FILTERS_VALUES}
               sliceName="appointment"
               onDispatch={{ setActiveFilter, setActiveFilters }}
+              selectActiveFilter={(state: RootState) =>
+                state.appointment.activeFilter
+              }
             />
             <div
               className={cn(

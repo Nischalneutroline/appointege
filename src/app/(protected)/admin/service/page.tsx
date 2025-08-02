@@ -443,6 +443,7 @@ const Page = () => {
               defaultFilters={DEFAULT_SERVICE_FILTERS_VALUES}
               sliceName="service"
               onDispatch={{ setActiveFilter, setActiveFilters }}
+              selectActiveFilter={(state: RootState) => state.service.activeFilter}
             />
             <div
               className={cn(

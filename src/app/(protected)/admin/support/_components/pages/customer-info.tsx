@@ -23,9 +23,10 @@ import { Switch } from '@/components/ui/switch'
 
 import {
   createSupportInfo,
-  DayOfWeek,
+
   updateSupportInfo,
-} from '@/store/slices/supportInfoSlice'
+} from '@/store/slices/supportSlice'
+import { cn } from '@/lib/utils'
 
 type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 
@@ -51,7 +52,7 @@ interface BusinessFormValues {
   supportNumber: string
   physicalAddress: string
   googleMap: string
-  businessAvailability: DayOfWeek[] // Array of selected days
+  businessAvailability: WeekDay[] // Array of selected days
   businessHours: BusinessHours // Business hours for each day
   breakHours: BusinessHours // Break hours for each day
 }
@@ -339,13 +340,13 @@ const CustomerInformation = () => {
   }
 
   return (
-    <div className="flex p-4 h-full  gap-4  bg-white  rounded-[8px] border border-[#E5E7EB]">
+    <div className="flex p-4 h-full  gap-4 bg-white  rounded-[8px] border border-[#E5E7EB]">
       {isLoading ? (
         <div>Loading support details...</div>
       ) : (
         <div className="flex flex-col w-full gap-6">
           <div>
-            <div className="text-lg md:text-xl font-semibold text-[#111827]">
+            <div className="text-lg md:text-xl font-medium text-[#111827]">
               Contact Information
             </div>
             <div className="text-[#6B7280] text-xs md:text-base font-normal">
@@ -370,7 +371,12 @@ const CustomerInformation = () => {
                         }
                       />
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="size-4 text-gray-500" />
+                        <CheckCircle
+                          className={cn(
+                            'size-4 text-gray-500',
+                            useBusinessInfo && 'text-green-700',
+                          )}
+                        />
                         <Label>Use Business Info</Label>
                       </div>
                     </div>

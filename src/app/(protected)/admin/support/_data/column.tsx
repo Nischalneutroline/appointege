@@ -5,7 +5,7 @@ import {
   openTicketForm,
   TicketFormData,
   TicketItem,
-} from '@/store/slices/ticketSlice'
+} from '@/store/slices/supportSlice'
 import {
   ChevronDown,
   Ellipsis,

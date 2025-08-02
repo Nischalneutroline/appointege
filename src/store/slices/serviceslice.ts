@@ -61,9 +61,11 @@ interface ServiceState {
   success: boolean
   activeFilter: ServiceFilterValue
   activeFilters: ServiceFilterValue[]
+  nestedTab: string | null
 }
 
 const initialState: ServiceState = {
+  nestedTab: '',
   services: [],
   filteredServices: [],
   serviceOptions: [],

@@ -25,7 +25,7 @@ import {
   createTicket,
   fetchTickets,
   updateTicket,
-} from '@/store/slices/ticketSlice'
+} from '@/store/slices/supportSlice'
 import {
   ArrowUpNarrowWide,
   Boxes,
@@ -90,7 +90,7 @@ const TicketFormModal = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const { currentTicket, ticketFormMode, isTicketFormOpen, success } =
-    useSelector((state: RootState) => state.ticket)
+    useSelector((state: RootState) => state.support.ticket)
   const user = useSelector((state: RootState) => state.auth.user)
 
   const form = useForm<TicketFormValues>({

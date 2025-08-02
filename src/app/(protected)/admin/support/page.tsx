@@ -15,6 +15,15 @@ import FaqSection from './_components/pages/faqs'
 
 import CustomerTicket from './_components/pages/customer-ticket'
 import AdminTicket from './_components/pages/admin-ticket'
+import TicketFormModal from './_components/forms/customer-ticket-from'
+import {
+  closeFaqForm,
+  closeTicketForm,
+  setNestedTab,
+} from '@/store/slices/supportSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '@/store/store'
+import FaqFormModal from './_components/forms/faqmodal-form'
 
 const TabInfo = [
   {
@@ -90,11 +99,16 @@ const TabButton = ({
 }) => {
   const isSelected = selectedTab === name
 
+  const dispatch = useDispatch<AppDispatch>()
+
   return (
     <button
-      onClick={() => setSelectedTab(name)}
+      onClick={() => {
+        setSelectedTab(name)
+        dispatch(setNestedTab(name as 'faq' | 'ticket'))
+      }}
       className={cn(
-        'flex justify-start items-center px-4 py-2.5 gap-3 rounded-[8px] border-[1px] w-full transition-colors duration-200',
+        'flex justify-start items-center px-2 md:px-4 py-2 md:py-2.5 gap-3 rounded-[8px] border-[1px] w-[160px] md:w-[260px] transition-colors duration-200',
         isSelected
           ? 'bg-[#2563EB] border-[#2563EB]'
           : 'bg-white border-[#E5E7EB]',
@@ -102,7 +116,7 @@ const TabButton = ({
     >
       <div
         className={cn(
-          'flex h-8 w-8 justify-center items-center rounded-[4px]',
+          ' flex h-5 w-5 md:h-9 md:w-9 p-1 md:p-2.5 justify-center items-center rounded-[4px]',
           isSelected ? 'bg-white' : 'bg-[#E6F0FF]',
         )}
       >
@@ -110,7 +124,7 @@ const TabButton = ({
       </div>
       <div
         className={cn(
-          'flex items-center font-medium text-lg w-[170px]',
+          'flex items-center font-medium text-sm md:text-lg md:w-[170px]',
           isSelected ? 'text-white' : 'text-black',
         )}
       >
@@ -122,9 +136,20 @@ const TabButton = ({
 
 const Page = () => {
   const [selectedTab, setSelectedTab] = useState('contact-info')
+  const dispatch = useDispatch<AppDispatch>()
+  const handleCloseTicketForm = () => {
+    dispatch(closeTicketForm())
+  }
+  const handleCloseFaqForm = () => {
+    dispatch(closeFaqForm())
+  }
+  const { isTicketFormOpen } = useSelector(
+    (state: RootState) => state.support.ticket,
+  )
+  const { isFaqFormOpen } = useSelector((state: RootState) => state.support.faq)
   return (
     <div className="flex flex-col w-full gap-4">
-      <div className="flex  gap-12 w-full">
+      <div className="flex  gap-6 w-full">
         {TabInfo.map((tab) => (
           <TabButton
             key={tab.name}
@@ -138,6 +163,7 @@ const Page = () => {
       </div>
 
       {/* Debug Output */}
+      {/* Control using store state */}
       <div className={cn()}>
         <div className="flex flex-col gap-8  w-full">
           {selectedTab === 'contact-info' && <CustomerInformation />}
@@ -146,6 +172,12 @@ const Page = () => {
           {selectedTab === 'admin-support' && <AdminTicket />}
         </div>
       </div>
+      <TicketFormModal
+        open={isTicketFormOpen}
+        onChange={handleCloseTicketForm}
+        ticketType={selectedTab === 'customer-support' ? 'Customer' : 'Admin'}
+      />
+      <FaqFormModal open={isFaqFormOpen} onChange={handleCloseFaqForm} />
     </div>
   )
 }

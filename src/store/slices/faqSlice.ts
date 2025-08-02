@@ -3,55 +3,22 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 
-export type FaqFilterValue = 'all' | 'public' | 'private'
 
-export interface FAQItem {
-  id?: string
-  question: string
-  answer: string
-  isActive: boolean
-  order: number | null
-  createdAt: string
-  updatedAt: string
-  category: FaqFilterValue
-  createdById: string
-  lastUpdatedById: string
-}
 
-export interface FilterOptionState {
-  label: string
-  value: FaqFilterValue
-  textColor: string
-  border: string
-  background: string
-  icon: string
-}
 
-interface FAQState {
-  faqs: FAQItem[]
-  filteredFaqs: FAQItem[]
-  isLoading: boolean
-  isSubmitting: boolean
-  count: string | null
-  activeFilter: FaqFilterValue
-  activeFilters: FaqFilterValue[]
-  searchQuery: string
-  isFaqFormOpen: boolean
-  currentFaq: FAQItem | null
-  faqFormMode: 'create' | 'edit'
-  success: boolean
-  message: string | null
-  error: string | null
-  counts: Record<FaqFilterValue, number>
-}
 
 const initialState: FAQState = {
   faqs: [],
   filteredFaqs: [],
   isLoading: false,
+  hasFetched: false,
   isSubmitting: false,
   error: null,
-  count: null,
+  counts: {
+    all: 0,
+    public: 0,
+    private: 0,
+  },
   activeFilter: 'all',
   activeFilters: ['all', 'public', 'private'],
   searchQuery: '',
@@ -60,30 +27,42 @@ const initialState: FAQState = {
   faqFormMode: 'create',
   success: false,
   message: null,
-  counts: {
-    all: 0,
-    public: 0,
-    private: 0,
-  },
 }
 
-const applyFilters = (
+export const applyFilters = (
   faqs: FAQItem[],
   activeFilters: FaqFilterValue[],
   searchQuery: string,
-) => {
-  return faqs.filter((faq) => {
+): { filtered: FAQItem[]; counts: Record<FaqFilterValue, number> } => {
+  const counts: Record<FaqFilterValue, number> = {
+    all: faqs.length,
+    public: 0,
+    private: 0,
+  }
+
+  const lowerSearch = searchQuery.toLowerCase()
+
+  const filtered = faqs.filter((faq) => {
+    const question = faq.question.toLowerCase()
+    const answer = faq.answer.toLowerCase()
+    const category = faq.category as FaqFilterValue
+
     const matchesSearch =
-      searchQuery === '' ||
-      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+      !searchQuery ||
+      question.includes(lowerSearch) ||
+      answer.includes(lowerSearch)
 
     const matchesCategory =
-      activeFilters.includes('all') ||
-      activeFilters.includes(faq.category as FaqFilterValue)
+      activeFilters.includes('all') || activeFilters.includes(category)
+
+    if (Object.keys(counts).includes(category)) {
+      counts[category] += 1
+    }
 
     return matchesSearch && matchesCategory
   })
+
+  return { filtered, counts }
 }
 
 // // Async thunks
@@ -177,43 +156,44 @@ const faqSlice = createSlice({
     setFaqs(state, action: PayloadAction<FAQItem[]>) {
       const faqs = action.payload
       state.faqs = faqs
-      state.filteredFaqs = applyFilters(
+      const { filtered, counts } = applyFilters(
         faqs,
         state.activeFilters,
         state.searchQuery,
       )
-
-      // Update counts
-      state.counts = {
-        all: faqs.length,
-        public: faqs.filter((faq) => faq?.category === 'public').length,
-        private: faqs.filter((faq) => faq?.category === 'private').length,
-      }
+      state.filteredFaqs = filtered
+      state.counts = counts
     },
     setActiveFilter(state, action: PayloadAction<FaqFilterValue>) {
       state.activeFilter = action.payload
       state.activeFilters = [action.payload]
-      state.filteredFaqs = applyFilters(
+      const { filtered, counts } = applyFilters(
         state.faqs,
-        [action.payload],
+        state.activeFilters,
         state.searchQuery,
       )
+      state.filteredFaqs = filtered
+      state.counts = counts
     },
     setActiveFilters(state, action: PayloadAction<FaqFilterValue[]>) {
       state.activeFilters = action.payload
-      state.filteredFaqs = applyFilters(
+      const { filtered, counts } = applyFilters(
         state.faqs,
         action.payload,
         state.searchQuery,
       )
+      state.filteredFaqs = filtered
+      state.counts = counts
     },
     setSearchQuery(state, action: PayloadAction<string>) {
       state.searchQuery = action.payload
-      state.filteredFaqs = applyFilters(
+      const { filtered, counts } = applyFilters(
         state.faqs,
         state.activeFilters,
         action.payload,
       )
+      state.filteredFaqs = filtered
+      state.counts = counts
     },
     openFaqForm(
       state,
@@ -285,18 +265,21 @@ const faqSlice = createSlice({
     builder.addCase(fetchFaq.pending, (state) => {
       state.isLoading = true
       state.error = null
+      state.hasFetched = false
     })
     builder.addCase(fetchFaq.fulfilled, (state, action) => {
       state.isLoading = false
       state.faqs = action.payload
       state.filteredFaqs = action.payload
       state.success = true
+      state.hasFetched = true
     })
     builder.addCase(fetchFaq.rejected, (state, action) => {
       state.isLoading = false
       state.error = action.payload?.error || 'Failed to fetch FAQ'
       state.message = action.payload?.message || null
       state.success = false
+      state.hasFetched = false
     })
 
     // Add FAQ
@@ -307,11 +290,13 @@ const faqSlice = createSlice({
     builder.addCase(createFaq.fulfilled, (state, action) => {
       state.isSubmitting = false
       state.faqs = [action.payload, ...state.faqs]
-      state.filteredFaqs = applyFilters(
+      const { filtered, counts } = applyFilters(
         state.faqs,
         state.activeFilters,
         state.searchQuery,
       )
+      state.filteredFaqs = filtered
+      state.counts = counts
       state.isFaqFormOpen = false
     })
     builder.addCase(createFaq.rejected, (state, action) => {
@@ -346,27 +331,33 @@ const faqSlice = createSlice({
       state.isSubmitting = true
       state.error = null
     })
-    builder.addCase(deleteFaq.fulfilled, (state) => {
-      state.isSubmitting = false
+    builder.addCase(
+      deleteFaq.fulfilled,
+      (state, action: PayloadAction<string>) => {
+        state.isSubmitting = false
+        const deletedId = action.payload
 
-      // Update filteredFaqs
-      state.filteredFaqs = applyFilters(
-        state.faqs,
-        state.activeFilters,
-        state.searchQuery,
-      )
+        // Remove the deleted FAQ from the state
+        state.faqs = state.faqs.filter((faq) => faq.id !== deletedId)
 
-      // Update counts
-      state.counts = {
-        all: state.faqs.length,
-        public: state.faqs.filter((faq) => faq.category === 'public').length,
-        private: state.faqs.filter((faq) => faq.category === 'private').length,
-      }
+        // Update filteredFaqs
+        const { filtered, counts } = applyFilters(
+          state.faqs,
+          state.activeFilters,
+          state.searchQuery,
+        )
+        state.filteredFaqs = filtered
+        state.counts = counts
 
-      state.success = true
-      state.message = 'FAQ deleted successfully'
-      return fetchFaq()
-    })
+        // Update counts
+        state.counts = {
+          all: state.faqs.length,
+          public: state.faqs.filter((faq) => faq.category === 'public').length,
+          private: state.faqs.filter((faq) => faq.category === 'private')
+            .length,
+        }
+      },
+    )
     builder.addCase(deleteFaq.rejected, (state, action) => {
       state.isSubmitting = false
       state.error = action.payload?.error || 'Failed to delete FAQ'

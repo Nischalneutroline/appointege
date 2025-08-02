@@ -2,24 +2,8 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '@/components/ui/select'
-import DataTable, { TableColumn } from '@/components/table/data-table'
-import {
-  Ticket,
-  Priority,
-  TicketStatus,
-  TicketCategory,
-  Role,
-} from '../../_types/types'
-import { ChevronDown, Plus, RefreshCcw } from 'lucide-react'
-import { RefreshCw } from 'lucide-react'
+import DataTable from '@/components/table/data-table'
+import { Plus, RefreshCcw } from 'lucide-react'
 import TicketFormModal from '../forms/customer-ticket-from'
 import { RootState } from '@/store/store'
 import { useDispatch, useSelector } from 'react-redux'
@@ -29,13 +13,13 @@ import {
   closeTicketForm,
   fetchTickets,
   openTicketForm,
-  setActiveFilter,
-  setActiveFilters,
+  setActiveTicketFilter,
+  setActiveTicketFilters,
+  setActiveTicketTab,
   setSearchQuery,
   TicketFilterValue,
   TicketFormData,
-  TicketItem,
-} from '@/store/slices/ticketSlice'
+} from '@/store/slices/supportSlice'
 import FilterTabs from '@/components/shared/layout/filter-tabs'
 import { createFilterOptions } from '../../_data/data'
 import { columns } from '../../_data/column'
@@ -63,17 +47,20 @@ const AdminTicket = () => {
   const dispatch = useDispatch<AppDispatch>()
 
   useEffect(() => {
+    dispatch(setActiveTicketTab('admin'))
     if (!hasFetched.current) {
       dispatch(fetchTickets())
       dispatch(
-        setActiveFilters(DEFAULT_TICKET_FILTERS_VALUES as TicketFilterValue[]),
+        setActiveTicketFilters(
+          DEFAULT_TICKET_FILTERS_VALUES as TicketFilterValue[],
+        ),
       )
       hasFetched.current = true
     }
   }, [dispatch])
 
   const { tickets, activeFilters, activeFilter, isLoading, isTicketFormOpen } =
-    useSelector((state: RootState) => state.ticket)
+    useSelector((state: RootState) => state.support.ticket)
   console.log(tickets, 'tickets')
   const allTickets = tickets?.length > 0 ? tickets : []
 
@@ -135,10 +122,12 @@ const AdminTicket = () => {
               <FilterTabs
                 key={index}
                 {...option}
-                sliceName="ticket"
+                sliceName="support"
                 onDispatch={(filter: string) =>
-                  dispatch(setActiveFilter(filter as TicketFilterValue))
+                  dispatch(setActiveTicketFilter(filter as TicketFilterValue))
                 }
+                nested="ticket"
+                type="admin"
               />
             ))}
           </div>
@@ -158,8 +147,15 @@ const AdminTicket = () => {
                   defaultFilters={
                     DEFAULT_TICKET_FILTERS_VALUES as TicketFilterValue[]
                   }
-                  sliceName="ticket"
-                  onDispatch={{ setActiveFilter, setActiveFilters }}
+                  sliceName="support"
+                  // onDispatch={{ setActiveTicketFilter, setActiveTicketFilters }}
+                  onDispatch={{
+                    setActiveFilter: setActiveTicketFilter,
+                    setActiveFilters: setActiveTicketFilters,
+                  }}
+                  selectActiveFilter={(state: RootState) =>
+                    state.support.ticket.activeFilter
+                  }
                 />
               </div>
             </div>
@@ -244,11 +240,6 @@ const AdminTicket = () => {
           )}
         </div>
       </div>
-      <TicketFormModal
-        open={isTicketFormOpen}
-        onChange={handleCloseForm}
-        ticketType="Admin"
-      />
     </>
   )
 }

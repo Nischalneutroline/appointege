@@ -12,16 +12,16 @@ import { AppDispatch, RootState } from '@/store/store'
 
 import { capitalizeFirstChar } from '@/utils/utils'
 import FaqFormModal from '../forms/faqmodal-form'
-import { deleteFaq } from '../../../../../../store/slices/faqSlice'
+import { deleteFaq, setActiveFilter } from '@/store/slices/supportSlice'
 import {
   closeFaqForm,
   fetchFaq,
   FilterOptionState,
   openFaqForm,
-  setActiveFilter,
-  setActiveFilters,
+  setActiveFAQFilter,
+  setActiveFAQFilters,
   setFaqs,
-} from '@/store/slices/faqSlice'
+} from '@/store/slices/supportSlice'
 
 // Types
 export type FaqFilterValue = 'all' | 'public' | 'private'
@@ -47,34 +47,7 @@ const DEFAULT_FAQ_FILTERS_VALUES: FaqFilterValue[] = [
   'private',
 ]
 
-const createFilterOptions = (faqs: FAQItem[]) => {
-  const filters: FilterOptionState[] = [
-    {
-      label: 'All',
-      value: 'all',
-      textColor: '#103064',
-      border: '#E9DFFF',
-      background: '#F0EBFB',
-      icon: 'Users',
-    },
-    {
-      label: 'Public',
-      value: 'public',
-      textColor: '#0F5327',
-      border: '#E6F4EC',
-      background: '#E9F9EF',
-      icon: 'Eye',
-    },
-    {
-      label: 'Private',
-      value: 'private',
-      textColor: '#7F1D1D',
-      border: '#FEE2E2',
-      background: '#FEF2F2',
-      icon: 'EyeOff',
-    },
-  ]
-
+const createFilterOptions = (faqs: FAQItem[], filters: FilterOptionState[]) => {
   return filters.map((option) => ({
     ...option,
     count: faqs.filter(
@@ -103,9 +76,9 @@ export default function FaqSection() {
     faqs,
     activeFilters = DEFAULT_FAQ_FILTERS_VALUES,
     isFaqFormOpen,
-    currentFaq,
-    faqFormMode,
-  } = useSelector((state: RootState) => state.faq)
+    filterOptions,
+    counts,
+  } = useSelector((state: RootState) => state.support.faq)
 
   const allFaqs = faqs?.length > 0 ? faqs : []
 
@@ -125,7 +98,7 @@ export default function FaqSection() {
   }, [allFaqs, searchQuery, activeFilters])
 
   const enrichedFilterOptions = useMemo(
-    () => createFilterOptions(allFaqs),
+    () => createFilterOptions(allFaqs, filterOptions),
     [allFaqs],
   )
 
@@ -154,6 +127,10 @@ export default function FaqSection() {
     dispatch(closeFaqForm())
   }
 
+  useEffect(() => {
+    dispatch(setActiveFAQFilter('all'))
+  }, [dispatch])
+
   return (
     <div className="flex flex-col p-4 h-full gap-4 bg-white  rounded-[8px] border border-[#E5E7EB]">
       <div className="flex justify-between items-center w-full">
@@ -181,16 +158,22 @@ export default function FaqSection() {
               'scrollbar-thin scrollbar-track-gray-300 scrollbar-thumb-gray-500',
             )}
           >
-            {enrichedFilterOptions.map((option, index) => (
-              <FilterTabs
-                key={index}
-                {...option}
-                sliceName="faq"
-                onDispatch={(filter: string) =>
-                  dispatch(setActiveFilter(option.value as FaqFilterValue))
-                }
-              />
-            ))}
+            {enrichedFilterOptions.map((option, index) => {
+              return (
+                <FilterTabs
+                  key={index}
+                  label={option.label}
+                  value={option.value}
+                  background={option.background}
+                  border={option.border}
+                  sliceName="support"
+                  onDispatch={() => {
+                    dispatch(setActiveFAQFilter(option.value))
+                  }}
+                  nested="faq"
+                />
+              )
+            })}
           </div>
 
           <div className="flex gap-2 min-w-1/4 lg:gap-3 justify-between">
@@ -205,8 +188,14 @@ export default function FaqSection() {
                 filterOptions={enrichedFilterOptions}
                 activeFilters={activeFilters}
                 defaultFilters={DEFAULT_FAQ_FILTERS_VALUES}
-                sliceName="faq"
-                onDispatch={{ setActiveFilter, setActiveFilters }}
+                sliceName="support"
+                onDispatch={{
+                  setActiveFilter: setActiveFAQFilter,
+                  setActiveFilters: setActiveFAQFilters,
+                }}
+                selectActiveFilter={(state: RootState) =>
+                  state.support.faq?.activeFilter || 'all'
+                }
               />
               <div
                 className={cn(
@@ -285,8 +274,6 @@ export default function FaqSection() {
           )}
         </div>
       </div>
-
-      <FaqFormModal open={isFaqFormOpen} onChange={handleCloseForm} />
     </div>
   )
 }

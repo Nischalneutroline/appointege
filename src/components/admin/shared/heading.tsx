@@ -7,9 +7,9 @@ interface HeadingProps {
 
 const Heading = ({ title, description }: HeadingProps) => {
   return (
-    <div className="  text-[#2563EB]  ">
-      <div className="flex items-center gap-2 ">
-        <span className=" text-2xl lg:text-3xl text-start font-semibold ">
+    <div className="flex flex-col gap-2  text-[#2563EB]  ">
+      <div className="flex items-center ">
+        <span className=" text-2xl lg:text-3xl text-start font-semibold leading-[80%]">
           {title}
         </span>
       </div>

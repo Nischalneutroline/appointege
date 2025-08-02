@@ -36,7 +36,7 @@ import {
   // createFaq,
   // storeFaq,
   // updateFaq,
-} from '@/store/slices/faqSlice'
+} from '@/store/slices/supportSlice'
 import { faqSchema } from '../../_schemas/faqSchema'
 
 
@@ -51,7 +51,7 @@ const FaqFormModal = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>()
   const { currentFaq, faqFormMode, isFaqFormOpen, success } = useSelector(
-    (state: RootState) => state.faq,
+    (state: RootState) => state.support.faq,
   )
   const user = useSelector((state: RootState) => state.auth.user)
 
