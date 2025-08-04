@@ -261,8 +261,10 @@ export default function ReminderForm() {
             <div className="">
               <div className="flex justify-between items-center">
                 <div className="flex gap-1">
-                  <Send strokeWidth={1.5} className="size-4 text-gray-500" />
-                  <Label>When to send?</Label>
+                  {/* <Send strokeWidth={1.5} className="size-4 text-gray-500" /> */}
+                  <Label className="text-xl font-semibold">
+                    Reminder Schedule
+                  </Label>
                 </div>
                 <Button
                   type="button"
