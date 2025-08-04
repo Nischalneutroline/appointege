@@ -1,73 +1,60 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
-import { z } from 'zod'
-import {
-  PrismaClient,
-  AvailabilityType,
-  HolidayType,
-  BusinessTimeType,
-} from '@prisma/client'
-import { getBusinessDetailByOwnerId } from '@/db/businessDetail'
-import { axiosApi } from '@/lib/baseUrl'
+// src/store/slices/businessDetailSlice.ts
+import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { AxiosError } from 'axios'
+import { axiosApi } from '@/lib/baseUrl'
 import { toast } from 'sonner'
-import { WeekDays } from '@/app/(protected)/admin/service/_types/service'
+import { ServiceAvailability } from '../../app/(protected)/admin/service/_types/service'
 
-const prisma = new PrismaClient()
+export interface BusinessStep {
+  id: string
+  label: string
+  completed: boolean
+  active: boolean
+  icon: IconName
+} 
+export type IconName =
+  | 'Check'
+  | 'HandHeart'
+  | 'BellRing'
+  | 'HiOutlineSpeakerphone'
 
-// Define a constant for all weekdays in order for reliable sorting
-export const allWeekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+interface BusinessState {}
 
-// Define a reusable Zod enum for weekdays
-const weekDayEnum = z.enum(allWeekDays)
-export type WeekDay = z.infer<typeof weekDayEnum>
+// Enums
+export enum BusinessStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  PENDING = 'PENDING',
+  SUSPENDED = 'SUSPENDED',
+}
 
-// ──────────────────────────────────────────────────────────────────────────
-// SCHEMAS & TYPES
-// ──────────────────────────────────────────────────────────────────────────
+export enum WeekDays {
+  MONDAY = 'MONDAY',
+  TUESDAY = 'TUESDAY',
+  WEDNESDAY = 'WEDNESDAY',
+  THURSDAY = 'THURSDAY',
+  FRIDAY = 'FRIDAY',
+  SATURDAY = 'SATURDAY',
+  SUNDAY = 'SUNDAY',
+}
 
-// Schema for the core data needed for API submission. It does NOT include UI-specific fields.
-export const businessAvailabilityFormSchema = z.object({
-  timezone: z.string().min(1, 'Time zone is required'),
-  holidays: z.array(weekDayEnum),
-  businessAvailability: z.array(weekDayEnum),
-  businessDays: z.record(
-    weekDayEnum,
-    z.array(z.tuple([z.string(), z.string()])),
-  ),
-  breakHours: z.record(weekDayEnum, z.array(z.tuple([z.string(), z.string()]))),
-})
+export enum BusinessTimeType {
+  WORK = 'WORK',
+  BREAK = 'BREAK',
+}
 
-// Extended schema for the form's UI state. It includes `from` and `to` for the day selector.
-export const businessAvailabilityFormSchemaExtended =
-  businessAvailabilityFormSchema.extend({
-    from: weekDayEnum.optional(),
-    to: weekDayEnum.optional(),
-  })
+export enum AvailabilityType {
+  GENERAL = 'GENERAL',
+  SUPPORT = 'SUPPORT',
+}
 
-export const serviceAvailabilityFormSchema = z.object({
-  serviceAvailability: z.array(weekDayEnum),
-  serviceDays: z.record(
-    weekDayEnum,
-    z.array(z.tuple([z.string(), z.string()])),
-  ),
-  isServiceVisible: z.boolean(),
-  isPricingEnabled: z.boolean(),
-})
+export enum HolidayType {
+  GENERAL = 'GENERAL',
+  SUPPORT = 'SUPPORT',
+}
 
-// Type for API-bound data
-export type BusinessAvailabilityFormValues = z.infer<
-  typeof businessAvailabilityFormSchema
->
-// Type for the full form state, including UI fields
-export type BusinessAvailabilityFormValuesExtended = z.infer<
-  typeof businessAvailabilityFormSchemaExtended
->
-export type ServiceAvailabilityFormValues = z.infer<
-  typeof serviceAvailabilityFormSchema
->
-
-// Prisma-aligned interfaces
-interface BusinessTime {
+// Interfaces
+export interface BusinessTime {
   id?: string
   type: BusinessTimeType
   startTime: string
@@ -75,50 +62,51 @@ interface BusinessTime {
   businessAvailabilityId?: string
 }
 
-interface BusinessAvailability {
+export interface BusinessAvailability {
   id?: string
   weekDay: WeekDays
   type: AvailabilityType
   timeSlots: BusinessTime[]
-  businessId?: string | null
-  supportBusinessDetailId?: string | null
+  businessId?: string
+  supportBusinessDetailId?: string
 }
 
-interface ServiceTime {
+export interface BusinessAddress {
   id?: string
-  type: BusinessTimeType
-  startTime: string
-  endTime: string
-  serviceAvailabilityId?: string
-}
-
-interface ServiceAvailability {
-  id?: string
-  weekDay: WeekDays
-  timeSlots: ServiceTime[]
-  serviceId?: string | null
-  businessDetailId?: string | null
-}
-
-interface Holiday {
-  id?: string
-  holiday: WeekDays
-  type: HolidayType
-  date?: Date | null
-  businessId?: string | null
-  supportBusinessDetailId?: string | null
-}
-
-interface Address {
-  id: string
   street: string
   city: string
   country: string
   state: string
   zipCode: string
   googleMap: string
-  businessId?: string | null
-  supportId?: string | null
+  businessId?: string
+  supportId?: string
+}
+
+export interface Holiday {
+  id?: string
+  holiday: WeekDays
+  type: HolidayType
+  date: string
+  businessId?: string
+  supportBusinessDetailId?: string
+}
+
+interface SupportBusinessDetail {
+  id: string
+  supportBusinessName: string
+  supportEmail: string
+  supportPhone: string
+  supportGoogleMap?: string
+  supportAddress: string
+  supportAvailability: BusinessAvailability[]
+  supportHoliday: Holiday[]
+  businessId: string
+  isLoading: false
+  isSaving: false
+  error: null
+  message: null
+  success: false
 }
 
 export interface BusinessDetail {
@@ -127,443 +115,467 @@ export interface BusinessDetail {
   industry: string
   email: string
   phone: string
-  website?: string | null
+  website?: string
+  businessType: string
   businessRegistrationNumber: string
-  taxID: string
-  businessType: 'PHYSICAL' | 'VIRTUAL' | 'ALL'
-  status: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'SUSPENDED'
-  timeZone?: string | null
-  businessOwner?: string | null
-  createdAt: Date
-  updatedAt: Date
+  status: BusinessStatus
+  timeZone?: string
+  address: BusinessAddress[]
   businessAvailability: BusinessAvailability[]
   serviceAvailability: ServiceAvailability[]
+  supportBusinessDetail?: SupportBusinessDetail
   holiday: Holiday[]
-  address: Address[]
+  createdAt?: string
+  updatedAt?: string
+  businessOwner?: string
+  resources?: any[]
+  services?: any[]
 }
 
-export enum BusinessTab {
-  BusinessDetail = 'Business Detail',
-  BusinessAvailability = 'Business Availability',
-  ServiceAvailability = 'Service Availability',
+export interface BusinessDetailFormValues {
+  id?: string
+  name: string
+  industry: string
+  email: string
+  phone: string
+  website: string
+  status: BusinessStatus
+  businessRegistrationNumber: string
+  address: Array<{
+    street: string
+    city: string
+    state: string
+    zipCode: string
+    country: string
+    googleMap: string
+  }>
+  taxId: string
+  logo: string | null
+}
+export type TimeSlot = {
+  startTime: string // ISO 8601 date string
+  endTime: string // ISO 8601 date string
+  type: 'WORK' | 'BREAK'
+}
+export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
+export interface BusinessAvailabilityFormValues {
+  timeZone: string
+  businessAvailability: WeekDay[]
+  businessHours: Partial<Record<WeekDay, [string, string][]>>
+  breakHours: Partial<Record<WeekDay, [string, string][]>>
+  holidays: WeekDay[]
 }
 
-export const weekdayMap: { [key: string]: string } = {
-  Mon: 'MONDAY',
-  MONDAY: 'Mon',
-  Tue: 'TUESDAY',
-  TUESDAY: 'Tue',
-  Wed: 'WEDNESDAY',
-  WEDNESDAY: 'Wed',
-  Thu: 'THURSDAY',
-  THURSDAY: 'Thu',
-  Fri: 'FRIDAY',
-  FRIDAY: 'Fri',
-  Sat: 'SATURDAY',
-  SATURDAY: 'Sat',
-  Sun: 'SUNDAY',
-  SUNDAY: 'Sun',
-}
-
-// ──────────────────────────────────────────────────────────────────────────
-// STATE DEFINITION
-// ──────────────────────────────────────────────────────────────────────────
-
-interface BusinessState {
-  businesses: BusinessDetail[]
-  selectedBusiness: BusinessDetail | null
-  businessData:
-    | (Partial<BusinessDetail> & {
-        // The form state now uses the EXTENDED type to hold from/to
-        businessAvailabilityForm?: BusinessAvailabilityFormValuesExtended
-        serviceAvailabilityForm?: ServiceAvailabilityFormValues
-      })
-    | null
-  activeTab: BusinessTab
-  loading: boolean
-  hasFetched: boolean
+// State
+interface BusinessDetailState {
+  activeStep: string
+  completedSteps: string[]
+  steps: BusinessStep[]
+  businessDetailForm: BusinessDetailFormValues | null
+  businessAvailabilityForm: BusinessAvailabilityFormValues[] | null
+  businessDetail: BusinessDetail | null
+  isLoading: boolean
+  isSaving: boolean
   error: string | null
+  message: string | null
+  success: boolean
 }
 
-const initialState: BusinessState = {
-  businesses: [],
-  selectedBusiness: null,
-  businessData: null,
-  activeTab: BusinessTab.BusinessDetail,
-  loading: false,
-  hasFetched: false,
+const initialState: BusinessDetailState = {
+  activeStep: 'business-settings',
+  completedSteps: [],
+  steps: [
+    {
+      id: 'business-settings',
+      label: 'Business Settings',
+      completed: false,
+      active: false,
+      icon: 'Check',
+    },
+    {
+      id: 'services',
+      label: 'Services',
+      completed: false,
+      active: false,
+      icon: 'HandHeart',
+    },
+    {
+      id: 'reminders',
+      label: 'Reminders',
+      completed: false,
+      active: false,
+      icon: 'BellRing',
+    },
+    {
+      id: 'announcemnet',
+      label: 'Announcement',
+      completed: false,
+      active: false,
+      icon: 'HiOutlineSpeakerphone',
+    },
+  ],
+  businessDetailForm: null,
+  businessAvailabilityForm: null,
+  businessDetail: null,
+  isLoading: false,
+  isSaving: false,
   error: null,
+  message: null,
+  success: false,
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// ASYNC THUNKS
-// ──────────────────────────────────────────────────────────────────────────
+// Helper function to transform API response
+const transformBusinessDetail = (data: any): BusinessDetail => ({
+  id: data.id,
+  name: data.name,
+  industry: data.industry,
+  email: data.email,
+  phone: data.phone,
+  website: data.website,
+  businessType: data.businessType,
+  businessRegistrationNumber: data.businessRegistrationNumber,
+  serviceAvailability: data.serviceAvailability || [],
+  status: data.status as BusinessStatus,
+  timeZone: data.timeZone,
+  address: data.address || [],
+  businessAvailability: data.businessAvailability || [],
+  holiday: data.holiday || [],
+  supportBusinessDetail: data.supportBusinessDetail || [],
+  createdAt: data.createdAt,
+  updatedAt: data.updatedAt,
+  businessOwner: data.businessOwner,
+  resources: data.resources || [],
+  services: data.services || [],
+})
 
-export const fetchBusinessByOwnerId = createAsyncThunk(
-  'business/fetchBusinessByOwnerId',
-  async (ownerId: string, { rejectWithValue }) => {
-    try {
-      const businesses = await getBusinessDetailByOwnerId(ownerId)
-      return businesses
-    } catch (error) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : 'Failed to fetch business',
-      )
-    }
-  },
-)
-
-export const createBusiness = createAsyncThunk(
-  'business/createBusiness',
-  async (data: Partial<BusinessDetail>, { rejectWithValue }) => {
-    try {
-      const response = await axiosApi.post('/api/business-detail/', data)
-      return response.data
-    } catch (error: any) {
-      const errorMsg =
-        error instanceof AxiosError && error.response?.data?.message
-          ? error.response.data.message
-          : 'An unknown error occurred'
-      toast.error(errorMsg, {
-        id: 'create-business',
-        duration: 3000,
-        description: errorMsg,
-      })
-      return rejectWithValue({ error: error.message, message: errorMsg })
-    }
-  },
-)
-
-export const updateBusiness = createAsyncThunk(
-  'business/updateBusiness',
-  async (
-    { id, data }: { id: string; data: Partial<BusinessDetail> },
-    { rejectWithValue },
-  ) => {
-    try {
-      const response = await axiosApi.put(`/api/business-detail/${id}`, data)
-      return response.data
-    } catch (error: any) {
-      const errorMsg =
-        error instanceof AxiosError && error.response?.data?.message
-          ? error.response.data.message
-          : 'An unknown error occurred'
-      toast.error(errorMsg, {
-        id: 'update-business',
-        duration: 3000,
-        description: errorMsg,
-      })
-      return rejectWithValue({ error: error.message, message: errorMsg })
-    }
-  },
-)
-
-// ──────────────────────────────────────────────────────────────────────────
-// HELPER FUNCTIONS
-// ──────────────────────────────────────────────────────────────────────────
-
-export const transformAvailabilityForForm = (
-  availability:
-    | BusinessAvailability[]
-    | ServiceAvailability[]
-    | null
-    | undefined,
-): {
-  work: Record<WeekDay, [string, string][]>
-  break: Record<WeekDay, [string, string][]>
-} => {
-  const businessHours = {
-    work: {} as Record<WeekDay, [string, string][]>,
-    break: {} as Record<WeekDay, [string, string][]>,
-  }
-  allWeekDays.forEach((day) => {
-    businessHours.work[day] = []
-    businessHours.break[day] = []
-  })
-
-  if (!availability) return businessHours
-
-  const formatTime = (isoString: string): string => {
-    const date = new Date(isoString)
-    let hours = date.getHours()
-    const minutes = date.getMinutes().toString().padStart(2, '0')
-    const ampm = hours >= 12 ? 'PM' : 'AM'
-    hours = hours % 12
-    if (hours === 0) hours = 12
-    return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`
-  }
-  availability.forEach((avail) => {
-    const dayKey = weekdayMap[avail.weekDay] as WeekDay | undefined
-    if (!dayKey) return
-    ;(avail.timeSlots as BusinessTime[]).forEach((slot) => {
-      const slotPair: [string, string] = [
-        formatTime(slot.startTime),
-        formatTime(slot.endTime),
-      ]
-      if (slot.type === 'BREAK') {
-        businessHours.break[dayKey].push(slotPair)
-      } else {
-        businessHours.work[dayKey].push(slotPair)
-      }
+// Async Thunks
+export const fetchBusinessDetail = createAsyncThunk<
+  BusinessDetail,
+  string,
+  { rejectValue: { error: string; message: string } }
+>('businessSettings/fetch', async (businessId, { rejectWithValue }) => {
+  try {
+    const response = await axiosApi.get<{ data: any }>(
+      `/api/business-detail/${businessId}`,
+    )
+    return transformBusinessDetail(response.data.data)
+  } catch (error) {
+    const err = error as AxiosError<{ error: string; message: string }>
+    return rejectWithValue({
+      error: 'Failed to fetch business details',
+      message: err.response?.data?.message || 'An error occurred',
     })
-  })
-  return businessHours
-}
-
-export const convertFormToApiFormat = (
-  formData: BusinessAvailabilityFormValues,
-): { businessAvailability: BusinessAvailability[]; holidays: Holiday[] } => {
-  const selectedDaysSet = new Set(formData.businessAvailability)
-
-  const holidays: Holiday[] = allWeekDays
-    .filter((day) => !selectedDaysSet.has(day as WeekDay))
-    .map((day) => ({
-      holiday: weekdayMap[day] as WeekDays,
-      type: 'GENERAL',
-      date: null,
-    }))
-
-  const businessAvailability: BusinessAvailability[] = []
-  for (const day of formData.businessAvailability) {
-    const apiDay = weekdayMap[day] as WeekDays
-    const workSlots: BusinessTime[] = (formData.businessDays[day] || []).map(
-      ([startTime, endTime]) => ({ type: 'WORK', startTime, endTime }),
-    )
-    const breakSlots: BusinessTime[] = (formData.breakHours[day] || []).map(
-      ([startTime, endTime]) => ({ type: 'BREAK', startTime, endTime }),
-    )
-
-    if (workSlots.length > 0 || breakSlots.length > 0) {
-      businessAvailability.push({
-        weekDay: apiDay,
-        type: 'GENERAL',
-        timeSlots: [...workSlots, ...breakSlots],
-      })
-    }
   }
-  return { businessAvailability, holidays }
-}
-
-export const convertServiceAvailabilityToApi = (
-  formData: ServiceAvailabilityFormValues,
-  businessId: string,
-): ServiceAvailability[] => {
-  const serviceAvailability: ServiceAvailability[] = []
-  for (const day of formData.serviceAvailability) {
-    const apiDay = weekdayMap[day] as WeekDays
-    const timeSlots: ServiceTime[] = (formData.serviceDays[day] || []).map(
-      ([startTime, endTime]) => ({
-        type: 'WORK',
-        startTime,
-        endTime,
-      }),
+})
+export const createBusinessDetail = createAsyncThunk<
+  BusinessDetail,
+  { data: Partial<BusinessDetail> },
+  { rejectValue: { error: string; message: string } }
+>('businessSettings/create', async ({ data }, { rejectWithValue }) => {
+  console.log('creating the business detail')
+  try {
+    const response = await axiosApi.post<{ data: any }>(
+      `/api/business-detail`,
+      data,
     )
 
-    if (timeSlots.length) {
-      serviceAvailability.push({
-        weekDay: apiDay,
-        timeSlots,
-        businessDetailId: businessId,
-      })
-    }
+    toast.success('Business details created successfully')
+    return response.data.data
+  } catch (error) {
+    const err = error as AxiosError<{ error: string; message: string }>
+    toast.error(
+      err.response?.data?.message || 'Failed to create business details',
+    )
+    return rejectWithValue({
+      error: 'Failed to create business details',
+      message: err.response?.data?.message || 'An error occurred',
+    })
   }
-  return serviceAvailability
-}
+})
 
-// ──────────────────────────────────────────────────────────────────────────
-// SLICE
-// ──────────────────────────────────────────────────────────────────────────
+export const updateBusinessDetail = createAsyncThunk<
+  BusinessDetail,
+  { id: string; data: Partial<BusinessDetail> },
+  { rejectValue: { error: string; message: string } }
+>('businessSettings/update', async ({ id, data }, { rejectWithValue }) => {
+  console.log('updating the business detail')
+  try {
+    const response = await axiosApi.put<{ data: any }>(
+      `/api/business-detail/${id}`,
+      data,
+    )
+    toast.success('Business details updated successfully')
+    return transformBusinessDetail(response.data.data)
+  } catch (error) {
+    const err = error as AxiosError<{ error: string; message: string }>
+    toast.error(
+      err.response?.data?.message || 'Failed to update business details',
+    )
+    return rejectWithValue({
+      error: 'Failed to update business details',
+      message: err.response?.data?.message || 'An error occurred',
+    })
+  }
+})
 
-const businessSlice = createSlice({
-  name: 'business',
+// Support Business Detail Thunk
+export const updateSupportBusinessDetail = createAsyncThunk<
+  SupportBusinessDetail,
+  { id: string; data: Partial<SupportBusinessDetail> },
+  { rejectValue: { error: string; message: string } }
+>('supportBusiness/update', async ({ id, data }, { rejectWithValue }) => {
+  try {
+    const response = await axiosApi.put<{ data: SupportBusinessDetail }>(
+      `/api/support-business-detail/${id}`,
+      data,
+    )
+    toast.success('Support business details updated successfully')
+    return response.data.data
+  } catch (error) {
+    const err = error as AxiosError<{ error: string; message: string }>
+    toast.error(
+      err.response?.data?.message ||
+        'Failed to update support business details',
+    )
+    return rejectWithValue({
+      error: 'Failed to update support business details',
+      message: err.response?.data?.message || 'An error occurred',
+    })
+  }
+})
+
+export const createSupportBusinessDetail = createAsyncThunk<
+  SupportBusinessDetail,
+  { data: Partial<SupportBusinessDetail> },
+  { rejectValue: { error: string; message: string } }
+>('supportBusiness/create', async ({ data }, { rejectWithValue }) => {
+  try {
+    console.log('Sending data:', JSON.stringify(data, null, 2)) // Log the data being sent
+    const response = await axiosApi.post<{ data: SupportBusinessDetail }>(
+      `/api/support-business-detail`,
+      data,
+    )
+    console.log('Response:', response.data) // Log the successful response
+    toast.success('Support business details created successfully')
+    return response.data.data
+  } catch (error) {
+    console.error('Error details:', {
+      error,
+      response: (error as any).response?.data,
+      status: (error as any).response?.status,
+      headers: (error as any).response?.headers,
+    })
+    const err = error as AxiosError<{ error: string; message: string }>
+    const errorMessage =
+      err.response?.data?.message || 'Failed to create support business details'
+    toast.error(errorMessage)
+    return rejectWithValue({
+      error: 'Failed to create support business details',
+      message: errorMessage,
+    })
+  }
+})
+
+// Slice
+const businessDetailSlice = createSlice({
+  name: 'businessSettings',
   initialState,
   reducers: {
-    setBusinessDetail(state, action: PayloadAction<Partial<BusinessDetail>>) {
-      state.businessData = { ...state.businessData, ...action.payload }
-      state.selectedBusiness = {
-        ...(state.selectedBusiness || ({} as BusinessDetail)),
-        ...action.payload,
-      }
+    setActiveStep: (state, action: PayloadAction<string>) => {
+      // Update all steps' active status
+      state.steps = state.steps.map((step) => ({
+        ...step,
+        active: step.id === action.payload,
+      }))
+      state.activeStep = action.payload
     },
-    setBusinessAvailabilityForm(
-      state,
-      action: PayloadAction<BusinessAvailabilityFormValuesExtended>, // Accepts the extended form data
-    ) {
-      // Use zod parse to strip out `from` and `to` before converting for the API format
-      const apiSafeData = businessAvailabilityFormSchema.parse(action.payload)
-      const { businessAvailability, holidays } =
-        convertFormToApiFormat(apiSafeData)
+    completeStep: (state, action: PayloadAction<string>) => {
+      const stepId = action.payload
 
-      state.businessData = {
-        ...state.businessData,
-        // Save the full form payload (including from/to) to Redux state
-        businessAvailabilityForm: action.payload,
-        // Update the top-level business data properties as before
-        timeZone: action.payload.timezone,
-        holiday: holidays,
-        businessAvailability,
+      // Update the step's completed status
+      state.steps = state.steps.map((step) =>
+        step.id === stepId ? { ...step, completed: true } : step,
+      )
+
+      // Add to completed steps if not already present
+      if (!state.completedSteps.includes(stepId)) {
+        state.completedSteps.push(stepId)
+      }
+
+      // Activate the next step if exists
+      const currentIndex = state.steps.findIndex((step) => step.id === stepId)
+      if (currentIndex < state.steps.length - 1) {
+        const nextStep = state.steps[currentIndex + 1]
+        state.activeStep = nextStep.id
+        state.steps = state.steps.map((step) => ({
+          ...step,
+          active: step.id === nextStep.id,
+        }))
       }
     },
-    setServiceAvailabilityForm(
+    resetBusinessDetailState: () => initialState,
+    setBusinessDetail: (
       state,
-      action: PayloadAction<ServiceAvailabilityFormValues>,
-    ) {
-      state.businessData = {
-        ...state.businessData,
-        serviceAvailabilityForm: action.payload,
-        serviceAvailability: convertServiceAvailabilityToApi(
-          action.payload,
-          state.selectedBusiness?.id || '',
-        ),
+      action: PayloadAction<BusinessDetail | null>,
+    ) => {
+      state.businessDetail = action.payload
+    },
+    clearBusinessDetailError: (state) => {
+      state.error = null
+      state.message = null
+    },
+    updateBusinessAvailability: (
+      state,
+      action: PayloadAction<BusinessAvailability[]>,
+    ) => {
+      if (state.businessDetail) {
+        state.businessDetail.businessAvailability = action.payload
       }
     },
-    setActiveTab(state, action: PayloadAction<BusinessTab>) {
-      state.activeTab = action.payload
+    updateBusinessAddress: (
+      state,
+      action: PayloadAction<BusinessAddress[]>,
+    ) => {
+      if (state.businessDetail) {
+        state.businessDetail.address = action.payload
+      }
     },
-    resetBusinessData(state) {
-      state.businessData = null
-      state.selectedBusiness = null
-      state.activeTab = BusinessTab.BusinessDetail
+    updateBusinessHolidays: (state, action: PayloadAction<Holiday[]>) => {
+      if (state.businessDetail) {
+        state.businessDetail.holiday = action.payload
+      }
+    },
+    updateBusinessDetailForm: (
+      state,
+      action: PayloadAction<BusinessDetailFormValues>,
+    ) => {
+      state.businessDetailForm = action.payload
+    },
+    updateBusinessAvailabilityForm: (
+      state,
+      action: PayloadAction<BusinessAvailabilityFormValues>,
+    ) => {
+      state.businessAvailabilityForm = [action.payload]
     },
   },
   extraReducers: (builder) => {
-    builder
-      .addCase(fetchBusinessByOwnerId.pending, (state) => {
-        state.loading = true
-        state.hasFetched = false
-        state.error = null
-      })
-      .addCase(fetchBusinessByOwnerId.fulfilled, (state, action) => {
-        state.loading = false
-        state.hasFetched = true
-        state.businesses = action.payload
-        state.selectedBusiness =
-          action.payload.length > 0 ? action.payload[0] : null
-      })
-      .addCase(fetchBusinessByOwnerId.rejected, (state, action) => {
-        state.loading = false
-        state.hasFetched = true
-        state.error = (action.payload as string) || 'Failed to fetch business'
-      })
-      .addCase(createBusiness.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(createBusiness.fulfilled, (state, action) => {
-        const newBusiness = action.payload.data as BusinessDetail
-        state.businesses.push(newBusiness)
-        state.selectedBusiness = newBusiness
+    // Fetch Business Detail
+    builder.addCase(fetchBusinessDetail.pending, (state) => {
+      state.isLoading = true
+      state.error = null
+    })
+    builder.addCase(fetchBusinessDetail.fulfilled, (state, action) => {
+      state.isLoading = false
+      state.businessDetail = action.payload
+      state.success = true
+    })
+    builder.addCase(fetchBusinessDetail.rejected, (state, action) => {
+      state.isLoading = false
+      state.error = action.payload?.error || 'Failed to fetch business details'
+      state.message = action.payload?.message || null
+      state.success = false
+    })
+    // Create Business Detail
+    builder.addCase(createBusinessDetail.pending, (state) => {
+      state.isSaving = true
+      state.error = null
+      state.message = null
+    })
 
-        const { work: businessWork, break: breakHours } =
-          transformAvailabilityForForm(newBusiness.businessAvailability)
-        const { work: serviceWork } = transformAvailabilityForForm(
-          newBusiness.serviceAvailability,
-        )
+    builder.addCase(
+      createBusinessDetail.fulfilled,
+      (state, action: PayloadAction<BusinessDetail>) => {
+        state.isSaving = false
+        state.businessDetail = action.payload
+        state.success = true
+        state.message = 'Business details created successfully'
+      },
+    )
 
-        const availableDays = (newBusiness.businessAvailability || []).map(
-          (avail) => weekdayMap[avail.weekDay] as WeekDay,
-        )
-        const sortedDays = allWeekDays.filter((d) => availableDays.includes(d))
-
-        state.businessData = {
-          ...newBusiness,
-          businessAvailabilityForm: {
-            timezone: newBusiness.timeZone || 'UTC',
-            holidays: (newBusiness.holiday || []).map(
-              (h) => weekdayMap[h.holiday] as WeekDay,
-            ),
-            businessAvailability: sortedDays,
-            businessDays: businessWork,
-            breakHours,
-            from: sortedDays.length > 0 ? sortedDays[0] : undefined,
-            to:
-              sortedDays.length > 0
-                ? sortedDays[sortedDays.length - 1]
-                : undefined,
-          },
-          serviceAvailabilityForm: {
-            serviceAvailability: (newBusiness.serviceAvailability || []).map(
-              (avail) => weekdayMap[avail.weekDay] as WeekDay,
-            ),
-            serviceDays: serviceWork,
-            isServiceVisible: true,
-            isPricingEnabled: false,
-          },
-        }
-        state.loading = false
-      })
-      .addCase(createBusiness.rejected, (state, action) => {
+    builder.addCase(createBusinessDetail.rejected, (state, action) => {
+      state.isSaving = false
+      state.error = action.payload?.error || 'Failed to create business details'
+      state.message = action.payload?.message || 'An unexpected error occurred'
+      state.success = false
+      console.error('Create business detail failed:', action.error)
+    })
+    // Update Business Detail
+    builder.addCase(updateBusinessDetail.pending, (state) => {
+      state.isSaving = true
+      state.error = null
+    })
+    builder.addCase(updateBusinessDetail.fulfilled, (state, action) => {
+      state.isSaving = false
+      state.businessDetail = action.payload
+      state.success = true
+    })
+    builder.addCase(updateBusinessDetail.rejected, (state, action) => {
+      state.isSaving = false
+      state.error = action.payload?.error || 'Failed to update business details'
+      state.message = action.payload?.message || null
+      state.success = false
+    })
+    // Update Support Business Detail
+    builder.addCase(updateSupportBusinessDetail.pending, (state) => {
+      state.isSaving = true
+      state.error = null
+    })
+    builder.addCase(updateSupportBusinessDetail.fulfilled, (state, action) => {
+      if (state.businessDetail) {
+        state.isSaving = false
+        state.businessDetail.supportBusinessDetail = action.payload
+        state.success = true
+      }
+    })
+    builder.addCase(updateSupportBusinessDetail.rejected, (state, action) => {
+      state.isSaving = false
+      state.error =
+        action.payload?.error || 'Failed to update support business details'
+      state.message = action.payload?.message || null
+      state.success = false
+    })
+    // Create Support Business Detail
+    builder.addCase(createSupportBusinessDetail.pending, (state) => {
+      state.isSaving = true
+      state.error = null
+      state.message = null
+    })
+    builder.addCase(createSupportBusinessDetail.fulfilled, (state, action) => {
+      if (state.businessDetail) {
+        state.isSaving = false
+        state.businessDetail.supportBusinessDetail = action.payload
+        state.success = true
+      } else {
+        state.isSaving = false
         state.error =
-          (action.payload as any)?.message || 'Failed to create business'
-        state.loading = false
-      })
-      .addCase(updateBusiness.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(updateBusiness.fulfilled, (state, action) => {
-        const updatedBusiness = action.payload.data as BusinessDetail
-        state.businesses = state.businesses.map((business) =>
-          business.id === updatedBusiness.id ? updatedBusiness : business,
-        )
-        state.selectedBusiness = updatedBusiness
-
-        const { work: businessWork, break: breakHours } =
-          transformAvailabilityForForm(updatedBusiness.businessAvailability)
-        const { work: serviceWork } = transformAvailabilityForForm(
-          updatedBusiness.serviceAvailability,
-        )
-
-        const availableDays = (updatedBusiness.businessAvailability || []).map(
-          (avail) => weekdayMap[avail.weekDay] as WeekDay,
-        )
-        const sortedDays = allWeekDays.filter((d) => availableDays.includes(d))
-
-        state.businessData = {
-          ...updatedBusiness,
-          businessAvailabilityForm: {
-            timezone: updatedBusiness.timeZone || 'UTC',
-            holidays: (updatedBusiness.holiday || []).map(
-              (h) => weekdayMap[h.holiday] as WeekDay,
-            ),
-            businessAvailability: sortedDays,
-            businessDays: businessWork,
-            breakHours,
-            from: sortedDays.length > 0 ? sortedDays[0] : undefined,
-            to:
-              sortedDays.length > 0
-                ? sortedDays[sortedDays.length - 1]
-                : undefined,
-          },
-          serviceAvailabilityForm: {
-            serviceAvailability: (
-              updatedBusiness.serviceAvailability || []
-            ).map((avail) => weekdayMap[avail.weekDay] as WeekDay),
-            serviceDays: serviceWork,
-            isServiceVisible:
-              state.businessData?.serviceAvailabilityForm?.isServiceVisible ??
-              true,
-            isPricingEnabled:
-              state.businessData?.serviceAvailabilityForm?.isPricingEnabled ??
-              false,
-          },
-        }
-        state.loading = false
-      })
-      .addCase(updateBusiness.rejected, (state, action) => {
-        state.error =
-          (action.payload as any)?.message || 'Failed to update business'
-        state.loading = false
-      })
+          action.payload?.error || 'Failed to create support business details'
+        state.message = action.payload?.message || null
+        state.success = false
+      }
+    })
+    builder.addCase(createSupportBusinessDetail.rejected, (state, action) => {
+      state.isSaving = false
+      state.error =
+        action.payload?.error || 'Failed to create support business details'
+      state.message = action.payload?.message || null
+      state.success = false
+    })
   },
 })
 
+// Export actions
 export const {
+  setActiveStep,
+  completeStep,
+  resetBusinessDetailState,
   setBusinessDetail,
-  setBusinessAvailabilityForm,
-  setServiceAvailabilityForm,
-  setActiveTab,
-  resetBusinessData,
-} = businessSlice.actions
+  clearBusinessDetailError,
+  updateBusinessAvailability,
+  updateBusinessAddress,
+  updateBusinessHolidays,
+  updateBusinessDetailForm,
+  updateBusinessAvailabilityForm,
+} = businessDetailSlice.actions
 
-export default businessSlice.reducer
+// Export the reducer
+export default businessDetailSlice.reducer
