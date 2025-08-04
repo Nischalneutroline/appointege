@@ -23,7 +23,6 @@ import { Switch } from '@/components/ui/switch'
 
 import {
   createSupportInfo,
-
   updateSupportInfo,
 } from '@/store/slices/supportSlice'
 import { cn } from '@/lib/utils'

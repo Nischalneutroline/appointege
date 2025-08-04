@@ -22,6 +22,8 @@ import {
   setActiveFAQFilters,
   setFaqs,
 } from '@/store/slices/supportSlice'
+import Image from 'next/image'
+import { capitalizeFirstLetter } from '@/lib/capitalize-text'
 
 // Types
 export type FaqFilterValue = 'all' | 'public' | 'private'
@@ -74,6 +76,8 @@ export default function FaqSection() {
 
   const {
     faqs,
+    isLoading,
+    activeFilter,
     activeFilters = DEFAULT_FAQ_FILTERS_VALUES,
     isFaqFormOpen,
     filterOptions,
@@ -184,7 +188,7 @@ export default function FaqSection() {
               onSearch={(value) => setSearchQuery(value)}
             />
             <div className="flex gap-3 justify-end">
-              <FilterDropdown<FaqFilterValue>
+              {/* <FilterDropdown<FaqFilterValue>
                 filterOptions={enrichedFilterOptions}
                 activeFilters={activeFilters}
                 defaultFilters={DEFAULT_FAQ_FILTERS_VALUES}
@@ -196,7 +200,7 @@ export default function FaqSection() {
                 selectActiveFilter={(state: RootState) =>
                   state.support.faq?.activeFilter || 'all'
                 }
-              />
+              /> */}
               <div
                 className={cn(
                   'flex items-center justify-center text-[#7285BD] cursor-pointer hover:rotate-90 transition duration-700 hover:scale-110',
@@ -214,8 +218,45 @@ export default function FaqSection() {
 
         <div className="flex flex-col gap-4 overflow-y-auto">
           {filteredFaqs.length === 0 ? (
-            <div className="text-center text-sm text-gray-500 italic">
-              No FAQs found.
+            <div className="h-full flex items-center justify-center text-gray-500">
+              <div className="flex flex-col items-center gap-2">
+                <Image
+                  src="/assets/ecommerce.svg"
+                  alt="No appointments"
+                  width={140}
+                  height={140}
+                />
+                <div className="text-2xl text-[#4F7CFF] font-semibold">
+                  No Ticket Found
+                </div>
+                <div className="text-[#9F9C9C] text-sm font-medium">
+                  {searchQuery ? (
+                    <>
+                      No tickets match your search query "{searchQuery}" for{' '}
+                      {activeFilter === 'all'
+                        ? 'all FAQs'
+                        : `${capitalizeFirstLetter(activeFilter as string)} FAQs`}
+                      .
+                    </>
+                  ) : (
+                    <>
+                      No tickets found for{' '}
+                      {activeFilter === 'all'
+                        ? 'all FAQs'
+                        : `${capitalizeFirstLetter(activeFilter as string)} FAQs.`}
+                    </>
+                  )}
+                  <button
+                    className="p-1 ml-1 text-blue-600 hover:underline disabled:opacity-50"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing || isLoading}
+                    aria-label="Retry fetching FAQs"
+                  >
+                    Try refreshing
+                  </button>{' '}
+                  or creating a new FAQ.
+                </div>
+              </div>
             </div>
           ) : (
             filteredFaqs?.map((faq, index) => (
@@ -230,7 +271,9 @@ export default function FaqSection() {
                   className="flex justify-between items-center cursor-pointer"
                   onClick={() => toggle(index)}
                 >
-                  <h4 className="font-medium text-gray-900">{faq?.question}</h4>
+                  <h4 className="font-medium text-sm md:text-base text-gray-900">
+                    {faq?.question}
+                  </h4>
 
                   <div className="flex gap-2 items-center">
                     {openIndex === index && (
@@ -255,7 +298,7 @@ export default function FaqSection() {
                         />
                       </div>
                     )}
-                    <div className="text-[#367C39] text-xs font-medium">
+                    <div className="text-[#367C39] text-xs md:text-sm font-medium">
                       {capitalizeFirstChar(faq?.category || '')}
                     </div>
                     <ChevronDown
@@ -267,7 +310,9 @@ export default function FaqSection() {
                   </div>
                 </div>
                 {openIndex === index && (
-                  <p className="mt-2 text-sm text-gray-700">{faq?.answer}</p>
+                  <p className="mt-2 text-xs md:text-sm text-gray-700">
+                    {faq?.answer}
+                  </p>
                 )}
               </div>
             ))

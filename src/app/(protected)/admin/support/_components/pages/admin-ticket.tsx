@@ -140,7 +140,7 @@ const AdminTicket = () => {
                 width="w-full max-w-[530px]"
                 onSearch={(value) => setSearchQuery(value)}
               />
-              <div className="flex gap-3 justify-end">
+              {/* <div className="flex gap-3 justify-end">
                 <FilterDropdown<TicketFilterValue>
                   filterOptions={enrichedFilterOptions}
                   activeFilters={activeFilters}
@@ -157,7 +157,7 @@ const AdminTicket = () => {
                     state.support.ticket.activeFilter
                   }
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="flex gap-2 items-center h-full">
@@ -166,7 +166,7 @@ const AdminTicket = () => {
                 onClick={handleOpenCreateForm}
               >
                 <Plus className=" h-4 w-4" />
-                <span className="text-sm font-medium">Raise A Issue</span>
+                <span className="flex text-sm font-medium">Raise A Issue</span>
               </button>
               <div
                 className={cn(
@@ -187,7 +187,7 @@ const AdminTicket = () => {
         <div className="h-[calc(100vh-200px)] w-full">
           {' '}
           {filteredTickets.length > 0 ? (
-            <div className=" ">
+            <div className=" max-w-full overflow-auto">
               <DataTable
                 columns={columns(dispatch)}
                 data={filteredTickets}

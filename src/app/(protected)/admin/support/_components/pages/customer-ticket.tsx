@@ -144,7 +144,7 @@ const CustomerTicket = () => {
                 width="w-full max-w-[530px]"
                 onSearch={(value) => setSearchQuery(value)}
               />
-              <div className="flex gap-3 justify-end">
+              {/* <div className="flex gap-3 justify-end">
                 <FilterDropdown<TicketFilterValue>
                   filterOptions={enrichedFilterOptions}
                   activeFilters={activeFilters}
@@ -160,7 +160,7 @@ const CustomerTicket = () => {
                     state.support.ticket.activeFilter
                   }
                 />
-              </div>
+              </div> */}
             </div>
 
             <div className="flex gap-2 items-center h-full">
@@ -190,7 +190,7 @@ const CustomerTicket = () => {
         <div className="h-[calc(100vh-200px)] w-full">
           {' '}
           {filteredTickets.length > 0 ? (
-            <div className=" ">
+            <div className="max-w-full overflow-auto scroll-auto ">
               <DataTable
                 columns={columns(dispatch)}
                 data={filteredTickets}
