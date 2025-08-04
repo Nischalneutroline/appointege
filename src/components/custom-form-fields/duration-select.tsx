@@ -1,3 +1,6 @@
+// src/components/custom-form-fields/duration-select.tsx
+'use client'
+
 import { useFormContext } from 'react-hook-form'
 import { Label } from '@/components/ui/label'
 import {
@@ -28,15 +31,20 @@ const DurationSelect = ({
 }) => {
   const { watch, setValue } = useFormContext()
 
-  const selected = watch(name) // will be "60" or "90" etc.
+  const selected = watch(name)?.toString() // Convert to string for Select
 
   return (
-    <div className="space-y-1 flex gap-2 ">
+    <div className="space-y-1 flex gap-2">
       <div className="flex items-center gap-2">
         {<Clock className="size-4 text-gray-500" />}
         <Label>{label}</Label>
       </div>
-      <Select value={selected} onValueChange={(val) => setValue(name, val)}>
+      <Select
+        value={selected}
+        onValueChange={(val) =>
+          setValue(name, parseInt(val, 10), { shouldValidate: true })
+        }
+      >
         <SelectTrigger>
           <SelectValue placeholder="Select Duration" />
         </SelectTrigger>

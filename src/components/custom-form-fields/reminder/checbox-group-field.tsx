@@ -75,18 +75,18 @@
 
 // export default CheckboxGroupField
 
-"use client"
+'use client'
 
-import { useFormContext } from "react-hook-form"
-import { Checkbox } from "@/components/ui/checkbox"
+import { useFormContext } from 'react-hook-form'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-} from "@/components/ui/form"
-import { Label } from "@/components/ui/label"
-import { LucideIcon } from "lucide-react"
+} from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
+import { LucideIcon } from 'lucide-react'
 
 interface CheckboxGroupFieldProps {
   name: string
@@ -113,7 +113,7 @@ const CheckboxGroupField = ({
     setValue(name, newValues)
   }
 
-  console.log("CheckboxGroupField: options =", options)
+  console.log('CheckboxGroupField: options =', options)
 
   return (
     <FormField
@@ -125,11 +125,11 @@ const CheckboxGroupField = ({
             {Icon && <Icon className="size-4 text-gray-500" />}
             <FormLabel>{label}</FormLabel>
           </div>
-          <div className="flex flex-col md:flex-row flex-wrap gap-4">
+          <div className="flex flex-col md:flex-col flex-wrap gap-4">
             {options?.map((option) => {
-              const value = typeof option === "string" ? option : option.value
+              const value = typeof option === 'string' ? option : option.value
               const displayLabel =
-                typeof option === "string" ? option : option.label
+                typeof option === 'string' ? option : option.label
 
               return (
                 <div key={value} className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useForm, FormProvider, useWatch } from 'react-hook-form'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
@@ -15,229 +15,158 @@ import BusinessHourSelector from '@/components/custom-form-fields/business-setti
 import {
   BusinessTab,
   setActiveTab,
-  setBusinessDetail,
   setServiceAvailabilityForm,
   transformAvailabilityForForm,
   convertFormToApiFormat,
   convertServiceAvailabilityToApi,
-  weekdayMap,
   serviceAvailabilityFormSchema,
   ServiceAvailabilityFormValues,
   createBusiness,
   updateBusiness,
-  BusinessDetail,
 } from '@/store/slices/businessSlice'
 import { normalizeWeekDays } from './business-availability'
+import { z } from 'zod'
 
 export type WeekDay = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
+const allDays: WeekDay[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-const defaultValues: ServiceAvailabilityFormValues = {
-  serviceAvailability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-  serviceDays: {
-    Mon: [['09:00 AM', '05:00 PM']],
-    Tue: [['09:00 AM', '05:00 PM']],
-    Wed: [['09:00 AM', '05:00 PM']],
-    Thu: [['09:00 AM', '05:00 PM']],
-    Fri: [['09:00 AM', '05:00 PM']],
-    Sat: [],
-    Sun: [],
-  },
-  isServiceVisible: true,
-  isPricingEnabled: false,
-}
+const serviceAvailabilityFormSchemaExtended =
+  serviceAvailabilityFormSchema.extend({
+    from: z.enum(allDays).optional(),
+    to: z.enum(allDays).optional(),
+  })
+type ServiceAvailabilityFormValuesExtended = z.infer<
+  typeof serviceAvailabilityFormSchemaExtended
+>
 
 const ServiceAvailabilityForm = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { selectedBusiness, businessData, loading } = useSelector(
+  const { selectedBusiness, businessData, loading, hasFetched } = useSelector(
     (state: RootState) => state.business,
   )
   const { user } = useSelector((state: RootState) => state.auth)
-  console.log('user in ServiceAvailabilityForm', user)
 
-  const [currentMode, setCurrentMode] = React.useState<'default' | 'custom'>(
+  const [currentMode, setCurrentMode] = useState<'default' | 'custom'>(
     'default',
   )
-  const [activeDay, setActiveDay] = React.useState<WeekDay>('Mon')
-  const lastResetDataRef = useRef<string | null>(null)
+  const [activeDay, setActiveDay] = useState<WeekDay>('Mon')
+  const isInitialized = useRef(false)
 
+  // Get business availability days to constrain service availability
+  const businessAvailabilityDays =
+    businessData?.businessAvailabilityForm?.businessAvailability || []
   const businessHoursFromState =
     businessData?.businessAvailabilityForm?.businessDays
-  const businessAvailabilityFromState =
-    businessData?.businessAvailabilityForm?.businessAvailability
+  const businessBreaksFromState =
+    businessData?.businessAvailabilityForm?.breakHours
 
-  const form = useForm<ServiceAvailabilityFormValues>({
-    resolver: zodResolver(serviceAvailabilityFormSchema),
-    defaultValues:
-      businessData?.serviceAvailabilityForm ||
-      (businessHoursFromState
-        ? {
-            serviceAvailability:
-              businessAvailabilityFromState ||
-              defaultValues.serviceAvailability,
-            serviceDays: normalizeWeekDays(
-              Object.fromEntries(
-                Object.entries(businessHoursFromState).map(([day, slots]) => [
-                  day,
-                  slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-                ]),
-              ),
-            ),
-            isServiceVisible: true,
-            isPricingEnabled: false,
-          }
-        : defaultValues),
+  const form = useForm<ServiceAvailabilityFormValuesExtended>({
+    resolver: zodResolver(serviceAvailabilityFormSchemaExtended),
+    defaultValues: {},
   })
 
   useEffect(() => {
-    let initialData: ServiceAvailabilityFormValues = defaultValues
+    if (
+      isInitialized.current ||
+      !hasFetched ||
+      !businessAvailabilityDays.length
+    )
+      return
 
-    if (businessData?.serviceAvailabilityForm) {
-      const result = serviceAvailabilityFormSchema.safeParse(
-        businessData.serviceAvailabilityForm,
+    let sourceData: ServiceAvailabilityFormValues
+    let sourceAvailabilityArray: WeekDay[] = []
+
+    const isUpdateMode = !!selectedBusiness?.id
+
+    if (isUpdateMode && selectedBusiness.serviceAvailability?.length > 0) {
+      // In update mode, use existing service availability but filter by current business days
+      const { work: serviceWork } = transformAvailabilityForForm(
+        selectedBusiness.serviceAvailability,
       )
-      initialData = result.success
-        ? {
-            ...result.data,
-            serviceDays: normalizeWeekDays(
-              Object.fromEntries(
-                Object.entries(result.data.serviceDays).map(([day, slots]) => [
-                  day,
-                  slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-                ]),
-              ),
-            ),
-          }
-        : defaultValues
-    } else if (selectedBusiness?.serviceAvailability?.length) {
-      initialData = {
-        serviceAvailability:
-          selectedBusiness.serviceAvailability
-            ?.map((avail) => weekdayMap[avail.weekDay] as WeekDay)
-            .filter((day): day is WeekDay => !!day) ||
-          defaultValues.serviceAvailability,
-        serviceDays: normalizeWeekDays(
-          Object.fromEntries(
-            Object.entries(
-              transformAvailabilityForForm(selectedBusiness.serviceAvailability)
-                .work,
-            ).map(([day, slots]) => [
-              day,
-              slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-            ]),
-          ),
-        ),
+      sourceAvailabilityArray = allDays.filter(
+        (day) =>
+          (serviceWork[day] || []).length > 0 &&
+          businessAvailabilityDays.includes(day),
+      )
+
+      // If no matching days, fall back to business availability days
+      if (sourceAvailabilityArray.length === 0) {
+        sourceAvailabilityArray = [...businessAvailabilityDays]
+      }
+
+      sourceData = {
+        serviceAvailability: sourceAvailabilityArray,
+        serviceDays: normalizeWeekDays(serviceWork),
         isServiceVisible: true,
         isPricingEnabled: false,
       }
-    } else if (businessHoursFromState && businessAvailabilityFromState) {
-      initialData = {
-        serviceAvailability: businessAvailabilityFromState,
-        serviceDays: normalizeWeekDays(
-          Object.fromEntries(
-            Object.entries(businessHoursFromState).map(([day, slots]) => [
-              day,
-              slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-            ]),
-          ),
-        ),
+    } else {
+      // In create mode, use business availability days directly
+      sourceAvailabilityArray = [...businessAvailabilityDays]
+      const businessHours =
+        businessData?.businessAvailabilityForm?.businessDays || {}
+
+      sourceData = {
+        serviceAvailability: sourceAvailabilityArray,
+        serviceDays: normalizeWeekDays(businessHours),
         isServiceVisible: true,
         isPricingEnabled: false,
       }
     }
 
-    const initialDataStr = JSON.stringify(initialData)
-    if (initialDataStr !== lastResetDataRef.current) {
-      form.reset(initialData, { keepDirty: false })
-      lastResetDataRef.current = initialDataStr
-    }
-  }, [selectedBusiness, businessData, form, user])
+    const sortedDays = allDays.filter((d) =>
+      sourceAvailabilityArray.includes(d),
+    )
+    const from = sortedDays.length > 0 ? sortedDays[0] : undefined
+    const to =
+      sortedDays.length > 0 ? sortedDays[sortedDays.length - 1] : undefined
 
-  const formData = useWatch({
-    control: form.control,
-  }) as ServiceAvailabilityFormValues
-  const lastFormDataRef = useRef<string | null>(null)
+    form.reset({
+      ...sourceData,
+      from,
+      to,
+    })
 
+    setActiveDay(from || 'Mon')
+    isInitialized.current = true
+  }, [
+    selectedBusiness,
+    businessData,
+    hasFetched,
+    form,
+    businessAvailabilityDays,
+  ])
+
+  const formData = useWatch({ control: form.control })
   useEffect(() => {
+    if (!isInitialized.current) return
     const timer = setTimeout(() => {
-      const result = serviceAvailabilityFormSchema.safeParse(formData)
-      let safeData: ServiceAvailabilityFormValues
-
-      if (result.success) {
-        safeData = {
-          ...result.data,
-          serviceDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.serviceDays).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
-      } else {
-        safeData = {
-          ...defaultValues,
-          ...formData,
-          serviceAvailability:
-            formData.serviceAvailability || defaultValues.serviceAvailability,
-          serviceDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(
-                formData.serviceDays || defaultValues.serviceDays,
-              ).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-          isServiceVisible:
-            formData.isServiceVisible ?? defaultValues.isServiceVisible,
-          isPricingEnabled:
-            formData.isPricingEnabled ?? defaultValues.isPricingEnabled,
-        }
+      const validationResult =
+        serviceAvailabilityFormSchemaExtended.safeParse(formData)
+      if (validationResult.success) {
+        const reduxSafeData = serviceAvailabilityFormSchema.parse(
+          validationResult.data,
+        )
+        dispatch(setServiceAvailabilityForm(reduxSafeData))
       }
-
-      const safeDataStr = JSON.stringify(safeData)
-      if (safeDataStr !== lastFormDataRef.current) {
-        dispatch(setServiceAvailabilityForm(safeData))
-        lastFormDataRef.current = safeDataStr
-      }
-    }, 300)
-
+    }, 500)
     return () => clearTimeout(timer)
   }, [formData, dispatch])
 
-  const onSubmit = async (formData: ServiceAvailabilityFormValues) => {
+  const onSubmit = async (data: ServiceAvailabilityFormValuesExtended) => {
     if (!businessData?.businessAvailabilityForm) {
-      toast.error('Please complete business availability first.')
+      toast.error('Please complete the Business Availability step first.')
       dispatch(setActiveTab(BusinessTab.BusinessAvailability))
       return
     }
 
-    const result = serviceAvailabilityFormSchema.safeParse(formData)
-    if (!result.success) {
-      toast.error('Invalid service availability data.')
-      return
-    }
-
-    const filteredFormData = {
-      ...formData,
-      serviceDays: normalizeWeekDays(
-        Object.fromEntries(
-          Object.entries(formData.serviceDays).map(([day, slots]) => [
-            day,
-            slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-          ]),
-        ),
-      ),
-    }
-
+    const apiSafeData = serviceAvailabilityFormSchema.parse(data)
     const { businessAvailability, holidays } = convertFormToApiFormat(
       businessData.businessAvailabilityForm,
     )
     const serviceAvailability = convertServiceAvailabilityToApi(
-      filteredFormData,
-      selectedBusiness?.id || crypto.randomUUID(),
+      apiSafeData,
+      selectedBusiness?.id || '',
     )
 
     const finalBusinessData = {
@@ -250,67 +179,23 @@ const ServiceAvailabilityForm = () => {
       businessOwner: user?.id,
     }
 
-    console.log(finalBusinessData, 'finalBusinessData')
-
     try {
-      dispatch(setBusinessDetail(finalBusinessData))
-      dispatch(setServiceAvailabilityForm(filteredFormData))
-
       if (selectedBusiness?.id) {
-        // Update existing business
         await dispatch(
           updateBusiness({ id: selectedBusiness.id, data: finalBusinessData }),
-        )
-        toast.success('Service availability updated successfully')
+        ).unwrap()
+        toast.success('Business and service availability updated successfully.')
       } else {
-        // Create new business
-        await dispatch(createBusiness(finalBusinessData))
-        toast.success('Service availability saved successfully')
+        await dispatch(createBusiness(finalBusinessData)).unwrap()
+        toast.success('Business created successfully.')
       }
     } catch (error) {
-      toast.error('Failed to save service availability')
+      toast.error('An error occurred while saving.')
     }
   }
 
-  const handleBack = () => {
-    const currentData = form.getValues()
-    const result = serviceAvailabilityFormSchema.safeParse(currentData)
-    const safeData = result.success
-      ? {
-          ...result.data,
-          serviceDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.serviceDays).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
-      : defaultValues
-    dispatch(setServiceAvailabilityForm(safeData))
+  const handleBack = () =>
     dispatch(setActiveTab(BusinessTab.BusinessAvailability))
-  }
-
-  const handleSkip = () => {
-    const currentData = form.getValues()
-    const result = serviceAvailabilityFormSchema.safeParse(currentData)
-    const safeData = result.success
-      ? {
-          ...result.data,
-          serviceDays: normalizeWeekDays(
-            Object.fromEntries(
-              Object.entries(result.data.serviceDays).map(([day, slots]) => [
-                day,
-                slots.filter((slot: [string, string]) => slot[0] && slot[1]),
-              ]),
-            ),
-          ),
-        }
-      : defaultValues
-    dispatch(setServiceAvailabilityForm(safeData))
-    toast.info('Service availability skipped')
-  }
 
   return (
     <FormProvider {...form}>
@@ -325,11 +210,12 @@ const ServiceAvailabilityForm = () => {
                 key={mode}
                 type="button"
                 onClick={() => setCurrentMode(mode as 'default' | 'custom')}
-                className={`w-[100px] text-base font-medium ${
+                className={cn(
+                  'w-[100px] text-base font-medium',
                   currentMode === mode
                     ? 'text-blue-600 bg-white rounded-[6px]'
-                    : 'text-gray-600'
-                }`}
+                    : 'text-gray-600',
+                )}
               >
                 {mode.charAt(0).toUpperCase() + mode.slice(1)}
               </button>
@@ -340,19 +226,16 @@ const ServiceAvailabilityForm = () => {
             <BusinessDaySelector
               name="serviceAvailability"
               label="Service Days"
-              className="border border-blue-200 rounded-[8px]"
               activeDay={activeDay}
               setActiveDay={setActiveDay}
-              currentMode={currentMode}
-              setCurrentMode={setCurrentMode}
+              availableDays={businessAvailabilityDays} // Pass business days as available days
             />
             <BusinessHourSelector
               name="serviceDays"
               dayName="serviceAvailability"
               label="Service Hours"
               initialBusinessHours={normalizeWeekDays(businessHoursFromState)}
-              businessBreaks={normalizeWeekDays({})}
-              className="border border-blue-200 rounded-[4px]"
+              businessBreaks={normalizeWeekDays(businessBreaksFromState)}
               activeDay={activeDay}
               restrictToInitialHours={true}
               isDefault={currentMode === 'default'}
@@ -362,29 +245,29 @@ const ServiceAvailabilityForm = () => {
 
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <span className={cn('text-sm font-medium text-[#111827]')}>
+              <span className="text-sm font-medium text-[#111827]">
                 Service Visibility
               </span>
               <Switch
-                {...form.register('isServiceVisible')}
                 checked={form.watch('isServiceVisible')}
                 onCheckedChange={(checked) =>
-                  form.setValue('isServiceVisible', checked)
+                  form.setValue('isServiceVisible', checked, {
+                    shouldDirty: true,
+                  })
                 }
-                className="data-[state=checked]:bg-primary"
               />
             </div>
             <div className="flex items-center gap-2">
-              <span className={cn('text-sm font-medium text-[#111827]')}>
+              <span className="text-sm font-medium text-[#111827]">
                 Enable Pricing?
               </span>
               <Switch
-                {...form.register('isPricingEnabled')}
                 checked={form.watch('isPricingEnabled')}
                 onCheckedChange={(checked) =>
-                  form.setValue('isPricingEnabled', checked)
+                  form.setValue('isPricingEnabled', checked, {
+                    shouldDirty: true,
+                  })
                 }
-                className="data-[state=checked]:bg-primary"
               />
             </div>
           </div>
@@ -397,26 +280,18 @@ const ServiceAvailabilityForm = () => {
             onClick={handleBack}
           >
             <ArrowLeft className="w-4 h-4" strokeWidth={3} />
-            <div className="text-[#BBBBBB] text-sm font-normal">Back</div>
+            <div className="text-sm font-normal">Back</div>
           </button>
           <div className="flex gap-4">
-            <button
-              type="button"
-              className="flex gap-1 items-center cursor-pointer text-[#6AA9FF]"
-              onClick={handleSkip}
-            >
-              <div className="text-[#6AA9FF] text-sm font-normal">Skip</div>
-              <ArrowRight className="w-4 h-4" strokeWidth={3} />
-            </button>
-            <Button type="submit" className="cursor-pointer">
+            <Button type="submit" disabled={loading} className="cursor-pointer">
               {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Save className="mr-2 h-4 w-4" strokeWidth={2.5} />
               )}
               {loading
-                ? `${selectedBusiness?.id ? 'Updating' : 'Creating'}`
-                : `${selectedBusiness?.id ? 'Update' : 'Create'}`}
+                ? `${selectedBusiness?.id ? 'Updating...' : 'Saving...'}`
+                : `${selectedBusiness?.id ? 'Update & Finish' : 'Save & Finish'}`}
             </Button>
           </div>
         </div>
