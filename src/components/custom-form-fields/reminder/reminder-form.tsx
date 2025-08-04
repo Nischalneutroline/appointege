@@ -185,7 +185,7 @@ export default function ReminderForm() {
 
   return (
     <FormProvider {...form}>
-      <div className="p-4 h-full">
+      <div className=" h-full">
         <div className="grid grid-cols-12 gap-4 h-full">
           {/* Form Fields */}
           <div className="col-span-12 lg:col-span-9 space-y-6">
