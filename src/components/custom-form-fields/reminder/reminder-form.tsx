@@ -18,6 +18,7 @@ import {
   Send,
   SlidersHorizontal,
   Trash2,
+  ChevronDown,
 } from 'lucide-react'
 import { RootState } from '@/store/store'
 import {
@@ -69,7 +70,7 @@ const scheduleLabels = {
   'Follow-up': 'Schedule follow-up',
   Missed: 'Schedule follow-up',
   Cancellation: 'Schedule follow-up',
-  Custom: 'Schedule reminder',
+  Custom: 'Schedule Reminder',
 }
 
 // Define send via and auto-delete options
@@ -114,12 +115,13 @@ export default function ReminderForm() {
     (state: RootState) => state.reminder,
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPreviewOpen, setIsPreviewOpen] = useState(true) // State for collapsible preview
 
   const form = useForm<FormData>({
     defaultValues: {
       ...formData,
       customSchedules: formData.customSchedules || [],
-    }, // Initialize with Redux formData and customSchedules
+    },
   })
 
   const { watch, setValue, handleSubmit, reset, getValues } = form
@@ -185,8 +187,8 @@ export default function ReminderForm() {
 
   return (
     <FormProvider {...form}>
-      <div className=" h-full">
-        <div className="grid grid-cols-12 gap-4 h-full">
+      <div className="h-full ">
+        <div className="grid grid-cols-12 relative gap-4 h-full">
           {/* Form Fields */}
           <div className="col-span-12 lg:col-span-9 space-y-6">
             {/* Subject Field */}
@@ -261,7 +263,6 @@ export default function ReminderForm() {
             <div className="">
               <div className="flex justify-between items-center">
                 <div className="flex gap-1">
-                  {/* <Send strokeWidth={1.5} className="size-4 text-gray-500" /> */}
                   <Label className="text-xl font-semibold">
                     Reminder Schedule
                   </Label>
@@ -355,22 +356,36 @@ export default function ReminderForm() {
             </Button>
           </div>
           {/* Live Preview */}
-          <div className="col-span-12 lg:col-span-3 bg-white border rounded-md p-4 overflow-y-auto">
-            <h3 className="text-lg font-semibold mb-4">Live Preview</h3>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-medium">Subject:</h4>
-                <p className="break-words">
-                  {formData.subject || 'No subject entered'}
-                </p>
-              </div>
-              <div>
-                <h4 className="font-medium">Message:</h4>
-                <p className="break-words whitespace-pre-wrap">
-                  {formData.message || 'No message entered'}
-                </p>
-              </div>
+          <div className="col-span-12 h-fit sticky top-0 lg:col-span-3 bg-white shadow border rounded-md p-4 overflow-y-auto">
+            <div
+              className="flex justify-between items-center cursor-pointer"
+              onClick={() => setIsPreviewOpen(!isPreviewOpen)}
+            >
+              <h3 className="text-base font-semibold">Live Preview</h3>
+              <ChevronDown
+                className={`size-5 transition-transform duration-200 ${isPreviewOpen ? 'rotate-180' : ''}`}
+              />
             </div>
+            {isPreviewOpen && (
+              <div className="space-y-4 mt-4">
+                <div className="space-y-1">
+                  <h4 className="font-medium text-stone-600 text-sm">
+                    Subject Preview
+                  </h4>
+                  <p className="break-words text-stone-600 border text-xs p-3 border-blue-200 rounded-[4px]">
+                    {formData.subject || 'No subject entered'}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <h4 className="font-medium text-stone-600 text-sm">
+                    Message Preview
+                  </h4>
+                  <p className="break-words text-stone-600 text-xs whitespace-pre-wrap border p-3 border-blue-200 rounded-[4px]">
+                    {formData.message || 'No message entered'}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
