@@ -1,5 +1,5 @@
 import { OpenAIEmbeddings } from '@langchain/openai'
-import logger from '@/lib/logger'
+// import logger from '@/lib/logger'
 import dotenv from 'dotenv'
 import { prisma } from '../prisma'
 
@@ -18,17 +18,17 @@ export async function generateServiceEmbedding(service: {
   try {
     const content =
       `${service.title} ${service.description} Duration: ${service.estimatedDuration} minutes`.trim()
-    logger.info(`Generating embedding for service content: ${content}`)
+    console.log(`Generating embedding for service content: ${content}`)
     const start = Date.now()
     const vector = await embeddings.embedQuery(content)
-    logger.info(`Service embedding generated`, {
+    console.log(`Service embedding generated`, {
       durationMs: Date.now() - start,
       vectorLength: vector.length,
       vectorSample: vector.slice(0, 5),
     })
     return { content, vector }
   } catch (error) {
-    logger.error(
+    console.log(
       `Failed to generate service embedding: ${error instanceof Error ? error.message : 'Unknown error'}`,
     )
     throw error

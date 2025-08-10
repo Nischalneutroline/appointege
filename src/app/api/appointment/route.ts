@@ -6,6 +6,7 @@ import { createAppointment } from '@/lib/appointment'
 import { appointmentSchema } from '@/app/(protected)/admin/appointment/_schema/appoinment'
 import { ReturnType } from '@/features/shared/api-route-types'
 import { Prisma, Appointment, User } from '@prisma/client'
+import { parse } from 'path'
 
 // Create new appointment
 export async function POST(
@@ -109,20 +110,22 @@ export async function POST(
     }
 
     // Create a new appointment in Prisma
-    const newAppointment = await createAppointment({
-      customerName: parsedData.customerName,
-      email: parsedData.email,
-      phone: parsedData.phone,
-      status: parsedData.status,
-      userId: parsedData.userId || session.user.id, // Fallback to authenticated user
-      bookedById: parsedData.bookedById || session.user.id,
-      serviceId: parsedData.serviceId,
-      selectedDate: parsedData.selectedDate,
-      selectedTime: parsedData.selectedTime,
-      message: parsedData.message,
-      isForSelf: parsedData.isForSelf || false,
-      createdById: parsedData.createdById || session.user.id,
-      resourceId: parsedData.resourceId,
+    const newAppointment = await prisma.appointment.create({
+      data: {
+        customerName: parsedData.customerName,
+        email: parsedData.email,
+        phone: parsedData.phone,
+        status: parsedData.status as any,
+        userId: parsedData.userId,
+        bookedById: parsedData.bookedById,
+        serviceId: parsedData.serviceId,
+        selectedDate: new Date(parsedData.selectedDate),
+        selectedTime: parsedData.selectedTime,
+        message: parsedData.message,
+        isForSelf: parsedData.isForSelf,
+        createdById: parsedData.createdById,
+        resourceId: parsedData.resourceId,
+      },
     })
 
     // Return a success response
