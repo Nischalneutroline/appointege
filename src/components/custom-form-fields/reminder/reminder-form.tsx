@@ -115,7 +115,7 @@ export default function ReminderForm() {
     (state: RootState) => state.reminder,
   )
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isPreviewOpen, setIsPreviewOpen] = useState(true) // State for collapsible preview
+  const [isPreviewOpen, setIsPreviewOpen] = useState(true)
 
   const form = useForm<FormData>({
     defaultValues: {
@@ -155,7 +155,7 @@ export default function ReminderForm() {
   // Sync form data to Redux on submit
   const onSubmit = (data: FormData) => {
     setIsSubmitting(true)
-    console.log('Form submitted:', data)
+    console.log('Form submitted with data:', data) // Log data for debugging
     dispatch(updateFormData(data))
     setTimeout(() => {
       setIsSubmitting(false)
@@ -187,7 +187,7 @@ export default function ReminderForm() {
 
   return (
     <FormProvider {...form}>
-      <div className="h-full ">
+      <form onSubmit={handleSubmit(onSubmit)} className="h-full">
         <div className="grid grid-cols-12 relative gap-4 h-full">
           {/* Form Fields */}
           <div className="col-span-12 lg:col-span-9 space-y-6">
@@ -388,7 +388,7 @@ export default function ReminderForm() {
             )}
           </div>
         </div>
-      </div>
+      </form>
     </FormProvider>
   )
 }

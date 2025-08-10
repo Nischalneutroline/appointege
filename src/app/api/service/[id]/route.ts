@@ -641,39 +641,52 @@ export async function PUT(
     }
 
     // Update service within a transaction
-    const updatedService = await prisma.$transaction(async (tx) => {
-      // Delete existing service availability
-      await tx.serviceAvailability.deleteMany({
+    // const updatedService = await prisma.$transaction(async (tx) => {
+    // Delete existing service availability
+    const deletedServiceAvailability =
+      await prisma.serviceAvailability.deleteMany({
         where: { serviceId: id },
       })
 
-      // Update the service
-      return tx.service.update({
-        where: { id },
-        data: {
-          title: parsedData.title,
-          description: parsedData.description,
-          estimatedDuration: parsedData.estimatedDuration,
-          status: parsedData.status || 'ACTIVE',
-          businessDetailId: parsedData.businessDetailId,
-          serviceAvailability: {
-            create: parsedData.serviceAvailability?.map((availability) => ({
-              weekDay: availability.weekDay,
-              timeSlots: {
-                create: availability.timeSlots?.map((timeSlot) => ({
-                  startTime: timeSlot.startTime,
-                  endTime: timeSlot.endTime,
-                })),
-              },
-            })),
-          },
+    // Update the service
+    const updatedService = await prisma.service.update({
+      where: { id },
+      data: {
+        title: parsedData.title,
+        description: parsedData.description,
+        estimatedDuration: parsedData.estimatedDuration,
+        status: parsedData.status || 'ACTIVE',
+        businessDetailId: parsedData.businessDetailId,
+        serviceAvailability: {
+          create: parsedData.serviceAvailability?.map((availability) => ({
+            weekDay: availability.weekDay,
+            timeSlots: {
+              create: availability.timeSlots?.map((timeSlot) => ({
+                startTime: timeSlot.startTime,
+                endTime: timeSlot.endTime,
+              })),
+            },
+          })),
         },
-        include: {
-          serviceAvailability: { include: { timeSlots: true } },
-          businessDetail: true,
-        },
-      })
+      },
+      include: {
+        serviceAvailability: { include: { timeSlots: true } },
+        businessDetail: true,
+      },
     })
+
+    if (!updatedService) {
+      return NextResponse.json(
+        {
+          data: null,
+          status: 400,
+          success: false,
+          message: 'Failed to update service!',
+          errorDetail: 'Failed to update service!',
+        },
+        { status: 400 },
+      )
+    }
 
     return NextResponse.json(
       {
