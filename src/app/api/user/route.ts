@@ -337,12 +337,9 @@ export const userSchema = z.object({
   email: z.string().email(),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      'Password must contain at least one uppercase letter, one lowercase letter, and one number',
-    )
+    .min(4, 'Password must be at least 4 characters')
     .optional(),
+
   name: z.string().optional(),
   phone: z.string().optional(),
   role: z.enum(['GUEST', 'USER', 'ADMIN', 'SUPER_ADMIN']).optional(),
