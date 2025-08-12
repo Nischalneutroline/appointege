@@ -8,6 +8,7 @@ import {
 } from '@prisma/client'
 import { getBusinessDetailByOwnerId } from '@/db/businessDetail'
 import { axiosApi } from '@/lib/baseUrl'
+import { AxiosError } from 'axios'
 import { toast } from 'sonner'
 import { WeekDays } from '@/app/(protected)/admin/service/_types/service'
 
@@ -82,51 +83,50 @@ interface BusinessTime {
   businessAvailabilityId?: string
 }
 
-export interface BusinessAvailability {
+interface BusinessAvailability {
   id?: string
   weekDay: WeekDays
   type: AvailabilityType
   timeSlots: BusinessTime[]
-  businessId?: string
-  supportBusinessDetailId?: string
+  businessId?: string | null
+  supportBusinessDetailId?: string | null
 }
 
-export interface BusinessAddress {
+interface ServiceTime {
   id?: string
+  type: BusinessTimeType
+  startTime: string
+  endTime: string
+  serviceAvailabilityId?: string
+}
+
+interface ServiceAvailability {
+  id?: string
+  weekDay: WeekDays
+  timeSlots: ServiceTime[]
+  serviceId?: string | null
+  businessDetailId?: string | null
+}
+
+interface Holiday {
+  id?: string
+  holiday: WeekDays
+  type: HolidayType
+  date?: Date | null
+  businessId?: string | null
+  supportBusinessDetailId?: string | null
+}
+
+interface Address {
+  id: string
   street: string
   city: string
   country: string
   state: string
   zipCode: string
   googleMap: string
-  businessId?: string
-  supportId?: string
-}
-
-export interface Holiday {
-  id?: string
-  holiday: WeekDays
-  type: HolidayType
-  date: string
-  businessId?: string
-  supportBusinessDetailId?: string
-}
-
-interface SupportBusinessDetail {
-  id: string
-  supportBusinessName: string
-  supportEmail: string
-  supportPhone: string
-  supportGoogleMap?: string
-  supportAddress: string
-  supportAvailability: BusinessAvailability[]
-  supportHoliday: Holiday[]
-  businessId: string
-  isLoading: false
-  isSaving: false
-  error: null
-  message: null
-  success: false
+  businessId?: string | null
+  supportId?: string | null
 }
 
 export interface BusinessDetail {
@@ -135,27 +135,26 @@ export interface BusinessDetail {
   industry: string
   email: string
   phone: string
-  website?: string
-  businessType: string
+  website?: string | null
   businessRegistrationNumber: string
-  status: BusinessStatus
-  timeZone?: string
-  address: BusinessAddress[]
+  taxID: string
+  businessType: 'PHYSICAL' | 'VIRTUAL' | 'ALL'
+  status: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'SUSPENDED'
+  timeZone?: string | null
+  businessOwner?: string | null
+  createdAt: Date
+  updatedAt: Date
   businessAvailability: BusinessAvailability[]
   serviceAvailability: ServiceAvailability[]
-  supportBusinessDetail?: SupportBusinessDetail
   holiday: Holiday[]
-  createdAt?: string
-  updatedAt?: string
-  businessOwner?: string
-  resources?: any[]
-  services?: any[]
+  address: Address[]
 }
 
 export enum BusinessTab {
   BusinessDetail = 'Business Detail',
   BusinessAvailability = 'Business Availability',
   ServiceAvailability = 'Service Availability',
+  Reminder = 'Reminder',
 }
 
 export const weekdayMap: { [key: string]: string } = {
@@ -203,8 +202,6 @@ const initialState: BusinessState = {
   loading: false,
   hasFetched: false,
   error: null,
-  message: null,
-  success: false,
 }
 
 // ──────────────────────────────────────────────────────────────────────────
@@ -378,50 +375,14 @@ const businessSlice = createSlice({
   name: 'business',
   initialState,
   reducers: {
-    setActiveStep: (state, action: PayloadAction<string>) => {
-      // Update all steps' active status
-      state.steps = state.steps.map((step) => ({
-        ...step,
-        active: step.id === action.payload,
-      }))
-      state.activeStep = action.payload
-    },
-    completeStep: (state, action: PayloadAction<string>) => {
-      const stepId = action.payload
-
-      // Update the step's completed status
-      state.steps = state.steps.map((step) =>
-        step.id === stepId ? { ...step, completed: true } : step,
-      )
-
-      // Add to completed steps if not already present
-      if (!state.completedSteps.includes(stepId)) {
-        state.completedSteps.push(stepId)
-      }
-
-      // Activate the next step if exists
-      const currentIndex = state.steps.findIndex((step) => step.id === stepId)
-      if (currentIndex < state.steps.length - 1) {
-        const nextStep = state.steps[currentIndex + 1]
-        state.activeStep = nextStep.id
-        state.steps = state.steps.map((step) => ({
-          ...step,
-          active: step.id === nextStep.id,
-        }))
+    setBusinessDetail(state, action: PayloadAction<Partial<BusinessDetail>>) {
+      state.businessData = { ...state.businessData, ...action.payload }
+      state.selectedBusiness = {
+        ...(state.selectedBusiness || ({} as BusinessDetail)),
+        ...action.payload,
       }
     },
-    resetBusinessDetailState: () => initialState,
-    setBusinessDetail: (
-      state,
-      action: PayloadAction<BusinessDetail | null>,
-    ) => {
-      state.businessDetail = action.payload
-    },
-    clearBusinessDetailError: (state) => {
-      state.error = null
-      state.message = null
-    },
-    updateBusinessAvailability: (
+    setBusinessAvailabilityForm(
       state,
       action: PayloadAction<BusinessAvailabilityFormValuesExtended>, // Accepts the extended form data
     ) {
@@ -453,17 +414,13 @@ const businessSlice = createSlice({
         ),
       }
     },
-    updateBusinessDetailForm: (
-      state,
-      action: PayloadAction<BusinessDetailFormValues>,
-    ) => {
-      state.businessDetailForm = action.payload
+    setActiveTab(state, action: PayloadAction<BusinessTab>) {
+      state.activeTab = action.payload
     },
-    updateBusinessAvailabilityForm: (
-      state,
-      action: PayloadAction<BusinessAvailabilityFormValues>,
-    ) => {
-      state.businessAvailabilityForm = [action.payload]
+    resetBusinessData(state) {
+      state.businessData = null
+      state.selectedBusiness = null
+      state.activeTab = BusinessTab.BusinessDetail
     },
   },
   extraReducers: (builder) => {
@@ -592,34 +549,18 @@ const businessSlice = createSlice({
       })
       .addCase(updateBusiness.rejected, (state, action) => {
         state.error =
-          action.payload?.error || 'Failed to create support business details'
-        state.message = action.payload?.message || null
-        state.success = false
-      }
-    })
-    builder.addCase(createSupportBusinessDetail.rejected, (state, action) => {
-      state.isSaving = false
-      state.error =
-        action.payload?.error || 'Failed to create support business details'
-      state.message = action.payload?.message || null
-      state.success = false
-    })
+          (action.payload as any)?.message || 'Failed to update business'
+        state.loading = false
+      })
   },
 })
 
-// Export actions
 export const {
-  setActiveStep,
-  completeStep,
-  resetBusinessDetailState,
   setBusinessDetail,
-  clearBusinessDetailError,
-  updateBusinessAvailability,
-  updateBusinessAddress,
-  updateBusinessHolidays,
-  updateBusinessDetailForm,
-  updateBusinessAvailabilityForm,
-} = businessDetailSlice.actions
+  setBusinessAvailabilityForm,
+  setServiceAvailabilityForm,
+  setActiveTab,
+  resetBusinessData,
+} = businessSlice.actions
 
-// Export the reducer
-export default businessDetailSlice.reducer
+export default businessSlice.reducer
