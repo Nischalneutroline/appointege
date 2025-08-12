@@ -11,7 +11,7 @@ import ReminderForm from '@/components/custom-form-fields/reminder/reminder-form
 const ReminderPage = ({ children }: { children: React.ReactNode }) => {
   const { activeTab } = useSelector((state: RootState) => state.reminder)
   return (
-    <main className="flex flex-col gap-4 h-full flex-1 overflow-y-auto">
+    <main className="flex focus:outline-none flex-col gap-4 h-full flex-1 overflow-y-auto">
       {/* Use overflow-y-auto for scrolling */}
       <div className="p-6 flex gap-4 flex-col">
         <Heading

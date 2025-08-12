@@ -11,10 +11,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useDispatch()
   return (
     <div className="flex gap-4 overflow-hidden flex-row bg-[#F8F9FA] h-full flex-1">
-      {' '}
       {/* Use h-full and flex-1 */}
       <div className="flex-1 w-full border rounded-md shadow h-full bg-white max-w-full flex flex-col overflow-y-auto">
-        {' '}
         {/* Enable scrolling */}
         <PageTabs<ReminderTab>
           activeTab={activeTab}

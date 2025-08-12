@@ -6,7 +6,6 @@ import { createAppointment } from '@/lib/appointment'
 import { appointmentSchema } from '@/app/(protected)/admin/appointment/_schema/appoinment'
 import { ReturnType } from '@/features/shared/api-route-types'
 import { Prisma, Appointment, User } from '@prisma/client'
-import { parse } from 'path'
 
 // Create new appointment
 export async function POST(
