@@ -176,7 +176,11 @@ export default function ChatDialog() {
                           {message.content}
                         </pre>
                       ) : (
-                        <p className="text-sm">{message.content}</p>
+                        <p className="text-sm">
+                          {typeof message.content === 'string'
+                            ? message.content
+                            : JSON.stringify(message.content)}
+                        </p>
                       )}
                     </div>
                   </div>

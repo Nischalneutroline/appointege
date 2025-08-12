@@ -1,17 +1,16 @@
 import { StateGraph, START, END } from '@langchain/langgraph'
 import { z } from 'zod'
 import { appointmentSchema } from '@/app/(protected)/admin/appointment/_schema/appoinment'
-import { tools } from './agentTool'
+import { bookAppointmentRaw, getTools } from './agentTool'
 import { prisma } from '@/lib/prisma'
 import { WeekDays } from '@prisma/client'
+import { getServiceIdByName } from '@/db/service'
 
 // 1. Define the LangGraph state schema using your appointment schema
 const AppointmentGraphStateSchema = appointmentSchema
   .pick({
     userId: true,
     serviceId: true,
-    selectedDate: true,
-    selectedTime: true,
     customerName: true,
     email: true,
     phone: true,
@@ -23,6 +22,10 @@ const AppointmentGraphStateSchema = appointmentSchema
   })
   .extend({
     missingFields: z.array(z.string()).optional(),
+    appointmentDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
+      message: 'Invalid date format',
+    }),
+    appointmentTime: z.string(),
     confirmed: z.boolean().optional(),
     error: z.string().optional(),
   })
@@ -43,11 +46,12 @@ async function collectService(
   state: AppointmentGraphState,
 ): Promise<Partial<AppointmentGraphState>> {
   console.log('collectService node called:', state)
-  if (!state.serviceId) {
-    // In a real chatbot, you'd return a prompt to the user here.
-    return { missingFields: ['serviceId'] }
+  // If we already have a valid serviceId, we're done.
+  if (state.serviceId) {
+    return {}
   }
-  return {}
+  // Neither serviceId nor resolvable serviceName—prompt for required info
+  return { missingFields: ['serviceId'] }
 }
 
 // 3. Node: Collect Date and Time
@@ -56,8 +60,8 @@ async function collectDateTime(
 ): Promise<Partial<AppointmentGraphState>> {
   const missing: string[] = []
   console.log('collectDateTime node called:', state)
-  if (!state.selectedDate) missing.push('selectedDate')
-  if (!state.selectedTime) missing.push('selectedTime')
+  if (!state.appointmentDate) missing.push('appointmentDate')
+  if (!state.appointmentTime) missing.push('appointmentTime')
   if (missing.length > 0) {
     return { missingFields: missing }
   }
@@ -69,6 +73,7 @@ async function confirmDetails(
   state: AppointmentGraphState,
 ): Promise<Partial<AppointmentGraphState>> {
   // In a real chatbot, you'd confirm details with the user.
+  console.log('hello')
   if (state.confirmed) {
     return {}
   }
@@ -80,56 +85,54 @@ async function bookAppointmentNode(
   state: AppointmentGraphState,
 ): Promise<Partial<AppointmentGraphState>> {
   try {
-    // Find the tool by name (or import the function directly if preferred)
-    const bookTool = tools.find((t) => t.name === 'bookAppointment')
-
-    if (!bookTool) throw new Error('Booking tool not found')
-
-    // Normalize the date before calling the tool
-    const normalizedDate = normalizeDate(state.selectedDate)
-
-    const createdById = state.createdById || state.userId
-    if (!createdById) {
-      throw new Error('createdById is required for booking.')
+    if (state.error) {
+      // Do not proceed if there is an error
+      return {}
     }
+    console.log('state is', state)
+    const result = await bookAppointmentRaw(state)
 
-    // Call the tool with the current state
-    const result = await bookTool.invoke({
-      customerName: state.customerName,
-      email: state.email,
-      phone: state.phone,
-      status: state.status || 'SCHEDULED',
-      bookedById: state.bookedById || state.userId,
-      serviceId: state.serviceId,
-      selectedDate: normalizedDate,
-      selectedTime: state.selectedTime,
-      userId: state.userId,
-      message: state.message || 'hi',
-      isForSelf: state.isForSelf ?? true,
-      createdById: createdById,
-    })
-    console.log('book tool', result)
-    return { confirmed: true, ...result } // Optionally merge result into state
-  } catch (error: any) {
-    return { error: error.message || 'Booking failed' }
+    return { confirmed: true, ...result }
+  } catch (error) {
+    // Check if error is an object and has a message property
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+      return {
+        error: (error as { message?: string }).message || 'Booking failed',
+      }
+    }
+    // fallback: error is not an object with 'message'
+    return { error: 'Booking failed' }
   }
 }
 
 async function checkAvailability(
   state: AppointmentGraphState,
 ): Promise<Partial<AppointmentGraphState>> {
-  if (!state.serviceId || !state.selectedDate || !state.selectedTime) {
+  if (!state.serviceId || !state.appointmentDate || !state.appointmentTime) {
     const requiredFields: (keyof AppointmentGraphState)[] = [
       'serviceId',
-      'selectedDate',
-      'selectedTime',
+      'appointmentDate',
+      'appointmentTime',
     ]
     const missingFields = requiredFields.filter((f) => !state[f])
     return { missingFields }
   }
 
+  const now = new Date()
   // Convert selectedDate to weekday string (e.g., MONDAY)
-  const dateObj = new Date(state.selectedDate)
+
+  const dateObj = new Date(state.appointmentDate)
+
+  now.setHours(0, 0, 0, 0)
+  dateObj.setHours(0, 0, 0, 0)
+  if (dateObj < now) {
+    console.log('true')
+    return {
+      error:
+        'You cannot book an appointment in the past. Please select a future date.',
+    }
+  }
+
   const weekDayString = dateObj
     .toLocaleDateString('en-US', { weekday: 'long' })
     .toUpperCase()
@@ -160,12 +163,35 @@ async function checkAvailability(
   const availability = service.serviceAvailability[0]
   console.log('availability', availability)
   const slot = availability.timeSlots.find(
-    (t) => t.startTime === state.selectedTime,
+    (t) => t.startTime === state.appointmentTime,
   )
   console.log('slot', slot)
+
+  const availableTimes = availability.timeSlots.map((ts) => ts.startTime)
+
   if (!slot) {
-    return { error: 'Requested time slot is not available.' }
+    return {
+      error: `Requested time slot is not available. Available times: ${availableTimes.join(', ')}`,
+    }
   }
+
+  // Check if someone already booked this slot
+  const existingBooking = await prisma.appointment.findFirst({
+    where: {
+      serviceId: state.serviceId,
+      selectedDate: new Date(state.appointmentDate),
+      selectedTime: state.appointmentTime,
+      status: 'SCHEDULED', // Only scheduled, not cancelled or completed
+    },
+  })
+
+  if (existingBooking) {
+    return {
+      error:
+        'The requested time slot has already been booked. Please select another time.',
+    }
+  }
+  console.log('checkAvailability ending. Returning:', {})
 
   return {}
 }

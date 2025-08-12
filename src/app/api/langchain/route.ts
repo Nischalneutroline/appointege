@@ -18,13 +18,20 @@ import {
   handleAppointmentHistoryQuery,
 } from '@/features/chatbot/appointmentHistory'
 
-import {
-  getConversationState,
-  handleAgentConversationFlow,
-} from '@/features/chatbot/conversationState'
+import { handleAgentConversationFlow } from '@/features/chatbot/conversationState'
 import { auth } from '@/auth'
+import { createOpenAIFunctionsAgent, AgentExecutor } from 'langchain/agents'
+import { getTools } from '@/features/chatbot/agentTool'
+import { createToolCallingAgent } from 'langchain/agents'
+import { BookAppointmentInput } from '@/features/chatbot/agentTool'
 
 const prisma = new PrismaClient()
+
+type User = {
+  id: string
+  role: string
+  email?: string
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,32 +49,50 @@ export async function POST(req: NextRequest) {
     // Now you can safely destructure or access the user object
     const { user } = session
 
+    if (!user.id) {
+      return NextResponse.json(
+        { message: 'User ID is missing' },
+        { status: 400 },
+      )
+    }
+
+    if (!user.email) {
+      return NextResponse.json(
+        { message: 'User email is missing' },
+        { status: 400 },
+      )
+    }
+
+    if (!user.role) {
+      return NextResponse.json(
+        { message: 'User role is missing' },
+        { status: 400 },
+      )
+    }
     const { messages }: { messages: any[] } = await req.json()
 
     // Get user and role
 
-    const chat_history = messages.slice(0, -1)
+    /*     const chat_history = messages.slice(0, -1) */
+
+    // Limit to the last 6 (before the latest message):
+    const HISTORY_LENGTH = 6
+    const chat_history = messages.slice(
+      Math.max(0, messages.length - (HISTORY_LENGTH + 1)),
+      messages.length - 1,
+    )
     const userMessage = messages[messages.length - 1]?.content || 'Hello!'
 
     // 1. Check if user is asking for appointment history
     if (isAppointmentHistoryQuery(userMessage)) {
       console.log('history')
       const result = await handleAppointmentHistoryQuery(
-        user,
+        user as User,
         userMessage,
         user.id,
       )
       return NextResponse.json(result)
     }
-
-    const state = await getConversationState(user.id)
-
-    const flowResult = await handleAgentConversationFlow({
-      user,
-      user.id,
-      userMessage,
-      state,
-    })
 
     // Setup vector store (using pgvector)
     /*  const embeddings = new OpenAIEmbeddings({
@@ -96,7 +121,8 @@ export async function POST(req: NextRequest) {
     const embeddingStr = `[${queryEmbedding.join(',')}]`
 
     // 3. Run the raw SQL similarity search
-    /*  const client = await pool.connect()
+    // it showed error while trying to exclude  the past appointment
+    /* const client = await pool.connect()
     let docs = []
     try {
       const sql = `
@@ -117,8 +143,8 @@ export async function POST(req: NextRequest) {
       }))
     } finally {
       client.release()
-    }
- */
+    } */
+
     const client = await pool.connect()
     let docs = []
     try {
@@ -137,20 +163,6 @@ export async function POST(req: NextRequest) {
       }))
     } finally {
       client.release()
-    }
-
-    // 3. Inject the booking confirmation, if any
-    if (flowResult) {
-      if (flowResult instanceof NextResponse) return flowResult
-
-      if (flowResult.bookingConfirmation) {
-        docs.unshift({
-          id: 'booking-confirmation',
-          pageContent: `🎉 The appointment has been booked!`, // Your message or use booking details
-          metadata: { source: 'booking_confirmation' },
-          distance: 0, // 0 = "most relevant" vs others from vector search
-        })
-      }
     }
 
     /*  Role-based retriever */
@@ -275,19 +287,83 @@ export async function POST(req: NextRequest) {
       combineDocsChain: questionAnswerChain,
     })
 
-    // Invoke
-    const result = await ragChain.invoke({
-      input: userMessage,
-      chat_history: chat_history,
+    const systemPrompt = ChatPromptTemplate.fromMessages([
+      [
+        'system',
+        'You are a helpful appointment assistant. Only invoke tools if the user clearly wants to book, cancel, or update an appointment. Otherwise answer conversationally.',
+      ],
+      new MessagesPlaceholder('agent_scratchpad'), // <-- THIS IS REQUIRED!
+      ['human', '{input}'], // <-- {input} is also required
+    ])
+
+    const tools = getTools(user.id, user.role)
+
+    // AGENT INITIALIZATION
+    const agent = createToolCallingAgent({
+      llm,
+      tools,
+      prompt: systemPrompt,
     })
 
-    return NextResponse.json({
-      answer: result.answer,
-      sources: result.context?.map((doc: Document) => ({
-        content: doc.pageContent.substring(0, 200) + '...',
-        source: doc.metadata.source || 'system',
-      })),
+    // Step 3: Wrap with an AgentExecutor
+    const agentExecutor = AgentExecutor.fromAgentAndTools({
+      agent,
+      tools,
+      returnIntermediateSteps: true,
+      maxIterations: 1,
     })
+
+    const agentResult = await agentExecutor.invoke({ input: userMessage })
+
+    // -- Check if agent used a tool (you might need to adjust this to your LangChain version) --
+    const toolTriggered =
+      agentResult?.intermediateSteps && agentResult.intermediateSteps.length > 0
+
+    if (toolTriggered) {
+      // Show the last tool observation, not just the first!
+      const lastStep =
+        agentResult.intermediateSteps[agentResult.intermediateSteps.length - 1]
+      let obs = lastStep.observation
+
+      // Parse the observation if it's a JSON string
+      try {
+        if (typeof obs === 'string' && obs.trim().startsWith('{'))
+          obs = JSON.parse(obs)
+      } catch (e) {}
+
+      // If it's a booking confirmation, let the LLM rephrase it
+      if (obs && typeof obs === 'object' && obs.bookingConfirmation) {
+        const prompt = `The booking tool has confirmed this appointment:
+            ${JSON.stringify(obs.bookingData, null, 2)}
+        Please write a warm, friendly, and celebratory chat message to the user, clearly confirming all the important appointment details.`
+        // Use your LLM (same as used for the chain) to rephrase
+        const llmResponse = await llm.invoke(prompt)
+        const answer =
+          typeof llmResponse === 'string'
+            ? llmResponse
+            : llmResponse.content || JSON.stringify(llmResponse)
+        return NextResponse.json({ answer })
+      }
+
+      // Otherwise: fallback to direct output or error
+      return NextResponse.json({
+        answer: typeof obs === 'string' ? obs : JSON.stringify(obs),
+      })
+    } else {
+      // No action, answer with RAG knowledge/FAQ etc
+      console.log('❌ Agent did NOT trigger any tool.')
+      const ragResult = await ragChain.invoke({
+        input: userMessage,
+        chat_history,
+      })
+      return NextResponse.json({
+        answer: ragResult.answer,
+        sources: ragResult.context?.map((doc: Document) => ({
+          content: doc.pageContent.substring(0, 200) + '...',
+          source: doc.metadata.source || 'system',
+        })),
+      })
+    }
   } catch (error: any) {
     console.error('RAG Chain Error:', error)
     return NextResponse.json(
