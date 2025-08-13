@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server"
-import { getAnnouncementOrOfferById } from "@/db/announcement-offer"
-import { prisma } from "@/lib/prisma"
-import { announcementOrOfferSchema } from "@/features/announcement-offer/schemas/schema"
-import { ZodError } from "zod"
+import { NextRequest, NextResponse } from 'next/server'
+import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
+import { prisma } from '@/lib/prisma'
+import { ZodError } from 'zod'
+import { announcementOrOfferSchema } from '@/app/(protected)/admin/reminders/schema/schema'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
@@ -15,15 +15,15 @@ export async function GET(req: NextRequest, { params }: ParamsProps) {
 
     if (!announcement) {
       return NextResponse.json(
-        { error: "Announcement or offer not found" },
-        { status: 404 }
+        { error: 'Announcement or offer not found' },
+        { status: 404 },
       )
     }
     return NextResponse.json(announcement, { status: 200 })
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch announcement" },
-      { status: 500 }
+      { error: 'Failed to fetch announcement' },
+      { status: 500 },
     )
   }
 }
@@ -34,8 +34,8 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     const { id } = await params
     if (!id) {
       return NextResponse.json(
-        { error: "Announcement/Offer Id required!" },
-        { status: 400 }
+        { error: 'Announcement/Offer Id required!' },
+        { status: 400 },
       )
     }
 
@@ -43,8 +43,8 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
     if (!existingAnnouncement) {
       return NextResponse.json(
-        { error: "Announcement not found" },
-        { status: 404 }
+        { error: 'Announcement not found' },
+        { status: 404 },
       )
     }
 
@@ -69,27 +69,27 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     if (!updatedAnnouncement) {
       return NextResponse.json(
         { error: "Announcement/Offer couldn't be updated" },
-        { status: 404 }
+        { status: 404 },
       )
     }
 
     return NextResponse.json(
       {
-        message: "Announcement updated successfully",
+        message: 'Announcement updated successfully',
         announcement: updatedAnnouncement,
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error },
-        { status: 400 }
+        { error: 'Validation failed', details: error },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: 'Internal server error' },
+      { status: 500 },
     )
   }
 }
@@ -100,16 +100,16 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
     const { id } = await params
     if (!id) {
       return NextResponse.json(
-        { error: "Announcement/Offer Id required!" },
-        { status: 400 }
+        { error: 'Announcement/Offer Id required!' },
+        { status: 400 },
       )
     }
 
     const existingAnnouncement = await getAnnouncementOrOfferById(id)
     if (!existingAnnouncement) {
       return NextResponse.json(
-        { error: "Announcement/Offer not found" },
-        { status: 404 }
+        { error: 'Announcement/Offer not found' },
+        { status: 404 },
       )
     }
 
@@ -119,15 +119,15 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
 
     return NextResponse.json(
       {
-        message: "Announcement deleted successfully",
+        message: 'Announcement deleted successfully',
         announcement: deletedAnnouncement,
       },
-      { status: 200 }
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete announcement" },
-      { status: 500 }
+      { error: 'Failed to delete announcement' },
+      { status: 500 },
     )
   }
 }

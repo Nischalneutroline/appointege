@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from "next/server"
-import { getAnnouncementOrOfferById } from "@/db/announcement-offer"
-import { getAppointmentById } from "@/db/appointment"
-import { getResourceDetailById } from "@/db/resources"
-import { prisma } from "@/lib/prisma"
-import { ZodError } from "zod"
-import { ResourceSchema } from "@/features/resource/schemas/schema"
+import { NextRequest, NextResponse } from 'next/server'
+import { getAnnouncementOrOfferById } from '@/db/announcement-offer'
+import { getAppointmentById } from '@/db/appointment'
+import { getResourceDetailById } from '@/db/resources'
+import { prisma } from '@/lib/prisma'
+import { ZodError } from 'zod'
+import { ResourceSchema } from '@/app/(protected)/admin/support/_schemas/staff'
 
 interface ParamsProps {
   params: Promise<{ id: string }>
@@ -17,15 +17,15 @@ export async function GET(req: NextRequest, { params }: ParamsProps) {
 
     if (!announcement) {
       return NextResponse.json(
-        { error: "Resource with id not found" },
-        { status: 404 }
+        { error: 'Resource with id not found' },
+        { status: 404 },
       )
     }
     return NextResponse.json(announcement, { status: 200 })
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch resource" },
-      { status: 500 }
+      { error: 'Failed to fetch resource' },
+      { status: 500 },
     )
   }
 }
@@ -37,8 +37,8 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Resource Id required!" },
-        { status: 400 }
+        { error: 'Resource Id required!' },
+        { status: 400 },
       )
     }
     const body = await req.json()
@@ -47,7 +47,7 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     const existingResource = await getResourceDetailById(id)
 
     if (!existingResource) {
-      return NextResponse.json({ error: "Resource not found" }, { status: 404 })
+      return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
     }
 
     const updatedResource = await prisma.resource.update({
@@ -57,7 +57,7 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
         email: parsedData.email,
         role: parsedData.role,
         phone: parsedData.phone,
-        address: parsedData.address || "",
+        address: parsedData.address || '',
         businessId: parsedData.businessId, // ✅ Required Field
         services: {
           connect: parsedData.services.map((service) => ({ id: service.id })),
@@ -67,25 +67,25 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
 
     if (!updatedResource) {
       return NextResponse.json(
-        { error: "Failed to update resource" },
-        { status: 500 }
+        { error: 'Failed to update resource' },
+        { status: 500 },
       )
     }
 
     return NextResponse.json(
-      { message: "Resource updated successfully", resource: updatedResource },
-      { status: 200 }
+      { message: 'Resource updated successfully', resource: updatedResource },
+      { status: 200 },
     )
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Validation failed", details: error },
-        { status: 400 }
+        { error: 'Validation failed', details: error },
+        { status: 400 },
       )
     }
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { error: 'Internal server error' },
+      { status: 500 },
     )
   }
 }
@@ -97,15 +97,15 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
 
     if (!id) {
       return NextResponse.json(
-        { error: "Resource Id required!" },
-        { status: 400 }
+        { error: 'Resource Id required!' },
+        { status: 400 },
       )
     }
 
     const existingResource = await getResourceDetailById(id)
 
     if (!existingResource) {
-      return NextResponse.json({ error: "Resource not found" }, { status: 404 })
+      return NextResponse.json({ error: 'Resource not found' }, { status: 404 })
     }
 
     const deletedResource = await prisma.resource.delete({
@@ -113,13 +113,13 @@ export async function DELETE(req: NextRequest, { params }: ParamsProps) {
     })
 
     return NextResponse.json(
-      { message: "Resource deleted successfully", resources: deletedResource },
-      { status: 200 }
+      { message: 'Resource deleted successfully', resources: deletedResource },
+      { status: 200 },
     )
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to delete resource" },
-      { status: 500 }
+      { error: 'Failed to delete resource' },
+      { status: 500 },
     )
   }
 }

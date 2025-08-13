@@ -1,6 +1,10 @@
 // import { BusinessAvailability } from "@/features/business-detail/types/types"
 // import { Holiday } from "@/features/business-detail/types/types"
 
+import { BusinessDetail } from '@/store/slices/businessSlice'
+import { Service } from '../../service/_types/service'
+import { Appointment } from '../../appointment/_types/appointment'
+
 // export interface PostSupportBusinessDetail {
 //   id?: string
 //   supportBusinessName: string
@@ -83,4 +87,16 @@ export enum TicketCategory {
   SECURITY = 'SECURITY', // For issues related to security, account breaches, data protection, etc.
   MAINTENANCE = 'MAINTENANCE', // For problems arising due to ongoing maintenance, outages, etc.
   FEEDBACK = 'FEEDBACK', // For submitting feedback or suggestions for improvement.
+}
+
+// Just to make workable for now
+export interface Resource {
+  id: string // Unique ID for the resource
+  name: string // Name of the staff (e.g., Doctor, Barber, Stylist)
+  role: string // Role of the staff (e.g., Doctor, Barber, Stylist)
+  businessId: string // Reference to the business this staff belongs to
+  business: BusinessDetail // Related BusinessDetail object
+
+  services: Service[] // Relationship to services provided by the staff
+  appointments: Appointment[] // Appointments this staff assigns/handles
 }

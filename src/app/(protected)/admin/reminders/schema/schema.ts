@@ -1,4 +1,10 @@
-import { NotificationMethod, ReminderType } from '@/data/structure'
+import {
+  ExpirationDuration,
+  NotificationMethod,
+  ReminderType,
+  Showon,
+  TargetAudience,
+} from '@/data/structure'
 import { z } from 'zod'
 
 //appointmentreminder offset
@@ -47,4 +53,23 @@ export const ReminderSchema = z.object({
   services: z.array(z.string()).min(1, 'At least one service is required'), // List of service IDs
   notifications: z.array(NotificationSchema), // List of notifications
   reminderOffset: z.array(ReminderOffsetSchema), // List of reminder offsets
+})
+
+// Just to make workable
+
+// Zod schema for AnnouncementOrOffer
+export const announcementOrOfferSchema = z.object({
+  id: z.string().optional(),
+  title: z
+    .string()
+    .min(3, 'Title is required and should be at least 3 characters long'),
+  description: z.string().optional(),
+  message: z.string().optional(),
+  audience: z.nativeEnum(TargetAudience),
+  isImmediate: z.boolean(),
+  scheduledAt: z.string().refine((val) => !isNaN(Date.parse(val)), {
+    message: 'Scheduled date must be a valid ISO date string',
+  }),
+  showOn: z.nativeEnum(Showon),
+  expiredAt: z.nativeEnum(ExpirationDuration),
 })
