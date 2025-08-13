@@ -8,10 +8,10 @@ import { setViewMode } from '@/store/slices/viewSlice'
 
 export type ViewType = 'card' | 'list'
 
-interface ViewOption {
+export interface ViewOption {
   value: ViewType
   label: string
-  icon: React.ReactNode
+  icon?: React.ReactNode
 }
 
 interface ViewTabsProps {
@@ -40,10 +40,7 @@ const ViewTabs = ({ options = defaultOptions, className }: ViewTabsProps) => {
   const { viewMode } = useSelector((state: RootState) => state.view)
   return (
     <div
-      className={cn(
-        'flex items-center gap-1 rounded-[8px] h-9 px-0.5',
-        className,
-      )}
+      className={cn('flex items-center gap-1 rounded-[8px] h-9 p-1', className)}
     >
       {options.map((option) => (
         <Button
