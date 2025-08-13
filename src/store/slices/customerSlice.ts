@@ -57,9 +57,11 @@ interface CustomerState {
   success: boolean
   activeFilter: CustomerFilterValue
   activeFilters: CustomerFilterValue[]
+  nestedTab: string | null
 }
 
 const initialState: CustomerState = {
+  nestedTab: '',
   customers: [],
   filteredCustomers: [],
   counts: {

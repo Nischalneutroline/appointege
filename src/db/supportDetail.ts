@@ -1,10 +1,18 @@
-import { prisma } from "../lib/prisma"
+import { prisma } from '../lib/prisma'
 
 // get service by id
 async function getSupportDetailById(id: string) {
   return await prisma.supportBusinessDetail.findUnique({
     where: {
       id,
+    },
+    include: {
+      supportAvailability: {
+        include: {
+          timeSlots: true,
+        },
+      },
+      supportHoliday: true,
     },
   })
 }

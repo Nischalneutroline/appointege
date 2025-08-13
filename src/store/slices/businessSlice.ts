@@ -154,6 +154,7 @@ export enum BusinessTab {
   BusinessDetail = 'Business Detail',
   BusinessAvailability = 'Business Availability',
   ServiceAvailability = 'Service Availability',
+  Reminder = 'Reminder',
 }
 
 export const weekdayMap: { [key: string]: string } = {

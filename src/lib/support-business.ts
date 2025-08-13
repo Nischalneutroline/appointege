@@ -341,27 +341,32 @@ export const transformServiceAvailability = (
   }
 }
 
-function formatTimeTo24Hour(timeStr: string): string {
-  // Remove any existing AM/PM and trim whitespace
-  const cleanTime = timeStr.replace(/[AP]M/i, '').trim()
-  const [hours, minutes] = cleanTime.split(':').map(Number)
-  let hour24 = hours
+function formatTimeTo24Hour(time: string) {
+  // Remove AM/PM (case insensitive) and trim whitespace
+  let cleaned = time.replace(/\s*(AM|PM)$/i, '').trim()
 
-  // Convert to 24-hour format
-  if (timeStr.toLowerCase().includes('pm') && hours < 12) {
-    hour24 = hours + 12
-  } else if (timeStr.toLowerCase().includes('am') && hours === 12) {
-    hour24 = 0
+  // Parse hour and minute from cleaned time (assumes format like '9:00', '12:30', etc)
+  let [hourStr, minuteStr] = cleaned.split(':')
+  let hour = parseInt(hourStr, 10)
+  let minute = minuteStr ? parseInt(minuteStr, 10) : 0
+
+  // Check if original time had PM to convert hour to 24-hour format
+  if (/PM$/i.test(time) && hour < 12) {
+    hour += 12
+  }
+  // Handle midnight AM (12 AM = 0)
+  if (/AM$/i.test(time) && hour === 12) {
+    hour = 0
   }
 
-  // Format with leading zeros
-  return `${hour24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`
+  // Zero pad hour and minute
+  const hh = hour.toString().padStart(2, '0')
+  const mm = minute.toString().padStart(2, '0')
+
+  return `${hh}:${mm}`
 }
 
-interface Slot {
-  open: string
-  close: string
-}
+// Transform form data to support business detail api data
 export function transformToSupportBusinessDetail(
   formData: any,
   businessId: string,
@@ -398,7 +403,7 @@ export function transformToSupportBusinessDetail(
 
     const fullDayName = dayMap[day] || day.toUpperCase()
     const workSlots = (slots as any[]).map(([start, end]) => ({
-      type: 'WORK' as const,
+      type: 'WORK',
       startTime: `2000-01-01T${formatTimeTo24Hour(start)}:00`,
       endTime: `2000-01-01T${formatTimeTo24Hour(end)}:00`,
     }))
@@ -431,7 +436,7 @@ export function transformToSupportBusinessDetail(
     .filter((day) => !supportedWeekDays.includes(day))
     .map((holidayDay) => ({
       holiday: holidayDay as WeekDays, // Already in full uppercase
-      type: HolidayType.SUPPORT,
+      type: 'SUPPORT',
       date: new Date('2000-01-01T00:00:00Z').toISOString(), // Proper ISO-8601 with timezone
     }))
 

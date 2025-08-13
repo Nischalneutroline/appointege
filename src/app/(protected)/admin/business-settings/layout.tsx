@@ -1,14 +1,5 @@
-'use client'
-
-// import { cn } from '@/utils/utils'
-import { useDispatch, useSelector } from 'react-redux'
-import { RootState } from '@/store/store'
-import { useEffect, useState } from 'react'
-// import StepTracker from './_components/step-tracker'
-import { toggleDesktopNav, toggleMobileNav } from '@/store/slices/navSlice'
-
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const dispatch = useDispatch()
+
 
   return (
     <div className="flex gap-4 overflow-visible flex-row ">

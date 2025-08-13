@@ -90,19 +90,19 @@ export async function PUT(req: NextRequest, { params }: ParamsProps) {
     if (deletedBusiness) {
       const newBusiness = await prisma.businessDetail.create({
         data: {
-          name: parsedData.name,
-          industry: parsedData.industry,
-          email: parsedData.email,
-          phone: parsedData.phone,
-          website: parsedData.website,
-          businessRegistrationNumber: parsedData.businessRegistrationNumber,
-          taxID: parsedData.taxID,
-          businessType: parsedData.businessType,
-          status: parsedData.status,
-          businessOwner: parsedData.businessOwner,
-          timeZone: parsedData.timeZone,
+          name: parsedData?.name,
+          industry: parsedData?.industry,
+          email: parsedData?.email,
+          phone: parsedData?.phone,
+          website: parsedData?.website,
+          businessRegistrationNumber: parsedData?.businessRegistrationNumber,
+          taxID: parsedData?.taxID,
+          businessType: parsedData?.businessType,
+          status: parsedData?.status,
+          businessOwner: parsedData?.businessOwner,
+          timeZone: parsedData?.timeZone,
           address: {
-            create: parsedData.address.map((address) => ({
+            create: parsedData?.address?.map((address) => ({
               street: address.street,
               city: address.city,
               state: address.state,

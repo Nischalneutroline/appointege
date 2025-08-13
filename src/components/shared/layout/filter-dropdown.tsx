@@ -468,11 +468,12 @@ interface FilterDropdownProps<T extends string> {
   filterOptions: (FilterOptionState<T> & { count: number })[]
   activeFilters: T[]
   defaultFilters: T[] // Non-removable filters
-  sliceName: 'appointment' | 'customer' | 'service' | 'faq' // Add more slice names as needed
+  sliceName: 'appointment' | 'customer' | 'service' | 'support' // Add more slice names as needed
   onDispatch: {
     setActiveFilter: (value: T) => any
     setActiveFilters: (filters: T[]) => any
   }
+  selectActiveFilter: (state: RootState) => T | undefined
 }
 
 const FilterDropdown = <T extends string>({
@@ -481,9 +482,10 @@ const FilterDropdown = <T extends string>({
   defaultFilters,
   sliceName,
   onDispatch,
+  selectActiveFilter,
 }: FilterDropdownProps<T>) => {
   const dispatch = useDispatch()
-  const { activeFilter } = useSelector((state: RootState) => state[sliceName])
+  const activeFilter = useSelector(selectActiveFilter)
 
   const handleFilterChange = (value: T, checked?: boolean) => {
     const isDefaultFilter = defaultFilters.includes(value)

@@ -10,6 +10,7 @@ import { BusinessTab, setActiveTab } from '@/store/slices/businessSlice'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import ServiceAvailabilityForm from './_components/form/service-availability-form'
+import ReminderForm from './_components/form/remiders-form'
 
 const BusinessSettingsPage = ({
   businessOwnerId,
@@ -61,7 +62,11 @@ const BusinessSettingsPage = ({
                 ? 'md:translate-x-0'
                 : activeTab === BusinessTab.BusinessAvailability
                   ? 'md:translate-x-[116%]'
-                  : 'md:translate-x-[232%]',
+                  : activeTab === BusinessTab.ServiceAvailability
+                    ? 'md:translate-x-[232%]'
+                    : activeTab === BusinessTab.Reminder
+                      ? 'md:translate-x-[348%]'
+                      : 'md:translate-x-[464%]',
             )}
             style={{ boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)' }}
           />
@@ -105,6 +110,18 @@ const BusinessSettingsPage = ({
           >
             Service Availability
           </button>
+          <button
+            type="button"
+            className={cn(
+              'relative z-10 h-8 w-[200px] text-base font-medium transition-colors duration-300 cursor-pointer',
+              activeTab === BusinessTab.Reminder
+                ? 'text-blue-600'
+                : 'text-gray-600',
+            )}
+            onClick={() => dispatch(setActiveTab(BusinessTab.Reminder))}
+          >
+            Reminder
+          </button>
         </div>
         <div className="flex flex-col gap-4 overflow-y-auto h-[calc(100vh-260px)]">
           {isLoading && (
@@ -121,6 +138,7 @@ const BusinessSettingsPage = ({
           {!isLoading && activeTab === BusinessTab.ServiceAvailability && (
             <ServiceAvailabilityForm />
           )}
+          {!isLoading && activeTab === BusinessTab.Reminder && <ReminderForm />}
         </div>
       </div>
     </div>

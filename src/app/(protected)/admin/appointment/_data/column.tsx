@@ -75,27 +75,37 @@ function AppointmentActions({ row }: { row: AppointmentWithService }) {
           <Ellipsis size={16} />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="">
+
+      <DropdownMenuContent
+        align="end"
+        className="w-auto bg-white rounded-md shadow-lg border border-gray-200 p-1 z-50"
+        sideOffset={5}
+      >
+        {/* View */}
         <DropdownMenuItem
-          className="group/view text-gray-500 hover:bg-gray-50 gap-0"
           onClick={handleViewClick}
+          className="group flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded cursor-pointer"
         >
-          <Eye className="mr-4 h-3.5 w-3.4 group-hover/view:text-[#2563EB] text-[#2563EB]" />
-          <div className=" group-hover/view:text-[#2563EB]">View</div>
+          <Eye className="h-4 w-4 text-[#2563EB] group-hover:text-[#1D4ED8]" />
+          <span className="group-hover:text-[#1D4ED8]">View</span>
         </DropdownMenuItem>
+
+        {/* Edit */}
         <DropdownMenuItem
           onClick={handleEditClick}
-          className="group/edit text-gray-500 hover:bg-gray-50 gap-0"
+          className="group flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded cursor-pointer"
         >
-          <SquarePen className="mr-4 h-4 w-4 group-hover/edit:text-[#10B981] text-[#10B981]" />
-          <div className="group-hover/edit:text-[#10B981]">Edit</div>
+          <SquarePen className="h-4 w-4 text-[#10B981] group-hover:text-[#059669]" />
+          <span className="group-hover:text-[#059669]">Edit</span>
         </DropdownMenuItem>
+
+        {/* Delete */}
         <DropdownMenuItem
           onClick={handleDeleteClick}
-          className="group/delete text-gray-500 hover:bg-gray-50 gap-0"
+          className="group flex items-center space-x-3 px-4 py-2 text-sm text-red-500 hover:bg-gray-100 rounded cursor-pointer"
         >
-          <Trash2 className="mr-4 h-4 w-4 group-hover/delete:text-red-500 text-red-500" />
-          <div className="group-hover/delete:text-red-500">Delete</div>
+          <Trash2 className="h-4 w-4 group-hover:text-red-600" />
+          <span className="group-hover:text-red-600">Delete</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

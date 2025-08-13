@@ -87,6 +87,7 @@ import {
 } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { LucideIcon } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface CheckboxGroupFieldProps {
   name: string
@@ -94,12 +95,17 @@ interface CheckboxGroupFieldProps {
   options: Array<string | { label: string; value: string }>
   className?: string
   icon?: LucideIcon
+  checkboxDivCss?: string
+  checkboxItemCss?: string
 }
 
 const CheckboxGroupField = ({
   name,
   label,
   options,
+  checkboxDivCss,
+  checkboxItemCss,
+
   className,
   icon: Icon,
 }: CheckboxGroupFieldProps) => {
@@ -125,14 +131,19 @@ const CheckboxGroupField = ({
             {Icon && <Icon className="size-4 text-gray-500" />}
             <FormLabel>{label}</FormLabel>
           </div>
-          <div className="flex flex-col md:flex-col flex-wrap gap-4">
+          <div
+            className={cn(
+              'flex flex-col md:flex-col flex-wrap gap-4',
+              checkboxDivCss,
+            )}
+          >
             {options?.map((option) => {
               const value = typeof option === 'string' ? option : option.value
               const displayLabel =
                 typeof option === 'string' ? option : option.label
 
               return (
-                <div key={value} className="flex items-center gap-2">
+                <div key={value} className={cn('flex items-center gap-2', checkboxItemCss)}>
                   <FormControl>
                     <Checkbox
                       id={`${name}-${value}`}

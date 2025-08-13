@@ -61,9 +61,11 @@ interface AppointmentState {
   success: boolean
   activeFilter: AppointmentFilterValue
   activeFilters: AppointmentFilterValue[]
+  nestedTab: string | null
 }
 
 const initialState: AppointmentState = {
+  nestedTab: '',
   appointments: [],
   filteredAppointments: [],
   counts: {
