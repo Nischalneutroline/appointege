@@ -1,6 +1,6 @@
 import React from 'react'
 import RecentActivity from './RecentActivity'
-import { Calendar, UserPlus } from 'lucide-react'
+import { ArrowRight, Calendar, UserPlus } from 'lucide-react'
 
 const RecentActivities = () => {
   return (
@@ -24,9 +24,11 @@ const RecentActivities = () => {
       />
 
       {/* View all activity */}
-      <div className=" flex gap-1 items-center text-[#2563EB]">
+      <div className=" flex gap-1 cursor-pointer text-sm font-medium items-center text-[#2563EB]">
         <button className=" text-sm font-semibold">View all activity</button>
-        <span>→</span>
+        <span>
+          <ArrowRight className="w-4 h-4" />
+        </span>
       </div>
     </div>
   )

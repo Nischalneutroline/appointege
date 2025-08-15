@@ -20,22 +20,22 @@ const RecentActivity = ({
 }) => {
   return (
     <div className="p-2 flex items-center gap-4">
-      <span className="text-[#2672EF] rounded-full p-[6px] shadow">{icon}</span>
+      <div className="text-[#2672EF] rounded-full p-[6px] shadow">{icon}</div>
 
-      <div className="flex flex-col gap-1">
+      <div className="flex-1 flex flex-col gap-1">
         {/* Header and user name */}
         <div className="flex flex-col gap-2">
           <h3 className="font-semibold text-base">{header}</h3>
-          <p className="text-sm  "> {userName}</p>
+          <p className="text-sm">{userName}</p>
         </div>
         {/* Action and date */}
         <div className="space-y-1">
           <p className="text-xs text-gray-500">{actionText}</p>
           {date && (
-            <div className="flex  items-center gap-1">
+            <div className="flex items-center gap-1">
               <div className="flex gap-1 items-center">
                 <span className="text-[#92ABF3]">
-                  {<Clock className="size-3" />}
+                  <Clock className="size-3" />
                 </span>
                 <span className="text-xs text-gray-500 font-medium">
                   {date}
@@ -45,7 +45,10 @@ const RecentActivity = ({
           )}
         </div>
       </div>
-      <span className="text-xs flex-none text-gray-500">{timeAgo}</span>
+
+      <div className="text-xs ml-auto">
+        <span className="text-gray-500">{timeAgo}</span>
+      </div>
     </div>
   )
 }
