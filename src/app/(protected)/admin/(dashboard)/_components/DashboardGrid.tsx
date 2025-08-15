@@ -1,6 +1,6 @@
 import React from 'react'
 import ColSpan from './ColSpan'
-import { Clock } from 'lucide-react'
+import { Bell, CalendarDays, ChartPie, Clock } from 'lucide-react'
 import RecentActivities from './RecentActivities'
 
 const DashboardGrid = () => {
@@ -17,7 +17,7 @@ const DashboardGrid = () => {
       <div className="col-span-12 md:col-span-8 lg:col-span-4">
         <ColSpan
           header="Service Distribution"
-          icon={<Clock className="w-5 h-5" />}
+          icon={<ChartPie className="w-5 h-5" />}
         />
       </div>
 
@@ -25,13 +25,13 @@ const DashboardGrid = () => {
       <div className="col-span-12 md:col-span-8 lg:col-span-8">
         <ColSpan
           header="Today's Appointments"
-          icon={<Clock className="w-5 h-5" />}
+          icon={<CalendarDays className="w-5 h-5" />}
         />
       </div>
 
       {/* Notification col 4, positioned in row 1, last column for md and lg */}
       <div className="col-span-12 md:col-span-4 lg:col-span-4 md:row-start-1 lg:row-start-1 md:col-start-9 lg:col-start-9">
-        <ColSpan header="Notifications" icon={<Clock className="w-5 h-5" />} />
+        <ColSpan header="Notifications" icon={<Bell className="w-5 h-5" />} />
       </div>
     </div>
   )
