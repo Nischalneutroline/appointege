@@ -1,8 +1,6 @@
 'use client'
 
 import Heading from '@/components/admin/shared/heading'
-import LayoutCards from '@/components/shared/layout/layout-cards'
-import ViewTabs from '@/components/shared/layout/view-tabs'
 import { fetchAppointments } from '@/store/slices/appointmentSlice'
 import { fetchBusinessByOwnerId } from '@/store/slices/businessSlice'
 import { fetchCustomers } from '@/store/slices/customerSlice'
@@ -11,13 +9,10 @@ import { fetchServices } from '@/store/slices/serviceslice'
 import { AppDispatch, RootState } from '@/store/store'
 import { useEffect, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import {
-  dashboardTabOptions,
-  DEFAULT_DASHBOARD_FILTERS_VALUES,
-} from './_types/dashboard'
+
 import TimeFilterTabs from './_components/TimeFilterTab'
-import DashboardLayoutCard from './_components/DashboardLayoutCard'
-import { dashboardCardData } from './_data/staticData'
+import DashboardCards from './_components/Cards'
+import DashboardGrid from './_components/DashboardGrid'
 
 const AdminDashboard = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -82,21 +77,8 @@ const AdminDashboard = () => {
           {/* </div> */}
         </div>
 
-        <div className="hidden md:flex gap-4 ">
-          {dashboardCardData.map((card, index) => (
-            <DashboardLayoutCard
-              key={index}
-              count={card.count}
-              label={card.label}
-              icon={card.icon}
-              subText={card.subText}
-              backgroundColor={card.backgroundColor}
-              borderColor={card.borderColor}
-              textColor={card.textColor}
-              isDown={card.isDown}
-            />
-          ))}
-        </div>
+        <DashboardCards />
+        <DashboardGrid />
       </div>
     </div>
   )
