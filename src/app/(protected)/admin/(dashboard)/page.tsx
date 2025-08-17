@@ -63,23 +63,21 @@ const AdminDashboard = () => {
   // }, [filterOptions, counts])
 
   return (
-    <div>
-      <div className="flex flex-col justify-between gap-4">
-        <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-0">
-          <Heading
-            title="Dashboard"
-            description="Here is the information about all your appointments"
-          />
-          {/* <div className="flex flex-row gap-2 md:gap-0 justify-between items-center lg:gap-3 h-10"> */}
-          {/* <div className="flex items-center bg-[#E5E7EB] w-fit h-9 py-1 rounded-[8px]"> */}
-          <TimeFilterTabs />
-          {/* </div> */}
-          {/* </div> */}
-        </div>
-
-        <DashboardCards />
-        <DashboardGrid />
+    <div className="flex flex-col justify-between gap-4 overflow-y-scroll">
+      <div className="w-full flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2 lg:gap-0">
+        <Heading
+          title="Dashboard"
+          description="Here is the information about all your appointments"
+        />
+        {/* <div className="flex flex-row gap-2 md:gap-0 justify-between items-center lg:gap-3 h-10"> */}
+        {/* <div className="flex items-center bg-[#E5E7EB] w-fit h-9 py-1 rounded-[8px]"> */}
+        <TimeFilterTabs />
+        {/* </div> */}
+        {/* </div> */}
       </div>
+
+      <DashboardCards />
+      <DashboardGrid />
     </div>
   )
 }

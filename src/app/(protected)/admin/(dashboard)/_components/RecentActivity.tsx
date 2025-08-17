@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils'
 import { Clock } from 'lucide-react'
 import React from 'react'
 
@@ -20,7 +21,14 @@ const RecentActivity = ({
 }) => {
   return (
     <div className="p-2 flex items-center gap-4">
-      <div className="text-[#2672EF] rounded-full p-[6px] shadow">{icon}</div>
+      <div
+        className={cn(
+          ' rounded-full p-[6px] shadow',
+          type === 'appoinment' ? 'text-[#2672EF]' : 'text-[#6B4300]',
+        )}
+      >
+        {icon}
+      </div>
 
       <div className="flex-1 flex flex-col gap-1">
         {/* Header and user name */}

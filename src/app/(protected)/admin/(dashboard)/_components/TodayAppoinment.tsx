@@ -1,3 +1,4 @@
+'use client'
 import React from 'react'
 import { Appointment } from '@/data/appointment'
 import {
@@ -23,11 +24,10 @@ import {
   openAppointmentViewForm,
 } from '@/store/slices/appointmentSlice'
 import { useDispatch } from 'react-redux'
-import { AppointmentWithService } from '../_data/column'
 import { formatAppointmentDateTime } from '@/lib/date-time-format'
 import { getRandomColor } from '@/lib/color'
 
-const AppointmentItem = ({ item }: { item: AppointmentWithService }) => {
+const TodayAppoinment = ({ item }: { item: any }) => {
   const dispatch = useDispatch()
 
   const statusVariants = {
@@ -43,9 +43,10 @@ const AppointmentItem = ({ item }: { item: AppointmentWithService }) => {
   )
 
   return (
-    <div className="  relative flex w-full items-center px-4 py-4 gap-3 border-[1px] border-[#DCE9F9] rounded-[8px] bg-white cursor-pointer">
+    <div className="  relative flex w-full items-center p-3 gap-2 border-[1px] border-[#E5E7EB] rounded-[8px] bg-white cursor-pointer">
       <div
-        className="h-16 w-16 text-lg font-semibold text-white flex items-center justify-center rounded-[8px]"
+        className="size-10 
+        text-base font-semibold text-white flex items-center justify-center rounded-full"
         style={{ backgroundColor: item.color || getRandomColor() }}
       >
         {getInitials(item.customerName)}
@@ -53,7 +54,7 @@ const AppointmentItem = ({ item }: { item: AppointmentWithService }) => {
       {/* Details */}
       <div className="w-full flex flex-col">
         {/* Name */}
-        <div className="flex w-full justify-between pr-8 md:pr-20">
+        <div className="flex w-full justify-between ">
           <div className="text-[#111827] font-semibold text-sm capitalize">
             {item.customerName}
           </div>
@@ -62,20 +63,24 @@ const AppointmentItem = ({ item }: { item: AppointmentWithService }) => {
           </Pill>
         </div>
         {/* Description */}
-        <div className="flex flex-col gap-3">
-          {/* Service  Name*/}
-          <div className="flex gap-2  text-sm font-normal leading-[100%]">
-            <div className="text-[#6B7280]">{item?.service?.title}</div>
-            <div className="flex gap-1">
+        {/* <div className="flex flex-col gap-3"> */}
+        {/* Service  Name*/}
+        <div className="flex gap-2 text-sm font-medium leading-[100%]">
+          <div className="text-[#78818C]">{item.time}</div>
+          <div className="text-[#78818C]">{item?.service?.title}</div>
+          <div className="text-[#78818C] ">
+            ({item?.service?.estimatedDuration} min)
+          </div>
+          {/* <div className="flex gap-1">
               <MapPin size={14} strokeWidth={2.5} color="#92AAF3" />
               <div className="font-medium text-[#78818C]">Physical</div>
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
           {/* Date amd Time */}
-          <div className=" flex gap-4 text-sm font-normal leading-[100%]">
+          {/* <div className=" flex gap-4 text-sm font-normal leading-[100%]">
             <div className="flex gap-2">
               <Calendar size={14} strokeWidth={2.5} color="#4e7dff" />
-              <div className="text-[#6B7280]">{formattedDate}</div>
+              <div className="text-[#6B7280]">{formattedDate || item.time}</div>
             </div>
             <div className="flex gap-2">
               <Clock size={14} strokeWidth={2.6} color="#4e7dff" />
@@ -83,10 +88,10 @@ const AppointmentItem = ({ item }: { item: AppointmentWithService }) => {
                 {formattedTime} ({item?.service?.estimatedDuration} min)
               </div>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
-      <div className="absolute top-4 right-4">
+      {/* <div className="absolute top-4 right-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="text-gray-400 hover:text-gray-600 cursor-pointer">
@@ -117,9 +122,9 @@ const AppointmentItem = ({ item }: { item: AppointmentWithService }) => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </div>
+      </div> */}
     </div>
   )
 }
 
-export default AppointmentItem
+export default TodayAppoinment

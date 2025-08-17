@@ -2,6 +2,7 @@ import React from 'react'
 import ColSpan from './ColSpan'
 import { Bell, CalendarDays, ChartPie, Clock } from 'lucide-react'
 import RecentActivities from './RecentActivities'
+import TodayAppoinments from './TodayAppoinments'
 
 const DashboardGrid = () => {
   return (
@@ -26,7 +27,9 @@ const DashboardGrid = () => {
         <ColSpan
           header="Today's Appointments"
           icon={<CalendarDays className="w-5 h-5" />}
-        />
+        >
+          <TodayAppoinments />
+        </ColSpan>
       </div>
 
       {/* Notification col 4, positioned in row 1, last column for md and lg */}

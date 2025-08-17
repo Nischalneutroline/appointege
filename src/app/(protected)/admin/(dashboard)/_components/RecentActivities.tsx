@@ -1,6 +1,7 @@
 import React from 'react'
 import RecentActivity from './RecentActivity'
 import { ArrowRight, Calendar, UserPlus } from 'lucide-react'
+import ViewAll from './ViewAll'
 
 const RecentActivities = () => {
   return (
@@ -24,12 +25,7 @@ const RecentActivities = () => {
       />
 
       {/* View all activity */}
-      <div className=" flex gap-1 cursor-pointer text-sm font-medium items-center text-[#2563EB]">
-        <button className=" text-sm font-semibold">View all activity</button>
-        <span>
-          <ArrowRight className="w-4 h-4" />
-        </span>
-      </div>
+      <ViewAll text="View all activity" route="/admin/notifications" />
     </div>
   )
 }

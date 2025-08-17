@@ -10,7 +10,8 @@ import SidebarMobile from '@/components/shared/layout/sidebar-mobile'
 
 const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className=" min-h-screen bg-[#f4f8fe] overflow-hidden">
+    <div className=" min-h-screen bg-[#f4f8fe] overflow-y-auto">
+      {/* <div className=" min-h-screen bg-[#F8F9FA] overflow-hidden"> */}
       <div className=" flex h-screen">
         {/* ------ Sidebar ------- */}
         <SidebarDesktop />
@@ -21,7 +22,7 @@ const AdminLayout = async ({ children }: { children: React.ReactNode }) => {
           <Header />
           {/* Main Content */}
           {/* <Toaster position="bottom-right" /> */}
-          <div className="flex-1 relative  shadow p-6 pb-0.5  overflow-y-auto md:overflow-hidden">
+          <div className="flex-1 relative  shadow p-6 pb-4  overflow-y-auto">
             {children}
           </div>
         </div>
