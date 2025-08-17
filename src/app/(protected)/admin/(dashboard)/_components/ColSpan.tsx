@@ -21,7 +21,7 @@ const ColSpan = ({
     >
       <div className="flex items-center gap-2">
         <span className="text-[#2672EF]">{icon}</span>
-        <h2 className="text-lg font-semibold">{header} </h2>
+        <h2 className="text-xl font-semibold">{header} </h2>
       </div>
       {children}
     </div>

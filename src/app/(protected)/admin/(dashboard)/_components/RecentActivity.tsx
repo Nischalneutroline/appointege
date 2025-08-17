@@ -43,7 +43,7 @@ const RecentActivity = ({
             <div className="flex items-center gap-1">
               <div className="flex gap-1 items-center">
                 <span className="text-[#92ABF3]">
-                  <Clock className="size-3" />
+                  <Clock className="size-5" />
                 </span>
                 <span className="text-xs text-gray-500 font-medium">
                   {date}
