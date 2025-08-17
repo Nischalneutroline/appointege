@@ -1,35 +1,15 @@
 'use client'
 import React from 'react'
 import { Appointment } from '@/data/appointment'
-import {
-  Calendar,
-  Clock,
-  Ellipsis,
-  Eye,
-  MapPin,
-  SquarePen,
-  Trash2,
-} from 'lucide-react'
+
 import { Pill } from '@/components/ui/pill'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+
 import { getInitials } from '@/lib/utils'
-import {
-  openAppointmentDeleteForm,
-  openAppointmentEditForm,
-  openAppointmentViewForm,
-} from '@/store/slices/appointmentSlice'
-import { useDispatch } from 'react-redux'
+
 import { formatAppointmentDateTime } from '@/lib/date-time-format'
 import { getRandomColor } from '@/lib/color'
 
 const TodayAppoinment = ({ item }: { item: any }) => {
-  const dispatch = useDispatch()
-
   const statusVariants = {
     COMPLETED: 'success',
     MISSED: 'destructive',

@@ -4,6 +4,7 @@ import { Bell, CalendarDays, ChartPie, Clock } from 'lucide-react'
 import RecentActivities from './RecentActivities'
 import TodayAppoinments from './TodayAppoinments'
 import Notifications from './Notification/Notifications'
+import { DashboardPieChart } from './PieChart'
 
 const DashboardGrid = () => {
   return (
@@ -20,7 +21,10 @@ const DashboardGrid = () => {
         <ColSpan
           header="Service Distribution"
           icon={<ChartPie className="w-6 h-6" />}
-        />
+          className="h-full"
+        >
+          <DashboardPieChart />
+        </ColSpan>
       </div>
 
       {/* Today's Appointments: lg: col-span-8 row 2, md: col-span-8 row 3, mobile: col-span-12 */}
