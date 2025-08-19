@@ -1,7 +1,12 @@
 import React from 'react'
+import ProfileHeader from './_component/header'
 
-const page = () => {
-  return <div>page</div>
+const ProfilePage = () => {
+  return (
+    <div>
+      <ProfileHeader />
+    </div>
+  )
 }
 
-export default page
+export default ProfilePage
