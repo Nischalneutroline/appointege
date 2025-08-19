@@ -2,7 +2,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { RootState } from '@/store/store'
-import { Camera, Pen } from 'lucide-react'
+import { Camera, Pen, PenBox } from 'lucide-react'
 import React from 'react'
 import { FaUser } from 'react-icons/fa'
 import { useSelector } from 'react-redux'
@@ -28,7 +28,8 @@ const ProfileHeader = () => {
               <FaUser className="size-1/2 object-cover" />
             </AvatarFallback>
           </Avatar>
-          <div className=" absolute bottom-2 right-0 p-1 bg-white size-7 border border-blue-400 rounded-full">
+          {/* Edit Icon */}
+          <div className="cursor-pointer absolute bottom-2 right-0 p-1 bg-white size-7 border border-blue-400 rounded-full">
             <Camera className="size-full text-blue-400" />
           </div>
         </div>
@@ -44,7 +45,9 @@ const ProfileHeader = () => {
         </div>
       </div>
       {/* Edit Button */}
-      <Button icon={<Pen />}>Edit Profile</Button>
+      <Button className="cursor-pointer px-3 rounded-lg" icon={<PenBox />}>
+        Edit Profile
+      </Button>
     </div>
   )
 }

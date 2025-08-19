@@ -16,10 +16,10 @@ export function LogoutButton() {
 
   return (
     <span
-      className="flex items-center gap-x-2 cursor-pointer"
+      className="flex items-center gap-x-2 cursor-pointer text-sm text-muted-foreground"
       onClick={onClick}
     >
-      <LogOutIcon className="w-4 h-4" /> Logout
+      <LogOutIcon className="w-4 h-4 text-sm text-muted-foreground" /> Logout
     </span>
   )
 }

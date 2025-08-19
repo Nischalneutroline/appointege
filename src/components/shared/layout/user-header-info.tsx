@@ -16,7 +16,7 @@ import { LogoutButton } from '@/components/auth/logout-button'
 import { useDispatch, useSelector } from 'react-redux'
 import { setSession } from '@/store/slices/authSlice'
 import type { RootState } from '@/store/store'
-import { NavigateTo } from '@/app/(protected)/admin/(dashboard)/_components/NavigateTo'
+import { NavigateTo } from '@/components/shared/layout/NavigateTo'
 import { UserRound } from 'lucide-react'
 import { GoQuestion } from 'react-icons/go'
 
@@ -91,20 +91,23 @@ export function UserButton({ user }: { user: User | null }) {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
         </div>
-        <DropdownMenuItem asChild className="px-1 cursor-pointer">
-          <NavigateTo
-            link="/admin/profile"
-            text="My Profile"
-            icon={UserRound}
-          />
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild className="px-1 cursor-pointer">
-          <NavigateTo
-            link="/admin/support"
-            text="Help & Support"
-            icon={GoQuestion}
-          />
-        </DropdownMenuItem>
+        <div>
+          <DropdownMenuItem className="px-1 cursor-pointer">
+            <NavigateTo
+              link="/admin/profile"
+              text="My Profile"
+              type="profile"
+              icon={UserRound}
+            />
+          </DropdownMenuItem>
+          <DropdownMenuItem className="px-1 cursor-pointer">
+            <NavigateTo
+              link="/admin/support"
+              text="Help & Support"
+              icon={GoQuestion}
+            />
+          </DropdownMenuItem>
+        </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="px-1">
           <LogoutButton />
