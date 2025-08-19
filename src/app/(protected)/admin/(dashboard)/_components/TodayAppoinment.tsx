@@ -1,6 +1,5 @@
 'use client'
 import React from 'react'
-import { Appointment } from '@/data/appointment'
 
 import { Pill } from '@/components/ui/pill'
 

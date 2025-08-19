@@ -77,7 +77,7 @@ export function DashboardPieChart() {
                 cursor={false}
                 content={<ChartTooltipContent hideLabel />}
               />
-              <Pie
+              {/* <Pie
                 label={renderCustomLabel}
                 data={chartData}
                 dataKey="count"
@@ -121,7 +121,13 @@ export function DashboardPieChart() {
                     }
                   }}
                 />
-              </Pie>
+              </Pie> */}
+              <Pie
+                data={chartData}
+                label={renderCustomLabel}
+                dataKey="count"
+                nameKey="service"
+              />
             </PieChart>
           </ChartContainer>
         </CardContent>

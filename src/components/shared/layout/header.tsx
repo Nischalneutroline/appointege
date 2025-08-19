@@ -25,7 +25,7 @@ const Header = async () => {
       user = adminUser
     }
   }
-  console.log('Current User in Header:', session?.user)
+  // console.log('Current User in Header:', session?.user)
 
   return (
     <div className="flex items-center gap-4 w-full bg-white border-b-1 px-6 py-[16px] border-b-[#E5E7EB]">
@@ -37,6 +37,7 @@ const Header = async () => {
         {/* Notifications & Avatar */}
         <div className="flex items-center gap-8 h-10">
           <LanguageSwitcher />
+
           <UserButton user={user || session?.user || null} />
         </div>
       </div>
